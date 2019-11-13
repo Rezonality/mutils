@@ -1,0 +1,53 @@
+image: Visual Studio 2017
+
+environment:
+    matrix:
+        - ARCH: x64
+          TOOLCHAIN: MinGW
+          BUILDSYSTEM: MSYS2
+        - ARCH: x64
+          TOOLCHAIN: MSYS
+          BUILDSYSTEM: MSYS2
+        - ARCH: x86
+          TOOLCHAIN: MinGW
+          BUILDSYSTEM: MSYS2
+        - ARCH: x86
+          TOOLCHAIN: MinGW
+          BUILDSYSTEM: CMAKE
+        - ARCH: x64
+          TOOLCHAIN: MinGW
+          BUILDSYSTEM: CMAKE
+        - ARCH: x86
+          TOOLCHAIN: MSVC
+          BUILDSYSTEM: CMAKE
+        - ARCH: x64
+          TOOLCHAIN: MSVC
+          BUILDSYSTEM: CMAKE
+
+install:
+    - if %BUILDSYSTEM%.==CMAKE. cinst ninja
+    - if %BUILDSYSTEM%.==CMAKE. set PATH=c:/tools/ninja;%PATH%
+    - if %TOOLCHAIN%%ARCH%.==MSVCx86. call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
+    - if %TOOLCHAIN%%ARCH%.==MSVCx64. call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+before_build:
+    - set BUILDTYPE= %ARCH%%TOOLCHAIN%
+    - if %BUILDTYPE%.==x64MinGW. set PATH=c:\msys64\usr\bin;c:\msys64\mingw64\bin;%PATH%
+    - if %BUILDTYPE%.==x86MinGW. set PATH=c:\msys64\usr\bin;c:\msys64\mingw32\bin;%PATH%
+    - if %BUILDTYPE%.==x64MSYS. set PATH=c:\msys64\usr\bin;%PATH%
+    - if %BUILDTYPE%.==x64MinGW. set CC=c:/msys64/mingw64/bin/gcc
+    - if %BUILDTYPE%.==x86MinGW. set CC=c:/msys64/mingw32/bin/gcc
+    - if %BUILDTYPE%.==x64MSYS. set CC=gcc
+    - if %TOOLCHAIN%.==MSVC. set CC=cl.exe
+    - if %TOOLCHAIN%%BUILDSYSTEM%.==MinGWMSYS2. set EXARG=
+    - if %TOOLCHAIN%%BUILDSYSTEM%.==MSYSMSYS2. set EXARG=PLATFORM=msys
+    - if %BUILDSYSTEM%.==CMAKE. cmake -G Ninja .
+
+build_script:
+    - if %BUILDSYSTEM%.==MSYS2. make CC=%CC% %EXARG% 
+    - if %BUILDSYSTEM%.==CMAKE. ninja
+
+test_script:
+    - if %BUILDSYSTEM%.==MSYS2. make CC=%CC% %EXARG% test
+    - if %BUILDSYSTEM%.==CMAKE. ctest --verbose .
+

@@ -1,0 +1,104 @@
+language: cpp
+dist: bionic
+
+before_script:
+  - chmod +x prebuild.sh
+  - chmod +x m3rdparty/packages/install.sh
+  - ./prebuild.sh
+  - mkdir build
+  - cd build
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - freeglut3-dev
+            - jackd2
+            - pulseaudio
+            - libasound2
+            - libasound2-dev
+      env:
+        - TEST="Clang"
+      script:
+        - cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+        - make
+        - make test
+
+      # Coverage
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - freeglut3-dev
+            - jackd2
+            - pulseaudio
+            - libasound2
+            - libasound2-dev
+      env:
+        - TEST="Coveralls"
+      script:
+        - pip install --upgrade --user git+git://github.com/eddyxu/cpp-coveralls.git
+        - cmake -DENABLE_COVERAGE=ON -DCMAKE_CXX_COMPILER="g++" ..
+        - make
+        - make test
+        - cd ..
+        - |
+          coveralls --build-root build --gcov-options '\-lp' \
+          -e include/mutils/tracy \
+          -e build \
+          -e cmake \
+          -e m3rdparty
+        - bash <(curl -s https://codecov.io/bash)
+
+      # Google Address Sanitizer
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - freeglut3-dev
+            - jackd2
+            - pulseaudio
+            - libasound2
+            - libasound2-dev
+      env:
+        - TEST="Google Address Sanitizer"
+      script:
+        - cmake -DENABLE_ASAN=ON -DCMAKE_CXX_COMPILER="g++" ..
+        - make
+        - make test
+
+      # Google Undefined Sanitizer
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - freeglut3-dev
+            - jackd2
+            - pulseaudio
+            - libasound2
+            - libasound2-dev
+      env:
+        - TEST="Google Undefined Sanitizer"
+      script:
+        - cmake -DENABLE_USAN=ON -DCMAKE_CXX_COMPILER="g++" ..
+        - make
+        - make test
+
+      # Google Thread Sanitizer
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - freeglut3-dev
+            - jackd2
+            - pulseaudio
+            - libasound2
+            - libasound2-dev
+      env:
+        - TEST="Google Thread Sanitizer"
+      script:
+        - cmake -DENABLE_TSAN=ON -DCMAKE_CXX_COMPILER="g++" ..
+        - make
+        - make test

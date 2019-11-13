@@ -1,0 +1,70 @@
+# Build worker image (VM template)
+image: Visual Studio 2019
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - date /T & time /T
+  - git config --global core.autocrlf input
+  - cmake --version
+
+branches:
+  only:
+  - master
+
+clone_depth: 5
+
+version: '{build}'
+
+platform:
+  - x64
+
+configuration:
+  - Release
+  - Debug
+
+environment:
+  MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
+  matrix:
+    - generator: "Visual Studio 16 2019"
+
+matrix:
+  fast_finish: true
+
+install:
+  - git submodule update --init --recursive
+  
+build_script:
+  # generate build script
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - dir
+  # create folder for an out-of-source-tree build: "c:\projects\build"
+  - prebuild.bat & exit 0
+  - cd.. 
+  - mkdir build
+  - cd build
+  - >
+    cmake %APPVEYOR_BUILD_FOLDER%
+    -G "%generator%" -A x64 
+    -DCMAKE_INSTALL_PREFIX=./mutils
+  # build
+  - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  # install
+  # - cmake --build . --target INSTALL --config %configuration% -- /nologo
+  # package (with cpack)
+  #- cmake --build ./build --target PACKAGE --config %configuration% -- /nologo
+
+test_script:
+    - ps: |
+        cd $env:CONFIGURATION
+        .\unittests.exe -r junit --out unit_tests_report.xml
+        $wc = New-Object 'System.Net.WebClient'
+        $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path unit_tests_report.xml))
+
+after_build:
+  # set compiler var
+  - if "%generator%"=="Visual Studio 16 2019" (set COMPILER="VC19")
+  # switch to project build folder and zip "tutorials" folder
+  - cd C:\projects\build
+  - 7z a -tzip -mx9 "mutils-%APPVEYOR_BUILD_VERSION%-%COMPILER%.zip" %configuration%
+  - appveyor PushArtifact "mutils-%APPVEYOR_BUILD_VERSION%-%COMPILER%.zip"
+

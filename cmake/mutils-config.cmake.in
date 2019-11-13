@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+set_and_check(MUTILS_INCLUDE_DIR "@PACKAGE_MUTILS_INCLUDE_DIR@")
+set_and_check(MUTILS_LIB_DIR "@PACKAGE_MUTILS_LIB_DIR@")
+
+if(NOT TARGET MUtils::MUtils)
+    include(${CMAKE_CURRENT_LIST_DIR}/mutils-targets.cmake)
+endif()
