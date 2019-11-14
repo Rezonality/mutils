@@ -7,22 +7,25 @@
 [![codecov](https://codecov.io/gh/cmaughan/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/cmaughan/MUtils)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ea66b760a217428c996b131bc183072f)](https://www.codacy.com/app/cmaughan/MUtils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cmaughan/MUtils&amp;utm_campaign=Badge_Grade)
 
-This project contains useful things that I usually need in c++ projects.  If code is in here, it helps save time when teaching coding or building apps.  Stuff here doesn't change much.  The point of it is that when you have built it, you can make apps quickly without figuring out how to compile and get everything to work cross platform.
+This project contains useful things that are often needed in bigger c++ projects.  If something is in here, it helps save time when teaching coding or building apps.  The point of this big static library and associated modules is that when you have built it, you can make apps quickly without figuring out how to compile and get everything to work cross platform.
 
-You can use it in your own projects by first building and installing it using cmake, then referencing it in other packages.
+Because of modern CMake, you can install this library & reference it in your CMake with just a couple of lines.
 
-First, you need to build the dependent packages - which will install SDL on your system.
+First, you need to build the dependent packages.  Some libraries do modern CMake well - such as SDL and OpenSSL.  Those can just be installed on your system.  Others are easy to reference as external project but don't quite handle the install step well; this project builds them and then does its own install of the necessary pieces.  The prebuild.bat/sh script is the part that handles that, and you need to run it first: 
+
 ```
 prebuild.bat OR prebuild.sh
 ```
 
-Then build and install the MUtils package:
+The MUtils build is pretty standard, and makes useful shared code, as well as installing various pieces.
+It is built like this:
+
 ```
 config.bat OR config.sh
 build_all.bat OR build.sh
 ```
 
-Now in your project CMakeLists.txt, you can add the following to reference the library and pull in all the header paths:
+Now in your project CMakeLists.txt, you can add the following to reference the library and pull in all the header paths.  Note there are no include/library defines; the target_link_libraries is enough to pull all the necessary things in.
 
 ```
 find_package(MUtils REQUIRED)
@@ -31,7 +34,8 @@ target_link_libraries(MyApp PRIVATE MUtils::MUtils)
 ```
 
 ## External Projects
-The following external projects are in the library for convenient access.  Look in their folders for more information.  Unless otherwise stated, these are all cross platform.  There are a couple projects that duplicate functionality; this is mostly to maintain backward compatibility if I've used another version.  Some of these components are installed on the machine when you run 'prebuild.bat/sh'.  Most of them are built into the static MUtils library.
+The following external projects are in the library for convenient access.  Look in their folders for more information.  These libraries are all cross platform - you shouldn't be using ones that arent.  There are a couple projects that duplicate functionality; this is mostly to maintain backward compatibility if I've used another version.  Some of these components are installed on the machine when you run 'prebuild.bat/sh'.  Most of them are built into the static MUtils library.
+
 * Catch2 - better unit testing that gtest
 * Chibi - a scheme implementation for embedding an interpreter
 * Clip - clipboard support
