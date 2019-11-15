@@ -211,12 +211,15 @@ std::shared_ptr<GLCompileResult> gl_load_program(const fs::path& vertex_file_pat
     }
 
     auto pRet = gl_link_shaders(pVertex, nullptr, pFragment);
-
-    glDetachShader(pRet->Id, pVertex->Id);
-    glDetachShader(pRet->Id, pFragment->Id);
+    if (pRet->state == CompileState::Valid)
+    {
+        glDetachShader(pRet->Id, pVertex->Id);
+        glDetachShader(pRet->Id, pFragment->Id);
+    }
 
     glDeleteShader(pVertex->Id);
     glDeleteShader(pFragment->Id);
+
     return pRet;
 }
 
