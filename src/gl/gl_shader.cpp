@@ -15,6 +15,7 @@
 #include <mutils/gl/gl_shader.h>
 #include <mutils/string/stringutils.h>
 #include <mutils/compile/compile_messages.h>
+#include <mutils/file/file.h>
 
 #undef min
 #undef max
@@ -24,10 +25,10 @@ using namespace std;
 namespace MUtils
 {
 
-std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const fs::path& file_path, const std::string& shaderCode)
+std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const ShaderPackage& shaderPackage)
 {
     auto spResult = std::make_shared<GLCompileResult>();
-    spResult->fileSource = file_path;
+    spResult->fileSource = shaderPackage.path;
     spResult->Id = 0;
 
     try
@@ -64,9 +65,9 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const fs::pa
         }
 
         std::string shader;
-        if (shaderCode.empty())
+        if (shaderPackage.fragments.empty())
         {
-            std::ifstream shaderStream(file_path, std::ios::in);
+            std::ifstream shaderStream(shaderPackage.path, std::ios::in);
             if (shaderStream.is_open())
             {
                 std::stringstream sstr;
@@ -76,13 +77,16 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const fs::pa
             }
             else
             {
-                spResult->messages.push_back(std::make_shared<CompileMessage>(CompileMessageType::Error, file_path, "Couldn't open file"));
+                spResult->messages.push_back(std::make_shared<CompileMessage>(CompileMessageType::Error, shaderPackage.path, "Couldn't open file"));
                 return spResult;
             }
         }
         else
         {
-            shader = shaderCode;
+            for (auto& fragment : shaderPackage.fragments)
+            {
+                shader += fragment.source;
+            }
         }
 
         GLint Result = GL_FALSE;
@@ -93,6 +97,13 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const fs::pa
         glShaderSource(spResult->Id, 1, &sourcePointer, NULL);
         glCompileShader(spResult->Id);
 
+        std::vector<uint32_t> counts;
+        for (auto& fragment : shaderPackage.fragments)
+        {
+            auto count = std::count_if(fragment.source.begin(), fragment.source.end(), [](char c) {return (c == '\n'); });
+            counts.push_back(count);
+        }
+
         // Check Fragment Shader
         glGetShaderiv(spResult->Id, GL_COMPILE_STATUS, &Result);
         glGetShaderiv(spResult->Id, GL_INFO_LOG_LENGTH, &InfoLogLength);
@@ -101,6 +112,25 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const fs::pa
             std::vector<char> errorMessage(InfoLogLength + 1);
             glGetShaderInfoLog(spResult->Id, InfoLogLength, NULL, &errorMessage[0]);
             compile_parse_shader_errors(spResult.get(), &errorMessage[0]);
+
+            //file_write("d:/dev/test.txt", shader.c_str());
+            // Fix up line numbers
+            for (auto& pMessage : spResult->messages)
+            {
+                uint32_t lastCount = 0;
+                uint32_t fragment = 0;
+                for (auto& count : counts)
+                {
+                    if (pMessage->line < (count + lastCount))
+                    {
+                        pMessage->line = pMessage->line - lastCount;
+                        pMessage->fragmentIndex = fragment;
+                        break;
+                    }
+                    lastCount += count;
+                    fragment++;
+                }
+            }
         }
 
         if (Result == GL_FALSE)

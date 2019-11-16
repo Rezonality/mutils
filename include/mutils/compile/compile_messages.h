@@ -44,6 +44,7 @@ struct CompileMessage
     std::string text;
     fs::path filePath;
     int32_t line = 0;
+    uint32_t fragmentIndex = 0;
     std::pair<int32_t, int32_t> range = std::make_pair(-1, -1);
     CompileMessageType msgType = CompileMessageType::Error;
 };
