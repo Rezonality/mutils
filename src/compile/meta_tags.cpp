@@ -33,12 +33,15 @@ MetaTags_t parse_meta_tags(const std::string& text)
                     tokens[tok] = string_tolower(tokens[tok]);
                 }
 
-                if (tokens.size() % 2 == 0)
+                if (!tokens.empty() && !tokens[0].empty() && tokens[0][0] == '#')
                 {
-                    auto keyValuePairs = vector_convert_to_pairs(tokens);
-                    for (auto& keyValue : keyValuePairs)
+                    if (tokens.size() == 1)
                     {
-                        tags[keyValue.first] = TagValue { keyValue.second, lineNumber };
+                        tags[tokens[0]] = TagValue{ "", lineNumber };
+                    }
+                    else if (tokens.size() == 2)
+                    { 
+                        tags[tokens[0]] = TagValue{ tokens[1], lineNumber };
                     }
                 }
             }
