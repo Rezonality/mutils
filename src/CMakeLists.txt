@@ -345,6 +345,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/kiss_fft
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/httplib
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/lexertk
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
