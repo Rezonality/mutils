@@ -69,9 +69,15 @@ void compile_parse_shader_errors(gsl::not_null<CompileResult*> pResult, const st
             }
             else
             {
-                pMsg->text = error;
+                // Bail and show the whole message at line 0
+                // TODO: 
+                // We can parse: Fragment Info ====== Err
+                pMsg->text = messages;
                 pMsg->line = 0;
-                pMsg->range = std::make_pair(0, 0);
+                pMsg->range = std::make_pair(0, 1);
+                pMsg->msgType = CompileMessageType::Error;
+                pResult->messages.push_back(pMsg);
+                break;
             }
         }
         catch (...)
