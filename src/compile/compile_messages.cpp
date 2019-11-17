@@ -15,6 +15,9 @@ void compile_parse_shader_errors(gsl::not_null<CompileResult*> pResult, const st
     // Exception should catch silly mistakes.
     std::vector<std::string> errors;
     string_split(messages, "\n", errors);
+
+    std::ostringstream strUnknown;
+
     for (auto error : errors)
     {
         auto pMsg = std::make_shared<CompileMessage>();
@@ -42,8 +45,33 @@ void compile_parse_shader_errors(gsl::not_null<CompileResult*> pResult, const st
                     // file (line, colstart-colend) error
                     pMsg->filePath = string_trim(error.substr(0, bracketPos));
                     pMsg->text = string_trim(error.substr(lastBracket, error.size() - lastBracket), " \t():\r\n\f\v");
+
+                    // Handle special multiline message; where there is preamble before error info
+                    if (!strUnknown.str().empty())
+                    {
+                        pMsg->text = strUnknown.str() + pMsg->text;
+               
+                        // Try to extract warning/error context from the whole string
+                        // <rant>Drivers are all different, and the API/Driver is not designed to report useful errors to tools.
+                        // What I wouldn't give for a simple line number/offset API for errors....
+                        // OpenGL is even inconsistent in the formatting of its errors.  DX is better in that regard. </rant>
+                        auto str = string_tolower(pMsg->text);
+                        if (str.find("info") != std::string::npos ||
+                            str.find("warning") != std::string::npos)
+                        {
+                            pMsg->msgType = CompileMessageType::Warning;
+                        }
+                        else if (str.find("error") != std::string::npos)
+                        {
+                            pMsg->msgType = CompileMessageType::Error;
+                        }
+
+                        strUnknown.swap(std::ostringstream());
+                    }
+
                     std::string numbers = string_trim(error.substr(bracketPos, lastBracket - bracketPos), "( )");
                     auto numVec = string_split(numbers, ",");
+
                     // (3, 5 - 3)
                     if (!numVec.empty())
                     {
@@ -69,15 +97,8 @@ void compile_parse_shader_errors(gsl::not_null<CompileResult*> pResult, const st
             }
             else
             {
-                // Bail and show the whole message at line 0
-                // TODO: 
-                // We can parse: Fragment Info ====== Err
-                pMsg->text = messages;
-                pMsg->line = 0;
-                pMsg->range = std::make_pair(0, 1);
-                pMsg->msgType = CompileMessageType::Error;
-                pResult->messages.push_back(pMsg);
-                break;
+                strUnknown << pMsg->rawText << std::endl;
+                continue;
             }
         }
         catch (...)

@@ -117,6 +117,7 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const Shader
             // Fix up line numbers
             for (auto& pMessage : spResult->messages)
             {
+                pMessage->filePath = spResult->fileSource;
                 uint32_t lastCount = 0;
                 uint32_t fragment = 0;
                 for (auto& count : counts)
@@ -192,15 +193,16 @@ std::shared_ptr<GLCompileResult> gl_link_shaders(std::shared_ptr<GLCompileResult
         compile_parse_shader_errors(spResult.get(), &ProgramErrorMessage[0]);
         for (auto& msg : spResult->messages)
         {
+            msg->filePath = spResult->fileSource;
             // Try to figure out the error source in the link step!
             auto err = string_tolower(msg->rawText);
             if (err.find("vertex") != std::string::npos)
             {
-                spVertex->messages.push_back(msg);
+                msg->filePath = spVertex->fileSource;
             }
-            else if (err.find("pixel") != std::string::npos)
+            else
             {
-                spPixel->messages.push_back(msg);
+                msg->filePath = spPixel->fileSource;
             }
         }
     }
