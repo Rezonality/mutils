@@ -66,7 +66,7 @@ void compile_parse_shader_errors(gsl::not_null<CompileResult*> pResult, const st
                             pMsg->msgType = CompileMessageType::Error;
                         }
 
-                        strUnknown.swap(std::ostringstream());
+                        strUnknown = std::ostringstream();
                     }
 
                     std::string numbers = string_trim(error.substr(bracketPos, lastBracket - bracketPos), "( )");
