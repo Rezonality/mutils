@@ -46,7 +46,7 @@ std::vector<std::vector<int>> string_get_integer_grid(const std::string& str)
 std::vector<int> string_get_integers(const std::string& str)
 {
     std::vector<int> vals;
-    auto strVals = string_split(str, "\t\n\r ");
+    auto strVals = string_split(str, "\t\n\r ,");
     std::transform(strVals.begin(), strVals.end(), back_inserter(vals), [](const std::string& str) { return stoi(str); });
     return vals;
 }
