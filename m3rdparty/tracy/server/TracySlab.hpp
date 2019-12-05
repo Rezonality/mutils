@@ -19,12 +19,12 @@ public:
         , m_buffer( { m_ptr } )
         , m_usage( BlockSize )
     {
-        memUsage.fetch_add( BlockSize, std::memory_order_relaxed );
+        memUsage += BlockSize;
     }
 
     ~Slab()
     {
-        memUsage.fetch_sub( m_usage, std::memory_order_relaxed );
+        memUsage -= m_usage;
         for( auto& v : m_buffer )
         {
             delete[] v;
@@ -44,7 +44,7 @@ public:
     }
 
     template<typename T>
-    T* AllocInit()
+    tracy_force_inline T* AllocInit()
     {
         const auto size = sizeof( T );
         assert( size <= BlockSize );
@@ -54,6 +54,26 @@ public:
         }
         void* ret = m_ptr + m_offset;
         new( ret ) T;
+        m_offset += size;
+        return (T*)ret;
+    }
+
+    template<typename T>
+    tracy_force_inline T* AllocInit( size_t sz )
+    {
+        const auto size = sizeof( T ) * sz;
+        assert( size <= BlockSize );
+        if( m_offset + size > BlockSize )
+        {
+            DoAlloc();
+        }
+        void* ret = m_ptr + m_offset;
+        T* ptr = (T*)ret;
+        for( size_t i=0; i<sz; i++ )
+        {
+            new( ptr ) T;
+            ptr++;
+        }
         m_offset += size;
         return (T*)ret;
     }
@@ -93,7 +113,7 @@ public:
         }
         else
         {
-            memUsage.fetch_add( size );
+            memUsage += size;
             m_usage += size;
             auto ret = new char[size];
             m_buffer.emplace_back( ret );
@@ -105,7 +125,7 @@ public:
     {
         if( m_buffer.size() > 1 )
         {
-            memUsage.fetch_sub( m_usage - BlockSize, std::memory_order_relaxed );
+            memUsage -= m_usage - BlockSize;
             m_usage = BlockSize;
             for( int i=1; i<m_buffer.size(); i++ )
             {
@@ -130,7 +150,7 @@ private:
         m_ptr = new char[BlockSize];
         m_offset = 0;
         m_buffer.emplace_back( m_ptr );
-        memUsage.fetch_add( BlockSize, std::memory_order_relaxed );
+        memUsage += BlockSize;
         m_usage += BlockSize;
     }
 

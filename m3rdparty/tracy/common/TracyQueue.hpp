@@ -12,6 +12,8 @@ enum class QueueType : uint8_t
     ZoneName,
     Message,
     MessageColor,
+    MessageCallstack,
+    MessageColorCallstack,
     MessageAppInfo,
     ZoneBeginAllocSrcLoc,
     ZoneBeginAllocSrcLocCallstack,
@@ -19,14 +21,34 @@ enum class QueueType : uint8_t
     Callstack,
     CallstackAlloc,
     FrameImage,
+    ZoneBegin,
+    ZoneBeginCallstack,
+    ZoneEnd,
+    LockWait,
+    LockObtain,
+    LockRelease,
+    LockSharedWait,
+    LockSharedObtain,
+    LockSharedRelease,
+    MemAlloc,
+    MemFree,
+    MemAllocCallstack,
+    MemFreeCallstack,
+    GpuZoneBegin,
+    GpuZoneBeginCallstack,
+    GpuZoneEnd,
+    GpuZoneBeginSerial,
+    GpuZoneBeginCallstackSerial,
+    GpuZoneEndSerial,
+    PlotData,
+    ContextSwitch,
+    ThreadWakeup,
+    GpuTime,
     Terminate,
     KeepAlive,
     ThreadContext,
     Crash,
     CrashReport,
-    ZoneBegin,
-    ZoneBeginCallstack,
-    ZoneEnd,
     ZoneValidation,
     FrameMarkMsg,
     FrameMarkMsgStart,
@@ -34,31 +56,19 @@ enum class QueueType : uint8_t
     SourceLocation,
     LockAnnounce,
     LockTerminate,
-    LockWait,
-    LockObtain,
-    LockRelease,
-    LockSharedWait,
-    LockSharedObtain,
-    LockSharedRelease,
     LockMark,
-    PlotData,
     MessageLiteral,
     MessageLiteralColor,
+    MessageLiteralCallstack,
+    MessageLiteralColorCallstack,
     GpuNewContext,
-    GpuZoneBegin,
-    GpuZoneBeginCallstack,
-    GpuZoneEnd,
-    GpuTime,
-    MemAlloc,
-    MemFree,
-    MemAllocCallstack,
-    MemFreeCallstack,
     CallstackFrameSize,
     CallstackFrame,
     SysTimeReport,
-    ContextSwitch,
-    ThreadWakeup,
     TidToPid,
+    PlotConfig,
+    ParamSetup,
+    CpuTopology,
     StringData,
     ThreadName,
     CustomStringData,
@@ -237,6 +247,7 @@ struct QueueGpuZoneBegin
 struct QueueGpuZoneEnd
 {
     int64_t cpuTime;
+    uint64_t thread;
     uint16_t queryId;
     uint8_t context;
 };
@@ -326,6 +337,34 @@ struct QueueTidToPid
     uint64_t pid;
 };
 
+enum class PlotFormatType : uint8_t
+{
+    Number,
+    Memory,
+    Percentage
+};
+
+struct QueuePlotConfig
+{
+    uint64_t name;      // ptr
+    uint8_t type;
+};
+
+struct QueueParamSetup
+{
+    uint32_t idx;
+    uint64_t name;      // ptr
+    uint8_t isBool;
+    int32_t val;
+};
+
+struct QueueCpuTopology
+{
+    uint32_t package;
+    uint32_t core;
+    uint32_t thread;
+};
+
 struct QueueHeader
 {
     union
@@ -374,6 +413,9 @@ struct QueueItem
         QueueContextSwitch contextSwitch;
         QueueThreadWakeup threadWakeup;
         QueueTidToPid tidToPid;
+        QueuePlotConfig plotConfig;
+        QueueParamSetup paramSetup;
+        QueueCpuTopology cpuTopology;
     };
 };
 #pragma pack()
@@ -386,6 +428,8 @@ static const size_t QueueDataSize[] = {
     sizeof( QueueHeader ) + sizeof( QueueZoneText ),        // zone name
     sizeof( QueueHeader ) + sizeof( QueueMessage ),
     sizeof( QueueHeader ) + sizeof( QueueMessageColor ),
+    sizeof( QueueHeader ) + sizeof( QueueMessage ),         // callstack
+    sizeof( QueueHeader ) + sizeof( QueueMessageColor ),    // callstack
     sizeof( QueueHeader ) + sizeof( QueueMessage ),         // app info
     sizeof( QueueHeader ) + sizeof( QueueZoneBegin ),       // allocated source location
     sizeof( QueueHeader ) + sizeof( QueueZoneBegin ),       // allocated source location, callstack
@@ -393,15 +437,35 @@ static const size_t QueueDataSize[] = {
     sizeof( QueueHeader ) + sizeof( QueueCallstack ),
     sizeof( QueueHeader ) + sizeof( QueueCallstackAlloc ),
     sizeof( QueueHeader ) + sizeof( QueueFrameImage ),
+    sizeof( QueueHeader ) + sizeof( QueueZoneBegin ),
+    sizeof( QueueHeader ) + sizeof( QueueZoneBegin ),       // callstack
+    sizeof( QueueHeader ) + sizeof( QueueZoneEnd ),
+    sizeof( QueueHeader ) + sizeof( QueueLockWait ),
+    sizeof( QueueHeader ) + sizeof( QueueLockObtain ),
+    sizeof( QueueHeader ) + sizeof( QueueLockRelease ),
+    sizeof( QueueHeader ) + sizeof( QueueLockWait ),        // shared
+    sizeof( QueueHeader ) + sizeof( QueueLockObtain ),      // shared
+    sizeof( QueueHeader ) + sizeof( QueueLockRelease ),     // shared
+    sizeof( QueueHeader ) + sizeof( QueueMemAlloc ),
+    sizeof( QueueHeader ) + sizeof( QueueMemFree ),
+    sizeof( QueueHeader ) + sizeof( QueueMemAlloc ),        // callstack
+    sizeof( QueueHeader ) + sizeof( QueueMemFree ),         // callstack
+    sizeof( QueueHeader ) + sizeof( QueueGpuZoneBegin ),
+    sizeof( QueueHeader ) + sizeof( QueueGpuZoneBegin ),    // callstack
+    sizeof( QueueHeader ) + sizeof( QueueGpuZoneEnd ),
+    sizeof( QueueHeader ) + sizeof( QueueGpuZoneBegin ),    // serial
+    sizeof( QueueHeader ) + sizeof( QueueGpuZoneBegin ),    // serial, callstack
+    sizeof( QueueHeader ) + sizeof( QueueGpuZoneEnd ),      // serial
+    sizeof( QueueHeader ) + sizeof( QueuePlotData ),
+    sizeof( QueueHeader ) + sizeof( QueueContextSwitch ),
+    sizeof( QueueHeader ) + sizeof( QueueThreadWakeup ),
+    sizeof( QueueHeader ) + sizeof( QueueGpuTime ),
     // above items must be first
     sizeof( QueueHeader ),                                  // terminate
     sizeof( QueueHeader ),                                  // keep alive
     sizeof( QueueHeader ) + sizeof( QueueThreadContext ),
     sizeof( QueueHeader ),                                  // crash
     sizeof( QueueHeader ) + sizeof( QueueCrashReport ),
-    sizeof( QueueHeader ) + sizeof( QueueZoneBegin ),
-    sizeof( QueueHeader ) + sizeof( QueueZoneBegin ),       // callstack
-    sizeof( QueueHeader ) + sizeof( QueueZoneEnd ),
     sizeof( QueueHeader ) + sizeof( QueueZoneValidation ),
     sizeof( QueueHeader ) + sizeof( QueueFrameMark ),       // continuous frames
     sizeof( QueueHeader ) + sizeof( QueueFrameMark ),       // start
@@ -409,31 +473,19 @@ static const size_t QueueDataSize[] = {
     sizeof( QueueHeader ) + sizeof( QueueSourceLocation ),
     sizeof( QueueHeader ) + sizeof( QueueLockAnnounce ),
     sizeof( QueueHeader ) + sizeof( QueueLockTerminate ),
-    sizeof( QueueHeader ) + sizeof( QueueLockWait ),
-    sizeof( QueueHeader ) + sizeof( QueueLockObtain ),
-    sizeof( QueueHeader ) + sizeof( QueueLockRelease ),
-    sizeof( QueueHeader ) + sizeof( QueueLockWait ),        // shared
-    sizeof( QueueHeader ) + sizeof( QueueLockObtain ),      // shared
-    sizeof( QueueHeader ) + sizeof( QueueLockRelease ),     // shared
     sizeof( QueueHeader ) + sizeof( QueueLockMark ),
-    sizeof( QueueHeader ) + sizeof( QueuePlotData ),
     sizeof( QueueHeader ) + sizeof( QueueMessage ),         // literal
     sizeof( QueueHeader ) + sizeof( QueueMessageColor ),    // literal
+    sizeof( QueueHeader ) + sizeof( QueueMessage ),         // literal, callstack
+    sizeof( QueueHeader ) + sizeof( QueueMessageColor ),    // literal, callstack
     sizeof( QueueHeader ) + sizeof( QueueGpuNewContext ),
-    sizeof( QueueHeader ) + sizeof( QueueGpuZoneBegin ),
-    sizeof( QueueHeader ) + sizeof( QueueGpuZoneBegin ),    // callstack
-    sizeof( QueueHeader ) + sizeof( QueueGpuZoneEnd ),
-    sizeof( QueueHeader ) + sizeof( QueueGpuTime ),
-    sizeof( QueueHeader ) + sizeof( QueueMemAlloc ),
-    sizeof( QueueHeader ) + sizeof( QueueMemFree ),
-    sizeof( QueueHeader ) + sizeof( QueueMemAlloc ),        // callstack
-    sizeof( QueueHeader ) + sizeof( QueueMemFree ),         // callstack
     sizeof( QueueHeader ) + sizeof( QueueCallstackFrameSize ),
     sizeof( QueueHeader ) + sizeof( QueueCallstackFrame ),
     sizeof( QueueHeader ) + sizeof( QueueSysTime ),
-    sizeof( QueueHeader ) + sizeof( QueueContextSwitch ),
-    sizeof( QueueHeader ) + sizeof( QueueThreadWakeup ),
     sizeof( QueueHeader ) + sizeof( QueueTidToPid ),
+    sizeof( QueueHeader ) + sizeof( QueuePlotConfig ),
+    sizeof( QueueHeader ) + sizeof( QueueParamSetup ),
+    sizeof( QueueHeader ) + sizeof( QueueCpuTopology ),
     // keep all QueueStringTransfer below
     sizeof( QueueHeader ) + sizeof( QueueStringTransfer ),  // string data
     sizeof( QueueHeader ) + sizeof( QueueStringTransfer ),  // thread name

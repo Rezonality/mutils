@@ -1,5 +1,6 @@
 OPTFLAGS := -g3 -fmerge-constants
-CFLAGS := $(OPTFLAGS) -Wall -DTRACY_ENABLE -rdynamic
+TRACYFLAGS :=
+CFLAGS := $(OPTFLAGS) -Wall -DTRACY_ENABLE $(TRACYFLAGS) -rdynamic
 CXXFLAGS := $(CFLAGS) -std=gnu++17
 DEFINES +=
 INCLUDES :=
@@ -14,6 +15,9 @@ OBJ := $(SRC:%.cpp=%.o)
 
 ifeq ($(shell uname -o),Cygwin)
 LIBS += -ldbghelp
+endif
+ifeq ($(shell uname -o),FreeBSD)
+LIBS += -lexecinfo
 endif
 
 all: $(IMAGE)

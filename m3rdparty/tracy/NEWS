@@ -6,16 +6,39 @@ Note: Release numbers are nothing more than numbers. There are some
 "missing" versions due to trace file changes during development. This is not
 a mistake.
 
-v0.6 (xxxx-xx-xx)
+v0.7 (xxxx-xx-xx)
 -----------------
 
+- Improved call stack decoding on OSX.
+- Collection of CPU topology data.
+
+v0.6.1 (2019-11-28)
+-------------------
+
+- Dropped support for pre-v0.5 traces.
+- Improve BSD support.
+- GPU zone CPU thread highlight will now highlight whole thread, not only
+  the thread name.
+- Added CPU thread highlight for CPU data items.
+- Client parameters may be now set from the server.
+- Minor UI fixes.
+
+v0.6 (2019-11-17)
+-----------------
+
+This is the last release which will be able to load pre-v0.5 traces. Use the
+update utility to convert your old traces now!
+
 - Dropped support for pre-v0.4 traces.
+- Major memory usage decrease.
+- Significant network bandwidth decrease.
 - Implemented context switch capture on selected platforms.
   - Zone timings in various UI places can now take into account only the
     time when the thread was executing.
   - Zone information window can now display regions in which thread was
     suspended by the operating system.
   - CPUs on which the zone was running are enumerated.
+  - Thread activity regions can be graphed on the timeline.
 - API breakage: SetThreadName() now only works on current thread.
 - Fixed thread name retrieval after thread is destroyed.
 - Added number of CPU cores to host info.
@@ -24,14 +47,40 @@ v0.6 (xxxx-xx-xx)
 - CPU cores are now displayed on the timeline.
   - Thread execution workload is displayed, including threads from external
     programs.
-- Added "CPU data" window (accessible from the trace info window), showing
-  programs competing for CPU during the capture.
+  - Thread migrations across CPU cores can be graphed.
+  - System-wide workload distribution is now plotted on the timeline.
+- Added "CPU data" window showing programs competing for CPU during the
+  capture.
 - Switched to using native thread identifiers (relatively small numbers), as
   opposed to pthreads identifiers, which in reality were pointers.
 - Improved thread name discovery if context switch capture is enabled.
 - Per-trace state is now preserved between profiling sessions:
   - Timeline view position.
   - Item categories draw/hide settings.
+- Timeline zones will be highlighted using a different color, when a
+  matching time range is selected on histogram.
+- Per-frame zone times are now displayed on the frames plot when a zone is
+  selected in the find zone menu.
+- Zone color is now displayed in zone information window.
+- Zone colors can now be determined basing on depth and thread or source
+  location.
+- Thread colors are displayed across the profiler application.
+- Frame times can be now compared.
+- Expose more lock handling functionality.
+- Network port can be now specified by the user.
+- Proper handling of multithreaded Vulkan code.
+- Added extreme compression level in update utility.
+- Added time distribution data in the zone information window.
+- Trace file name is now displayed in trace information window.
+- Annotations can be now added to the timeline.
+- Server now performs network data retrieval and decompression on a dedicated
+  thread.
+- Added examples of Tracy integration.
+- Allow grouping of zones in the find zone menu by zone parent or with no
+  grouping.
+- Zone list in the statistics window can be now filtered.
+- Implemented configuration of plots.
+- Messages can now collect call stacks.
 
 v0.5 (2019-08-10)
 -----------------

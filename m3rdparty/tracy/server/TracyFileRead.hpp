@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <thread>
 
 #include "TracyFileHeader.hpp"
@@ -23,7 +24,7 @@ public:
     static FileRead* Open( const char* fn )
     {
         auto f = fopen( fn, "rb" );
-        return f ? new FileRead( f ) : nullptr;
+        return f ? new FileRead( f, fn ) : nullptr;
     }
 
     ~FileRead()
@@ -76,21 +77,63 @@ public:
 
     }
 
-    template<class T>
-    tracy_force_inline void Read2( T& v0, T& v1 )
+    template<class T, class U>
+    tracy_force_inline void Read2( T& v0, U& v1 )
     {
-        if( sizeof( T ) * 2 < BufSize - m_offset )
+        if( sizeof( T ) + sizeof( U ) < BufSize - m_offset )
         {
             memcpy( &v0, m_buf + m_offset, sizeof( T ) );
-            memcpy( &v1, m_buf + m_offset + sizeof( T ), sizeof( T ) );
-            m_offset += sizeof( T ) * 2;
+            memcpy( &v1, m_buf + m_offset + sizeof( T ), sizeof( U ) );
+            m_offset += sizeof( T ) + sizeof( U );
         }
         else
         {
-            T tmp[2];
-            ReadBig( tmp, sizeof( T ) * 2 );
+            char tmp[sizeof( T ) + sizeof( U )];
+            ReadBig( tmp, sizeof( T ) + sizeof( U ) );
             memcpy( &v0, tmp, sizeof( T ) );
-            memcpy( &v1, tmp+1, sizeof( T ) );
+            memcpy( &v1, tmp + sizeof( T ), sizeof( U ) );
+        }
+    }
+
+    template<class T, class U, class V>
+    tracy_force_inline void Read3( T& v0, U& v1, V& v2 )
+    {
+        if( sizeof( T ) + sizeof( U ) + sizeof( V ) < BufSize - m_offset )
+        {
+            memcpy( &v0, m_buf + m_offset, sizeof( T ) );
+            memcpy( &v1, m_buf + m_offset + sizeof( T ), sizeof( U ) );
+            memcpy( &v2, m_buf + m_offset + sizeof( T ) + sizeof( U ), sizeof( V ) );
+            m_offset += sizeof( T ) + sizeof( U ) + sizeof( V );
+        }
+        else
+        {
+            char tmp[sizeof( T ) + sizeof( U ) + sizeof( V )];
+            ReadBig( tmp, sizeof( T ) + sizeof( U ) + sizeof( V ) );
+            memcpy( &v0, tmp, sizeof( T ) );
+            memcpy( &v1, tmp + sizeof( T ), sizeof( U ) );
+            memcpy( &v2, tmp + sizeof( T ) + sizeof( U ), sizeof( V ) );
+        }
+    }
+
+    template<class T, class U, class V, class W>
+    tracy_force_inline void Read4( T& v0, U& v1, V& v2, W& v3 )
+    {
+        if( sizeof( T ) + sizeof( U ) + sizeof( V ) + sizeof( W ) < BufSize - m_offset )
+        {
+            memcpy( &v0, m_buf + m_offset, sizeof( T ) );
+            memcpy( &v1, m_buf + m_offset + sizeof( T ), sizeof( U ) );
+            memcpy( &v2, m_buf + m_offset + sizeof( T ) + sizeof( U ), sizeof( V ) );
+            memcpy( &v3, m_buf + m_offset + sizeof( T ) + sizeof( U ) + sizeof( V ), sizeof( W ) );
+            m_offset += sizeof( T ) + sizeof( U ) + sizeof( V ) + sizeof( W );
+        }
+        else
+        {
+            char tmp[sizeof( T ) + sizeof( U ) + sizeof( V ) + sizeof( W )];
+            ReadBig( tmp, sizeof( T ) + sizeof( U ) + sizeof( V ) + sizeof( W ) );
+            memcpy( &v0, tmp, sizeof( T ) );
+            memcpy( &v1, tmp + sizeof( T ), sizeof( U ) );
+            memcpy( &v2, tmp + sizeof( T ) + sizeof( U ), sizeof( V ) );
+            memcpy( &v3, tmp + sizeof( T ) + sizeof( U ) + sizeof( V ), sizeof( W ) );
         }
     }
 
@@ -105,8 +148,10 @@ public:
         return false;
     }
 
+    const std::string& GetFilename() const { return m_filename; }
+
 private:
-    FileRead( FILE* f )
+    FileRead( FILE* f, const char* fn )
         : m_stream( LZ4_createStreamDecode() )
         , m_file( f )
         , m_buf( m_bufData[1] )
@@ -116,6 +161,7 @@ private:
         , m_signalSwitch( false )
         , m_signalAvailable( false )
         , m_exit( false )
+        , m_filename( fn )
     {
         char hdr[4];
         if( fread( hdr, 1, sizeof( hdr ), m_file ) != sizeof( hdr ) ) throw NotTracyDump();
@@ -215,7 +261,6 @@ private:
 
     LZ4_streamDecode_t* m_stream;
     FILE* m_file;
-    char m_bufData[2][BufSize];
     char* m_buf;
     char* m_second;
     size_t m_offset;
@@ -226,6 +271,9 @@ private:
     std::atomic<bool> m_exit;
 
     std::thread m_decThread;
+
+    std::string m_filename;
+    char m_bufData[2][BufSize];
 };
 
 }

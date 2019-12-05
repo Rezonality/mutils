@@ -122,6 +122,8 @@ std::shared_ptr<Shape> shape_create_sphere(const glm::vec3& size, uint32_t subdi
 
 std::shared_ptr<Shape> shape_create_icosphere(const glm::vec3& size, uint32_t subdivisions, bool smooth, const glm::vec4& color, const glm::vec3& off)
 {
+    subdivisions = std::min(subdivisions, (uint32_t)10);
+
     Icosphere sphere(.5f, subdivisions, smooth);
 
     auto spShape = std::make_shared<Shape>();
