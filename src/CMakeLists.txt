@@ -229,6 +229,7 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/openssl>
     $<INSTALL_INTERFACE:include/toml11>
     $<INSTALL_INTERFACE:include/clip>
+    $<INSTALL_INTERFACE:include/tracy>
     $<INSTALL_INTERFACE:include>
     $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include/imgui/misc/freetype>
@@ -369,11 +370,6 @@ install(FILES ${MUTILS_ROOT}/m3rdparty/zip/src/zip.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/zip
     )
 
-# Note: We keep the necessary includes seperate for clean install
-install(DIRECTORY ${MUTILS_ROOT}/include/mutils/tracy
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
-
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/imgui
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
@@ -388,6 +384,11 @@ install(FILES ${MUTILS_ROOT}/m3rdparty/chibi/lib/init-7.scm
 
 install(FILES ${MUTILS_ROOT}/m3rdparty/chibi/lib/meta-7.scm
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chibi
+    )
+
+# Note: We keep the necessary includes seperate for clean install
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/tracy
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy
     )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/chibi/install.h
