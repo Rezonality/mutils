@@ -78,6 +78,10 @@ uint32_t profile_get_id(const char* strName)
 {
     std::lock_guard<std::mutex>(globalProfiler.profile_mutex);
 
+    if (globalProfiler.currentId == 0)
+    {
+        timer_start(globalProfiler.globalTimer);
+    }
     globalProfiler.nameToId[strName] = globalProfiler.currentId;
     globalProfiler.IdToName[globalProfiler.currentId] = strName;
     if (globalProfiler.timerData.size() <= (globalProfiler.currentId + 1))

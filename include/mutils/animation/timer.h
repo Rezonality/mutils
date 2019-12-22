@@ -43,6 +43,7 @@ struct profile_data
     std::unordered_map<std::string, uint32_t> nameToId;
     std::unordered_map<uint32_t, std::string> IdToName;
     uint32_t currentId = 0;
+    timer globalTimer;
     std::mutex profile_mutex;
 };
 
