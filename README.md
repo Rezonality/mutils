@@ -11,7 +11,7 @@ This project contains useful things that are often needed in bigger c++ projects
 
 Because of modern CMake, you can install this library & reference it in your CMake with just a couple of lines.
 
-First, you need to build the dependent packages.  Some libraries do modern CMake well - such as SDL and OpenSSL.  Those can just be installed on your system.  Others are easy to reference as external project but don't quite handle the install step well; this project builds them and then does its own install of the necessary pieces.  The prebuild.bat/sh script is the part that handles that, and you need to run it first: 
+First, you need to build the dependent packages.  Some libraries do modern CMake well - such as SDL and OpenSSL.  Those can just be installed on your system.  Others are easy to reference as external project but don't quite handle the install step well; this project builds them and then does its own install of the necessary pieces.  The prebuild.bat/sh script is the part that handles that, and you need to run it first.  Note that on linux it will also apt install 'libasound2-dev.lib'
 
 ```
 prebuild.bat OR prebuild.sh
