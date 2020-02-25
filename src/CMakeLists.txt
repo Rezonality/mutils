@@ -112,6 +112,15 @@ set (CHIBI_SCHEME_SOURCE
     ${M3RDPARTY_DIR}/chibi/eval.c
     ${M3RDPARTY_DIR}/chibi/simplify.c)
 
+set (ORCA_SOURCE
+    ${M3RDPARTY_DIR}/orca-c/field.c
+    ${M3RDPARTY_DIR}/orca-c/gbuffer.c
+    #${M3RDPARTY_DIR}/orca-c/osc_out.c
+    ${M3RDPARTY_DIR}/orca-c/sim.c
+    #${M3RDPARTY_DIR}/orca-c/sysmisc.c
+    ${M3RDPARTY_DIR}/orca-c/vmio.c
+    ${M3RDPARTY_DIR}/orca-c/vmio.h)
+
 set(default_module_path
     ""
     #"${CMAKE_INSTALL_PREFIX}/${thePrefix}${pathsep}${CMAKE_INSTALL_PREFIX}/bin"
@@ -180,6 +189,7 @@ add_library(MUtils STATIC
     ${SDL2_SOURCE}
     ${TFD_SOURCE}
     ${CHIBI_SCHEME_SOURCE}
+    ${ORCA_SOURCE}
     ${FILEWATCHER_SOURCE}
     ${ZIP_SOURCE}
     ${CLIP_SOURCE}
@@ -228,8 +238,10 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/rtaudio>
     $<INSTALL_INTERFACE:include/openssl>
     $<INSTALL_INTERFACE:include/toml11>
+    $<INSTALL_INTERFACE:include/utfcpp/source>
     $<INSTALL_INTERFACE:include/clip>
     $<INSTALL_INTERFACE:include/tracy>
+    $<INSTALL_INTERFACE:include/orca-c>
     $<INSTALL_INTERFACE:include>
     $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include/imgui/misc/freetype>
@@ -315,6 +327,14 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/FileWatcher
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/toml11
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/orca-c
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/utfcpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
