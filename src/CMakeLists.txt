@@ -177,6 +177,17 @@ SET(IMGUI_SOURCE
     ${IMGUI_DIR}/misc/freetype/imgui_freetype.cpp
     ${IMGUI_DIR}/imgui.cpp)
 
+SET(NANOVG_DIR ${MUTILS_ROOT}/m3rdparty/nanovg)
+SET(NANOVG_SOURCE
+    ${NANOVG_DIR}/src/nanovg.c
+    ${NANOVG_DIR}/src/nanovg.h
+    ${NANOVG_DIR}/src/nanovg_gl.h
+    ${NANOVG_DIR}/src/fontstash.h
+    ${NANOVG_DIR}/src/nanovg_gl_utils.h
+    ${NANOVG_DIR}/src/stb_image.h
+    ${NANOVG_DIR}/src/stb_truetype.h
+)
+
 # Create the library
 add_library(MUtils STATIC 
     ${UTILS_SOURCES}
@@ -185,6 +196,7 @@ add_library(MUtils STATIC
     ${KISFFT_SOURCE}
     ${MPC_SOURCE}
     ${IMGUI_SOURCE}
+    ${NANOVG_SOURCE}
     ${SOUNDPIPE_SOURCE}
     ${SDL2_SOURCE}
     ${TFD_SOURCE}
@@ -242,6 +254,7 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/clip>
     $<INSTALL_INTERFACE:include/tracy>
     $<INSTALL_INTERFACE:include/orca-c>
+    $<INSTALL_INTERFACE:include/nanovg>
     $<INSTALL_INTERFACE:include>
     $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include/imgui/misc/freetype>
@@ -422,6 +435,10 @@ install(FILES
     ${MUTILS_ROOT}/m3rdparty/imgui/examples/libs/gl3w/GL/gl3w.h
     ${MUTILS_ROOT}/m3rdparty/imgui/examples/libs/gl3w/GL/glcorearb.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/GL
+    )
+
+install(FILES ${NANOVG_SOURCE}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nanovg
     )
 
 install(FILES 
