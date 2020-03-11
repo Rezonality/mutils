@@ -51,7 +51,7 @@ ORCA_OK_IF_UNUSED
 static Mark_flags mbuffer_peek(Mark *mbuf, Usz height, Usz width, Usz y,
                                Usz x) {
   (void)height;
-  return mbuf[y * width + x];
+  return (Mark_flags)mbuf[y * width + x];
 }
 
 ORCA_OK_IF_UNUSED
@@ -61,7 +61,7 @@ static Mark_flags mbuffer_peek_relative(Mark *mbuf, Usz height, Usz width,
   Isz x0 = (Isz)x + offs_x;
   if (y0 >= (Isz)height || x0 >= (Isz)width || y0 < 0 || x0 < 0)
     return Mark_flag_none;
-  return mbuf[(Usz)y0 * width + (Usz)x0];
+  return (Mark_flags)mbuf[(Usz)y0 * width + (Usz)x0];
 }
 
 ORCA_OK_IF_UNUSED
