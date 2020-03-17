@@ -461,6 +461,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/ctti
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/concurrentqueue
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/catch2
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
