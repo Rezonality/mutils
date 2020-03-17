@@ -30,6 +30,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <ios>
 
 #define  gsl_lite_MAJOR  0
 #define  gsl_lite_MINOR  35
