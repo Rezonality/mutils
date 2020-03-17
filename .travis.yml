@@ -1,5 +1,4 @@
 language: cpp
-dist: bionic
 
 before_script:
   - chmod +x prebuild.sh
@@ -23,6 +22,7 @@ matrix:
         - make test
   include:
     - os: linux
+      dist: bionic
       addons:
         apt:
           packages:
@@ -40,6 +40,7 @@ matrix:
 
       # Coverage
     - os: linux
+      dist: bionic
       addons:
         apt:
           packages:
@@ -66,6 +67,7 @@ matrix:
 
       # Google Address Sanitizer
     - os: linux
+      dist: bionic
       addons:
         apt:
           packages:
@@ -83,6 +85,7 @@ matrix:
 
       # Google Undefined Sanitizer
     - os: linux
+      dist: bionic
       addons:
         apt:
           packages:
@@ -100,6 +103,7 @@ matrix:
 
       # Google Thread Sanitizer
     - os: linux
+      dist: bionic
       addons:
         apt:
           packages:
