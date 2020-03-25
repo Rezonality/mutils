@@ -2,18 +2,27 @@
 
 // Helpers for conversion
 #include <glm/glm.hpp>
+#include "math.h"
 
 #define IM_VEC4_CLASS_EXTRA                                                 \
 ImVec4(const glm::vec4& f) { x = f.x; y = f.y; z = f.z; w = f.w; }          \
-ImVec4(const glm::ivec4& f) { x = (float)f.x; y = (float)f.y; z = (float)f.z; w = (float)f.w; }             \
-operator glm::vec4() const { return glm::vec4(x,y,z,w); }                                                    \
-operator glm::ivec4() const { return glm::ivec4((int)x,(int)y,(int)z,(int)w); }
+ImVec4(const glm::ivec4& f) { x = (float)f.x; y = (float)f.y; z = (float)f.z; w = (float)f.w; }         \
+operator glm::vec4() const { return glm::vec4(x,y,z,w); }                                               \
+operator glm::ivec4() const { return glm::ivec4((int)x,(int)y,(int)z,(int)w); }                         \
+ImVec4(const MUtils::NVec4f& f) { x = f.x; y = f.y; z = f.z; w = f.w; }                                         \
+ImVec4(const MUtils::NVec4i& f) { x = (float)f.x; y = (float)f.y; z = (float)f.z; w = (float)f.w; }             \
+operator MUtils::NVec4f() const { return MUtils::NVec4f(x,y,z,w); }                                                     \
+operator MUtils::NVec4i() const { return MUtils::NVec4i((int)x,(int)y,(int)z,(int)w); }
 
 #define IM_VEC2_CLASS_EXTRA                                                 \
 ImVec2(const glm::vec2& f) { x = f.x; y = f.y; }                            \
 ImVec2(const glm::ivec2& f) { x = (float)f.x; y = (float)f.y; }             \
 operator glm::vec2() const { return glm::vec2(x, y); }                      \
-operator glm::ivec2() const { return glm::ivec2((int)x, (int)y); }
+operator glm::ivec2() const { return glm::ivec2((int)x, (int)y); }          \
+ImVec2(const MUtils::NVec2f& f) { x = f.x; y = f.y; }                            \
+ImVec2(const MUtils::NVec2i& f) { x = (float)f.x; y = (float)f.y; }             \
+operator MUtils::NVec2f() const { return MUtils::NVec2f(x, y); }                      \
+operator MUtils::NVec2i() const { return MUtils::NVec2i((int)x, (int)y); }
 
 #define IM_QUAT_CLASS_EXTRA                                                 \
 ImQuat(const glm::quat& f) { x = f.x; y = f.y; z = f.z; w = f.w; }          \
