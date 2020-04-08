@@ -114,6 +114,4 @@ static bool orca_is_valid_glyph(Glyph c) {
   return false;
 }
 
-#ifdef WIN32
 #define restrict __restrict
-#endif
