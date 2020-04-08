@@ -23,6 +23,7 @@ struct AppStarterSettings
     glm::ivec2 startSize = glm::ivec2(1024, 768);
     uint32_t flags = AppStarterFlags::None;
     glm::vec4 clearColor = glm::vec4(0.45f, 0.55f, 0.60f, 1.00f);
+    std::string appName = "My App";
 };
 
 struct IAppStarterClient

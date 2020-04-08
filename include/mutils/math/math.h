@@ -110,11 +110,11 @@ inline NVec2<T>& operator*=(NVec2<T>& lhs, float val)
 template <class T>
 inline bool operator<(const NVec2<T>& lhs, const NVec2<T>& rhs)
 {
-    if (lhs.x != rhs.x)
+    if (lhs.y != rhs.y)
     {
-        return lhs.x < rhs.x;
+        return lhs.y < rhs.y;
     }
-    return lhs.y < rhs.y;
+    return lhs.x < rhs.x;
 }
 template <class T>
 inline NVec2<T> Clamp(const NVec2<T>& val, const NVec2<T>& min, const NVec2<T>& max)

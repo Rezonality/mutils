@@ -6,6 +6,7 @@
 #include <imgui/imgui.h>
 #include <imgui/examples/imgui_impl_sdl.h>
 #include <imgui/examples/imgui_impl_opengl3.h>
+#include <imgui/misc/freetype/imgui_freetype.h>
 
 #include <SDL.h>
 
@@ -70,7 +71,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.startSize.x, settings.startSize.y, window_flags);
+    SDL_Window* window = SDL_CreateWindow(settings.appName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.startSize.x, settings.startSize.y, window_flags);
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
@@ -120,11 +121,13 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     config.DstFont = ImGui::GetFont();
     io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/ProggyClean.ttf").string().c_str(), 13 * dpi.scaleFactor, &config, ranges);
 
+    unsigned int flags = 0;// ImGuiFreeType::NoHinting;
+    ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
+
     // Our state
     bool show_demo_window = false;
-
-    pClient->Init();
-
+    bool firstInit = true;
+    
     timer theTimer;
     timer_start(theTimer);
 
@@ -167,6 +170,12 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL2_NewFrame(window);
         ImGui::NewFrame();
+
+        if (firstInit)
+        {
+            pClient->Init();
+            firstInit = false;
+        }
 
         pClient->DrawGUI(displaySize);
 
