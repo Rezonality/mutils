@@ -17,6 +17,7 @@
 #include "mutils/logger/logger.h"
 #include "mutils/file/runtree.h"
 #include "mutils/animation/timer.h"
+#include "mutils/profile/profile.h"
 
 using namespace gsl;
 
@@ -200,6 +201,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         }
 
         SDL_GL_SwapWindow(window);
+
+        MUtilsFrameMark;
     }
 
     pClient->Destroy();
