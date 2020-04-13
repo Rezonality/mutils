@@ -14,7 +14,8 @@ enum
 {
     None = (0),
     ShowDemoWindow = (1 << 0),
-    DockingEnable = (1 << 1)
+    DockingEnable = (1 << 1),
+    HideCursor = (1 << 2)
 };
 }
 

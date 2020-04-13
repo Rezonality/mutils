@@ -134,8 +134,10 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     // Main loop
     bool done = false;
+
     while (!done)
     {
+
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
@@ -163,7 +165,6 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
             displaySize.y > 0)
         {
             pClient->Update(timer_get_elapsed_seconds(theTimer), displaySize);
-
             pClient->Draw(displaySize);
         }
 
@@ -176,6 +177,12 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         {
             pClient->Init();
             firstInit = false;
+        }
+
+        bool shouldHide = ((settings.flags & AppStarterFlags::HideCursor) ? true : false);
+        if (shouldHide)
+        {
+            SDL_ShowCursor(0);
         }
 
         pClient->DrawGUI(displaySize);
