@@ -159,12 +159,14 @@ set (MPC_SOURCE
     ${M3RDPARTY_DIR}/mpc/mpc.c)
 
 SET(SOUNDPIPE_DIR ${MUTILS_ROOT}/m3rdparty/soundpipe)
+SET(SOUNDPIPE_EXTENSIONS_DIR ${MUTILS_ROOT}/m3rdparty/soundpipe_extensions)
 
 file(GLOB_RECURSE SOUNDPIPE_SOURCE "${SOUNDPIPE_DIR}/modules/*.c")
 list (REMOVE_ITEM SOUNDPIPE_SOURCE "${SOUNDPIPE_DIR}/modules/diskin.c")            
 LIST(APPEND SOUNDPIPE_SOURCE
     ${SOUNDPIPE_DIR}/lib/dr_wav/dr_wav.c
-    ${SOUNDPIPE_DIR}/lib/inih/ini.c)
+    ${SOUNDPIPE_DIR}/lib/inih/ini.c
+    ${SOUNDPIPE_EXTENSIONS_DIR}/modules/oscmorph2d.c)
 
 SET(IMGUI_DIR ${MUTILS_ROOT}/m3rdparty/imgui)
 SET(IMGUI_SOURCE
@@ -244,6 +246,7 @@ target_include_directories(MUtils
     $<BUILD_INTERFACE:${SOUNDPIPE_DIR}/lib/openlpc>
     $<BUILD_INTERFACE:${SOUNDPIPE_DIR}/lib/spa>
     $<BUILD_INTERFACE:${SOUNDPIPE_DIR}/h>
+    $<BUILD_INTERFACE:${SOUNDPIPE_EXTENSIONS_DIR}>
     $<BUILD_INTERFACE:${IMGUI_DIR}/examples/libs/gl3w>
     $<BUILD_INTERFACE:${IMGUI_DIR}/misc/freetype>
 
@@ -259,6 +262,7 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include/imgui/misc/freetype>
     $<INSTALL_INTERFACE:include/glm>
+    $<INSTALL_INTERFACE:include/soundpipe/h>
     $<INSTALL_INTERFACE:include/ctti/include>)
 
 target_link_libraries(MUtils 
@@ -451,6 +455,10 @@ install(FILES ${MUTILS_ROOT}/m3rdparty/miniaudio/miniaudio.h
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/soundpipe/h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/soundpipe
+    )
+
+install(FILES ${MUTILS_ROOT}/m3rdparty/soundpipe_extensions/soundpipeextension.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/soundpipe
     )
 
