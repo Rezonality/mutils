@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL.h>
+
 #include <mutils/file/file.h>
 
 #include <glm/glm.hpp>
@@ -35,6 +37,7 @@ struct IAppStarterClient
     virtual void Destroy() = 0;
     virtual void Draw(const glm::ivec2& displaySize) = 0;
     virtual void DrawGUI(const glm::ivec2& displaySize) = 0;
+    virtual void KeyEvent(const SDL_KeyboardEvent&) {};
     virtual AppStarterSettings& GetSettings() = 0;
 };
 

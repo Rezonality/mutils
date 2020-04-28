@@ -8,8 +8,6 @@
 #include <imgui/examples/imgui_impl_opengl3.h>
 #include <imgui/misc/freetype/imgui_freetype.h>
 
-#include <SDL.h>
-
 #include <GL/gl3w.h> 
 
 #include "mutils/ui/dpi.h"
@@ -151,6 +149,11 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
                 done = true;
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+            {
+                pClient->KeyEvent(event.key);
+            }
         }
 
         int w, h;
