@@ -112,13 +112,19 @@ public:
         this->condition.notify_one();
         return res;
     }
-    // the destructor joins all threads
-    virtual ~TPool()
+
+    void WaitAll()
     {
         this->stop = true;
         this->condition.notify_all();
         for(std::thread& worker : this->workers)
             worker.join();
+    }
+
+    // the destructor joins all threads
+    virtual ~TPool()
+    {
+        WaitAll();
     }
 private:
     // need to keep track of threads so we can join them
