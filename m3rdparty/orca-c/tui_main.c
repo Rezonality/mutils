@@ -18,6 +18,11 @@
 #include <portmidi.h>
 #endif
 
+#if NCURSES_VERSION_PATCH < 20081122
+int _nc_has_mouse(void);
+#define has_mouse _nc_has_mouse
+#endif
+
 #define TIME_DEBUG 0
 #if TIME_DEBUG
 static int spin_track_timeout = 0;
@@ -2246,7 +2251,7 @@ static void push_opers_guide_msg(void) {
   };
   static struct Guide_item items[] = {
       {'A', "add", "Outputs sum of inputs."},
-      {'B', "between", "Outputs subtraction of inputs."},
+      {'B', "subtract", "Outputs difference of inputs."},
       {'C', "clock", "Outputs modulo of frame."},
       {'D', "delay", "Bangs on modulo of frame."},
       {'E', "east", "Moves eastward, or bangs."},
