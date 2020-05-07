@@ -18,7 +18,8 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/gl/gl_shader.cpp
     ${MUTILS_ROOT}/src/gl/gl_texture.cpp
     ${MUTILS_ROOT}/src/callback/callback.cpp
-    ${MUTILS_ROOT}/src/animation/timer.cpp
+    ${MUTILS_ROOT}/src/time/timer.cpp
+    ${MUTILS_ROOT}/src/time/time_provider.cpp
     ${MUTILS_ROOT}/src/string/stringutils.cpp
     ${MUTILS_ROOT}/src/string/tomlutils.cpp
     ${MUTILS_ROOT}/src/string/murmur_hash.cpp

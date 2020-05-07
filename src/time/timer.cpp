@@ -2,7 +2,7 @@
 #include <iomanip>
 
 #include "mutils/logger/logger.h"
-#include "mutils/animation/timer.h"
+#include "mutils/time/timer.h"
 
 namespace MUtils
 {

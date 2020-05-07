@@ -30,7 +30,6 @@ enum LogType
     NONE,
     DEBUG,
     INFO,
-    WARN,
     WARNING,
     ERROR
 };
@@ -38,7 +37,7 @@ enum LogType
 struct Logger
 {
     bool headers = false;
-    LogType level = WARN;
+    LogType level = WARNING;
 };
 
 extern Logger logger;
@@ -95,7 +94,6 @@ private:
             case INFO:
                 label = "INFO ";
                 break;
-            case WARN:
             case WARNING:
                 label = "WARN ";
                 break;

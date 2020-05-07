@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "mutils/animation/timer.h"
+#include "mutils/time/timer.h"
 
 namespace MUtils
 {

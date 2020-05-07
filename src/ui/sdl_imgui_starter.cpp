@@ -14,7 +14,7 @@
 #include "mutils/ui/sdl_imgui_starter.h"
 #include "mutils/logger/logger.h"
 #include "mutils/file/runtree.h"
-#include "mutils/animation/timer.h"
+#include "mutils/time/timer.h"
 #include "mutils/profile/profile.h"
 
 using namespace gsl;
@@ -26,7 +26,7 @@ namespace MUtils
 #ifdef _DEBUG
 Logger logger = { true, DEBUG };
 #else
-Logger logger = { true, WARNING };
+Logger logger = { true, INFO };
 #endif
 bool LOG::disabled = false;
 
