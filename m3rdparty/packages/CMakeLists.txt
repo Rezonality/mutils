@@ -14,7 +14,10 @@ endif()
 INCLUDE(ExternalProject)
 ExternalProject_Add(
     sdl2
-    URL https://www.libsdl.org/release/SDL2-2.0.10.zip
+    GIT_TAG 2dfaaa3a821e029b2ddd48a84acea6a583c66638
+    GIT_REPOSITORY "https://github.com/spurious/SDL-mirror"
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
     CMAKE_ARGS -DCMAKE_STATIC=ON 
     INSTALL_COMMAND ${INST_CMD}
 )
