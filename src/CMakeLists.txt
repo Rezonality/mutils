@@ -280,6 +280,8 @@ if (WIN32)
         )
     target_link_libraries(MUtils
         PUBLIC
+        # Wire in the library full path as a transitive dependency for freetype on windows!
+        ${MUTILS_ROOT}/m3rdparty/packages/build/freetype-install/lib/freetype$<$<CONFIG:DEBUG>:d>.lib
         Ws2_32)
 else()
     target_include_directories(MUtils
