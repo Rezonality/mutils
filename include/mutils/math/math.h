@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cmath>
-#include <ostream>
 #include <algorithm>
+#include <cmath>
 #include <functional>
+#include <ostream>
 
 // This just saves using a library like glm (my personal preference)
 namespace MUtils
@@ -25,12 +25,11 @@ struct NVec2
     {
     }
 
-    template<class Y>
+    template <class Y>
     NVec2(NVec2<Y> val)
-        : x((T)val.x),
-        y((T)val.y)
+        : x((T)val.x)
+        , y((T)val.y)
     {
-
     }
 
     NVec2()
@@ -54,7 +53,6 @@ struct NVec2
         return !(*this == rhs);
     }
 };
-
 
 template <class T>
 inline NVec2<T> operator+(const NVec2<T>& lhs, const NVec2<T>& rhs)
@@ -145,7 +143,9 @@ std::ostream& operator<<(std::ostream& str, const NVec2<T>& v)
 }
 
 using NVec2f = NVec2<float>;
-using NVec2i = NVec2<long>;
+using NVec2d = NVec2<double>;
+using NVec2i = NVec2<int>;
+using NVec2l = NVec2<long>;
 
 template <class T>
 struct NVec4
@@ -163,14 +163,13 @@ struct NVec4
     {
     }
 
-    template<class Y>
+    template <class Y>
     explicit NVec4(NVec4<Y> val)
-        : x((T)val.x),
-        y((T)val.y),
-        z((T)val.z),
-        w((T)val.w)
+        : x((T)val.x)
+        , y((T)val.y)
+        , z((T)val.z)
+        , w((T)val.w)
     {
-
     }
 
     NVec4()
@@ -196,6 +195,42 @@ struct NVec4
     bool operator!=(const NVec4<T>& rhs) const
     {
         return !(*this = rhs);
+    }
+
+    T& operator[](size_t index)
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        default:
+            assert(!"Invalid index");
+            return x;
+        }
+    }
+    
+    const T& operator[](size_t index) const
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        case 3:
+            return w;
+        default:
+            assert(!"Invalid index");
+            return x;
+        }
     }
 };
 template <class T>
@@ -227,10 +262,30 @@ inline NVec4<T>& operator-=(NVec4<T>& lhs, const NVec4<T>& rhs)
     return lhs;
 }
 template <class T>
-inline NVec4<T> operator*(const NVec4<T>& lhs, float val)
+inline NVec4<T> operator*(const NVec4<T>& lhs, T val)
 {
     return NVec4<T>(lhs.x * val, lhs.y * val, lhs.z * val, lhs.w * val);
 }
+
+template <class T>
+inline NVec4<T> operator*(const NVec4<T>& lhs, const NVec4<T>& rhs)
+{
+    return NVec4<T>(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w);
+}
+
+
+template <class T>
+inline NVec4<T> operator/(const NVec4<T>& lhs, T val)
+{
+    return NVec4<T>(lhs.x / val, lhs.y / val, lhs.z / val, lhs.w / val);
+}
+
+template <class T>
+inline NVec4<T> operator/(const NVec4<T>& lhs, const NVec4<T>& rhs)
+{
+    return NVec4<T>(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z, lhs.w / rhs.w);
+}
+
 template <class T>
 inline NVec4<T>& operator*=(NVec4<T>& lhs, float val)
 {
@@ -238,6 +293,36 @@ inline NVec4<T>& operator*=(NVec4<T>& lhs, float val)
     lhs.y *= val;
     lhs.z *= val;
     lhs.w *= val;
+    return lhs;
+}
+
+template <class T>
+inline NVec4<T>& operator*=(NVec4<T>& lhs, const NVec4<T>& rhs)
+{
+    lhs.x *= rhs.x;
+    lhs.y *= rhs.y;
+    lhs.z *= rhs.z;
+    lhs.w *= rhs.w;
+    return lhs;
+}
+
+template <class T>
+inline NVec4<T>& operator/=(NVec4<T>& lhs, T val)
+{
+    lhs.x /= val;
+    lhs.y /= val;
+    lhs.z /= val;
+    lhs.w /= val;
+    return lhs;
+}
+
+template <class T>
+inline NVec4<T>& operator/=(NVec4<T>& lhs, const NVec4<T>& rhs)
+{
+    lhs.x /= rhs.x;
+    lhs.y /= rhs.y;
+    lhs.z /= rhs.z;
+    lhs.w /= rhs.w;
     return lhs;
 }
 template <class T>
@@ -343,40 +428,40 @@ inline NVec4<float> HSVToRGB(float h, float s, float v)
         switch (i)
         {
         case 0:
-        r = v;
-        g = t;
-        b = p;
-        break;
+            r = v;
+            g = t;
+            b = p;
+            break;
 
         case 1:
-        r = q;
-        g = v;
-        b = p;
-        break;
+            r = q;
+            g = v;
+            b = p;
+            break;
 
         case 2:
-        r = p;
-        g = v;
-        b = t;
-        break;
+            r = p;
+            g = v;
+            b = t;
+            break;
 
         case 3:
-        r = p;
-        g = q;
-        b = v;
-        break;
+            r = p;
+            g = q;
+            b = v;
+            break;
 
         case 4:
-        r = t;
-        g = p;
-        b = v;
-        break;
+            r = t;
+            g = p;
+            b = v;
+            break;
 
         default:
-        r = v;
-        g = p;
-        b = q;
-        break;
+            r = v;
+            g = p;
+            b = q;
+            break;
         }
     }
 
@@ -391,7 +476,14 @@ inline std::ostream& operator<<(std::ostream& str, const NVec4<T>& region)
 }
 
 using NVec4f = NVec4<float>;
-using NVec4i = NVec4<long>;
+using NVec4d = NVec4<double>;
+using NVec4i = NVec4<int>;
+using NVec4l = NVec4<long>;
+
+using NVec3f = NVec4<float>;
+using NVec3d = NVec4<double>;
+using NVec3i = NVec4<int>;
+using NVec3l = NVec4<long>;
 
 template <class T>
 struct NRect
@@ -417,7 +509,7 @@ struct NRect
 
     bool Contains(const NVec2<T>& pt) const
     {
-        return topLeftPx.x <= pt.x && topLeftPx.y <= pt.y && bottomRightPx.x > pt.x&& bottomRightPx.y > pt.y;
+        return topLeftPx.x <= pt.x && topLeftPx.y <= pt.y && bottomRightPx.x > pt.x && bottomRightPx.y > pt.y;
     }
 
     NVec2<T> BottomLeft() const
@@ -598,11 +690,11 @@ inline void hash_combine(size_t& seed, size_t hash)
 
 } // namespace MUtils
 
-
 namespace std
 {
 
-template<class T> struct hash<MUtils::NVec2<T>>
+template <class T>
+struct hash<MUtils::NVec2<T>>
 {
     inline size_t operator()(const MUtils::NVec2<T>& v) const
     {
@@ -614,7 +706,8 @@ template<class T> struct hash<MUtils::NVec2<T>>
     };
 };
 
-template<class T> struct hash<MUtils::NVec4<T>>
+template <class T>
+struct hash<MUtils::NVec4<T>>
 {
     inline size_t operator()(const MUtils::NVec4<T>& v) const
     {
@@ -628,7 +721,8 @@ template<class T> struct hash<MUtils::NVec4<T>>
     };
 };
 
-template<class T> struct hash<MUtils::NRect<T>>
+template <class T>
+struct hash<MUtils::NRect<T>>
 {
     inline size_t operator()(const MUtils::NRect<T>& v) const
     {
@@ -640,5 +734,4 @@ template<class T> struct hash<MUtils::NRect<T>>
     };
 };
 
-
-};
+}; // namespace std

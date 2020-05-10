@@ -114,4 +114,4 @@ static bool orca_is_valid_glyph(Glyph c) {
   return false;
 }
 
-#define restrict __restrict
+//#define restrict __restrict

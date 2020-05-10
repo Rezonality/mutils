@@ -8,6 +8,8 @@
 
 #include <toml11/toml.hpp>
 
+#include <mutils/math/math.h>
+
 namespace MUtils
 {
 
@@ -52,9 +54,30 @@ inline std::vector<float> toml_floats(const toml::value& val)
     return std::vector<float>{};
 }
 
-inline glm::vec3 toml_get_vec3(const toml::table& table, const char* pszName, const glm::vec3& def = glm::vec3(0.0f))
+inline std::vector<int> toml_ints(const toml::value& val)
 {
-    glm::vec3 ret = def;
+    try
+    {
+        return toml::get<std::vector<int>>(val);
+    }
+    catch (...)
+    {
+        auto ret = toml::get<std::vector<int>>(val);
+        std::vector<int> vals;
+        for (auto& val : ret)
+        {
+            vals.push_back((int)val);
+        }
+        return vals;
+    }
+
+    return std::vector<int>{};
+}
+
+
+inline NVec3f toml_get_vec3(const toml::table& table, const char* pszName, const NVec3f& def = NVec3f(0.0f))
+{
+    NVec3f ret = def;
     if (table.count(pszName) != 0)
     {
         auto itrFloats = table.find(pszName);
@@ -78,9 +101,9 @@ inline glm::vec3 toml_get_vec3(const toml::table& table, const char* pszName, co
     return ret;
 }
 
-inline glm::vec4 toml_get_vec4(const toml::table& table, const char* pszName, const glm::vec4& def = glm::vec4(0.0f))
+inline NVec4f toml_get_vec4(const toml::table& table, const char* pszName, const NVec4f& def = NVec4f(0.0f))
 {
-    glm::vec4 ret = def;
+    NVec4f ret = def;
     if (table.count(pszName) != 0)
     {
         auto itrFloats = table.find(pszName);
@@ -117,6 +140,44 @@ inline glm::vec4 toml_get_vec4(const toml::table& table, const char* pszName, co
     return ret;
 }
 
+inline NVec4i toml_get_vec4i(const toml::table& table, const char* pszName, const NVec4i& def = NVec4i(0))
+{
+    NVec4i ret = def;
+    if (table.count(pszName) != 0)
+    {
+        auto itrFloats = table.find(pszName);
+        if (itrFloats != table.end())
+        {
+            auto v = toml_ints(itrFloats->second);
+            if (v.size() == 4)
+            {
+                ret.x = v[0];
+                ret.y = v[1];
+                ret.z = v[2];
+                ret.w = v[3];
+            }
+            else if (v.size() == 3)
+            {
+                ret.x = v[0];
+                ret.y = v[1];
+                ret.z = v[2];
+            }
+            else if (v.size() == 2)
+            {
+                ret.x = v[0];
+                ret.y = v[1];
+            }
+            else if (v.size() == 1)
+            {
+                ret.x = v[0];
+                ret.y = v[0];
+                ret.z = v[0];
+                ret.w = v[0];
+            }
+        }
+    }
+    return ret;
+}
 template <typename T>
 inline T toml_get(const toml::table& table, const char* pszName, const T& val = T{})
 {

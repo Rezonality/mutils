@@ -75,8 +75,9 @@ void TimeProvider::UnRegisterConsumer(ITimeConsumer* pConsumer)
 
 void TimeProvider::StartThread()
 {
-    static Moving_Average<uint64_t, uint64_t, 100> av;
+//    static Moving_Average<uint64_t, uint64_t, 100> av;
 
+    MUtilsNameThread("Time Provider");
     auto lastTime = TimeProvider::Instance().Now();
 
     // A thread which wakes up and ticks
@@ -89,16 +90,17 @@ void TimeProvider::StartThread()
             auto startTime = TimeProvider::Instance().Now();
             auto nextTime = startTime + std::chrono::milliseconds(m_timePerBeat);
 
-            av(startTime.time_since_epoch().count() - lastTime.time_since_epoch().count());
-            lastTime = startTime;
+            //av(startTime.time_since_epoch().count() - lastTime.time_since_epoch().count());
+            //lastTime = startTime;
 
             auto tick = m_tickCount.load();
             auto beat = tick % m_beatsPerBar.load();
             
-            if (tick % 10 == 0)
+            /*if (tick % 10 == 0)
             {
                 LOG(WARNING) << ((long long)(uint64_t)av - std::chrono::nanoseconds(std::chrono::milliseconds(m_timePerBeat)).count());
             }
+            */
 
             TimeEvent ev{ startTime, tick, beat };
             

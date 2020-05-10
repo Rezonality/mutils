@@ -3,6 +3,8 @@
 
 //////// Utilities
 
+#define restrict
+
 static Glyph const glyph_table[36] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', //  0-11
     'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', // 12-23
