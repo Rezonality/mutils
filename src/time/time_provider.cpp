@@ -73,6 +73,17 @@ void TimeProvider::UnRegisterConsumer(ITimeConsumer* pConsumer)
     m_consumers.erase(pConsumer);
 }
 
+void TimeProvider::Tick()
+{
+    auto beat = m_tickCount % m_beatsPerBar.load();
+    TimeEvent ev{ TimeProvider::Instance().Now(), m_tickCount++, beat };
+    std::unique_lock<std::mutex> lock(m_mutex);
+    for (auto& consumer : m_consumers)
+    {
+        consumer->AddTimeEvent(ev);
+    }
+}
+
 void TimeProvider::StartThread()
 {
 //    static Moving_Average<uint64_t, uint64_t, 100> av;

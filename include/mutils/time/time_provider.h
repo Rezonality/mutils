@@ -46,6 +46,7 @@ public:
     uint32_t GetBeatsPerMinute() const;
     uint32_t GetTickCount() const;
 
+    void Tick();
 private:
     TimePoint m_startTime;
     std::unordered_set<ITimeConsumer*> m_consumers;
