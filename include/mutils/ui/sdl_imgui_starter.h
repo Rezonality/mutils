@@ -2,6 +2,8 @@
 
 #include <SDL.h>
 
+#include <imgui/imgui.h>
+
 #include <mutils/file/file.h>
 
 #include <glm/glm.hpp>

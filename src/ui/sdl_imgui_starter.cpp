@@ -3,19 +3,18 @@
 // (SDL is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphics context creation, etc.)
 // (GL3W is a helper library to access OpenGL functions since there is no standard header to access modern OpenGL functions easily. Alternatives are GLEW, Glad, etc.)
 
-#include <imgui/imgui.h>
-#include <imgui/examples/imgui_impl_sdl.h>
-#include <imgui/examples/imgui_impl_opengl3.h>
-#include <imgui/misc/freetype/imgui_freetype.h>
-
-#include <GL/gl3w.h> 
+#include "mutils/ui/sdl_imgui_starter.h"
 
 #include "mutils/ui/dpi.h"
-#include "mutils/ui/sdl_imgui_starter.h"
 #include "mutils/logger/logger.h"
 #include "mutils/file/runtree.h"
 #include "mutils/time/timer.h"
 #include "mutils/profile/profile.h"
+
+#include <GL/gl3w.h> 
+#include <imgui/examples/imgui_impl_sdl.h>
+#include <imgui/examples/imgui_impl_opengl3.h>
+#include <imgui/misc/freetype/imgui_freetype.h>
 
 using namespace gsl;
 

@@ -9,8 +9,10 @@
 
 #include "../../server/TracyFileRead.hpp"
 #include "../../server/TracyFileWrite.hpp"
+#include "../../server/TracyPrint.hpp"
 #include "../../server/TracyVersion.hpp"
 #include "../../server/TracyWorker.hpp"
+#include "../../zstd/zstd.h"
 
 #ifdef __CYGWIN__
 #  define ftello64(x) ftello(x)
@@ -23,6 +25,7 @@ void Usage()
     printf( "Usage: update [--hc|--extreme] input.tracy output.tracy\n\n" );
     printf( "  --hc: enable LZ4HC compression\n" );
     printf( "  --extreme: enable extreme LZ4HC compression (very slow)\n" );
+    printf( "  --zstd level: use Zstd compression with given compression level\n" );
     exit( 1 );
 }
 
@@ -38,7 +41,8 @@ int main( int argc, char** argv )
 
     tracy::FileWrite::Compression clev = tracy::FileWrite::Compression::Fast;
 
-    if( argc != 3 && argc != 4 ) Usage();
+    int zstdLevel = 1;
+    if( argc != 3 && argc != 4 && argc != 5 ) Usage();
     if( argc == 4 )
     {
         if( strcmp( argv[1], "--hc" ) == 0 )
@@ -55,6 +59,18 @@ int main( int argc, char** argv )
         }
         argv++;
     }
+    if( argc == 5 )
+    {
+        if( strcmp( argv[1], "--zstd" ) != 0 ) Usage();
+        clev = tracy::FileWrite::Compression::Zstd;
+        zstdLevel = atoi( argv[2] );
+        if( zstdLevel > ZSTD_maxCLevel() || zstdLevel < ZSTD_minCLevel() )
+        {
+            printf( "Available Zstd compression levels range: %i - %i\n", ZSTD_minCLevel(), ZSTD_maxCLevel() );
+            exit( 1 );
+        }
+        argv += 2;
+    }
 
     const char* input = argv[1];
     const char* output = argv[2];
@@ -70,15 +86,18 @@ int main( int argc, char** argv )
 
     try
     {
+        int64_t t;
+        float ratio;
         int inVer;
         {
+            const auto t0 = std::chrono::high_resolution_clock::now();
             tracy::Worker worker( *f, tracy::EventType::All, false );
 
 #ifndef TRACY_NO_STATISTICS
             while( !worker.AreSourceLocationZonesReady() ) std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
 #endif
 
-            auto w = std::unique_ptr<tracy::FileWrite>( tracy::FileWrite::Open( output, clev ) );
+            auto w = std::unique_ptr<tracy::FileWrite>( tracy::FileWrite::Open( output, clev, zstdLevel ) );
             if( !w )
             {
                 fprintf( stderr, "Cannot open output file!\n" );
@@ -87,7 +106,12 @@ int main( int argc, char** argv )
             printf( "Saving... \r" );
             fflush( stdout );
             worker.Write( *w );
+            w->Finish();
+            const auto t1 = std::chrono::high_resolution_clock::now();
+            const auto stats = w->GetCompressionStatistics();
+            ratio = 100.f * stats.second / stats.first;
             inVer = worker.GetTraceVersion();
+            t = std::chrono::duration_cast<std::chrono::nanoseconds>( t1 - t0 ).count();
         }
 
         FILE* in = fopen( input, "rb" );
@@ -100,7 +124,10 @@ int main( int argc, char** argv )
         const auto outSize = ftello64( out );
         fclose( out );
 
-        printf( "%s (%i.%i.%i) {%zu KB} -> %s (%i.%i.%i) {%zu KB}  %.2f%% size change\n", input, inVer >> 16, ( inVer >> 8 ) & 0xFF, inVer & 0xFF, size_t( inSize / 1024 ), output, tracy::Version::Major, tracy::Version::Minor, tracy::Version::Patch, size_t( outSize / 1024 ), float( outSize ) / inSize * 100 );
+        printf( "%s (%i.%i.%i) {%s} -> %s (%i.%i.%i) {%s, %.2f%%}  %s, %.2f%% change\n",
+            input, inVer >> 16, ( inVer >> 8 ) & 0xFF, inVer & 0xFF, tracy::MemSizeToString( inSize ),
+            output, tracy::Version::Major, tracy::Version::Minor, tracy::Version::Patch, tracy::MemSizeToString( outSize ), ratio,
+            tracy::TimeToString( t ), float( outSize ) / inSize * 100 );
     }
     catch( const tracy::UnsupportedVersion& e )
     {
@@ -110,6 +137,11 @@ int main( int argc, char** argv )
     catch( const tracy::NotTracyDump& e )
     {
         fprintf( stderr, "The file you are trying to open is not a tracy dump.\n" );
+        exit( 1 );
+    }
+    catch( const tracy::FileReadError& e )
+    {
+        fprintf( stderr, "The file you are trying to open cannot be mapped to memory.\n" );
         exit( 1 );
     }
     catch( const tracy::LegacyVersion& e )

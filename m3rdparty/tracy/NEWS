@@ -9,8 +9,86 @@ a mistake.
 v0.7 (xxxx-xx-xx)
 -----------------
 
+- Added display of statistical mode to find zone menu.
+- Automatic stack sampling is now available on windows.
+- Properly handle tracing on long-running systems.
+- Message list entries can now show associated frame image.
+- Call stack window will now display module names.
+- Symbol location in call stack window may now also display symbol address.
+- Statistics menu can now be used to display call stack sampling data or
+  list available symbols.
+- All call paths leading to the sampled instruction in a call stack can be
+  now displayed.
+- Frame image compression ratio (lossless in-memory compression, not taking
+  into account DXT compression) is displayed in playback window.
+- Allow reconnection straight from the discard data dialog.
+- Added ability to set custom names for locks.
+- Improved handling of network ports.
+- Added time percentage display to instrumentation statistics.
+- Display of ghost zones (generated from automated call stack sampling).
+- Notify when empty labels display is enabled.
+- Small fragments of executable code will be now sent from client to server.
+- Added notification about query backlog.
+- Fixed performance problem with query backlog.
+- Display number of in-flight queries, in addition to query backlog.
+- Improved failure reports.
+- The capture utility will connect to localhost by default.
+- Added optional support for QPC timer on windows.
+- Complete rewrite of source file viewer. It is now 100% reliable when going
+  to a source location.
+- Symbol source view was added.
+  - Extension of source file viewer.
+  - Can display source file, assembly view, or both at the same time.
+  - May include display of statistical profiling data.
+  - Ability to switch between source files which were used to build the
+    symbol.
+  - Ability to switch between inlined functions which are incorporated into
+    the symbol.
+  - Graphical representation of control flow in program.
+  - Display of micro-architectural data for each assembly instruction.
+  - Tracking register dependencies between assembly instructions.
+  - Disassembly may be saved to a file, in order to be processed by external
+    tools.
+- If the default listening port is occupied, profiler will now try listening
+  on other ports.
+- Added possibility to perform source file names substitution.
+- Profiler windows can be now docked.
+- CPU usage tooltip now displays a list of running threads.
+- Added possibility to filter discovered clients list.
+
+v0.6.3 (2020-02-13)
+-------------------
+
+- Fixed performance issues with loading saved traces on Ryzen CPUs.
+- Profiler window contents are now properly updated during window resize.
+- Improved tid to pid mapping on windows.
+- Zero length and unfinished zones are no longer taken into account for
+  statistics.
+- Build files for shared library are now available (experimental).
+- GPU zones now also have "active" parameter.
+- Further reduction of memory usage and on-disk trace size.
+- Replaced ska::flat_hash_map with robin-hood-hashing.
+- Speed-up rendering of long lists of items.
+- Exact event time is displayed in some places in the UI.
+- Memory allocation lists can now be sorted.
+- Added display of trace file compression ratio.
+- Optional Zstd compression of trace files.
+- Frame images are now internally compressed using Zstd (instead of LZ4).
+- Fix display of continuous frame set tooltips.
+
+v0.6.2 (2019-12-30)
+-------------------
+
 - Improved call stack decoding on OSX.
 - Collection of CPU topology data.
+- C API now supports allocated source locations.
+- Added chrome:tracing importer.
+- Allow merging of ZoneText() strings.
+- Time distribution can now show both exclusive and inclusive times.
+- Display proper value of selection time in find zone menu.
+- Implemented limiting find zone search to a specified time range.
+- Highlight hovered zone from find zone menu zone list on the histogram.
+- Allow copying user data directory location to the clipboard.
 
 v0.6.1 (2019-11-28)
 -------------------

@@ -62,6 +62,9 @@ void InitWinSock()
 }
 #endif
 
+
+enum { BufSize = 128 * 1024 };
+
 Socket::Socket()
     : m_buf( (char*)tracy_malloc( BufSize ) )
     , m_bufPtr( nullptr )
@@ -218,33 +221,36 @@ int Socket::Recv( void* _buf, int len, int timeout )
     }
 }
 
-bool Socket::Read( void* _buf, int len, int timeout, std::function<bool()> exitCb )
+bool Socket::Read( void* buf, int len, int timeout )
 {
-    auto buf = (char*)_buf;
-
+    auto cbuf = (char*)buf;
     while( len > 0 )
     {
-        if( exitCb() ) return false;
-        const auto sz = RecvBuffered( buf, len, timeout );
-        switch( sz )
-        {
-        case 0:
-            return false;
-        case -1:
-#ifdef _WIN32
-        {
-            auto err = WSAGetLastError();
-            if( err == WSAECONNABORTED || err == WSAECONNRESET ) return false;
-        }
-#endif
-            break;
-        default:
-            len -= sz;
-            buf += sz;
-            break;
-        }
+        if( !ReadImpl( cbuf, len, timeout ) ) return false;
     }
+    return true;
+}
 
+bool Socket::ReadImpl( char*& buf, int& len, int timeout )
+{
+    const auto sz = RecvBuffered( buf, len, timeout );
+    switch( sz )
+    {
+    case 0:
+        return false;
+    case -1:
+#ifdef _WIN32
+    {
+        auto err = WSAGetLastError();
+        if( err == WSAECONNABORTED || err == WSAECONNRESET ) return false;
+    }
+#endif
+    break;
+    default:
+        len -= sz;
+        buf += sz;
+        break;
+    }
     return true;
 }
 
@@ -270,6 +276,11 @@ bool Socket::HasData()
     fd.events = POLLIN;
 
     return poll( &fd, 1, 0 ) > 0;
+}
+
+bool Socket::IsValid() const
+{
+    return m_sock >= 0;
 }
 
 
@@ -304,6 +315,15 @@ bool ListenSocket::Listen( int port, int backlog )
     if( getaddrinfo( nullptr, portbuf, &hints, &res ) != 0 ) return false;
 
     m_sock = socket( res->ai_family, res->ai_socktype, res->ai_protocol );
+    if (m_sock == -1)
+    {
+        // IPV6 protocol may not be available/is disabled. Try to create a socket
+        // with the IPV4 protocol
+        hints.ai_family = AF_INET;
+        if( getaddrinfo( nullptr, portbuf, &hints, &res ) != 0 ) return false;
+        m_sock = socket( res->ai_family, res->ai_socktype, res->ai_protocol );
+        if( m_sock == -1 ) return false;
+    }
 #if defined _WIN32 || defined __CYGWIN__
     unsigned long val = 0;
     setsockopt( m_sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&val, sizeof( val ) );
@@ -316,8 +336,8 @@ bool ListenSocket::Listen( int port, int backlog )
     int val = 1;
     setsockopt( m_sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( val ) );
 #endif
-    if( bind( m_sock, res->ai_addr, res->ai_addrlen ) == -1 ) { freeaddrinfo( res ); return false; }
-    if( listen( m_sock, backlog ) == -1 ) { freeaddrinfo( res ); return false; }
+    if( bind( m_sock, res->ai_addr, res->ai_addrlen ) == -1 ) { freeaddrinfo( res ); Close(); return false; }
+    if( listen( m_sock, backlog ) == -1 ) { freeaddrinfo( res ); Close(); return false; }
     freeaddrinfo( res );
     return true;
 }
