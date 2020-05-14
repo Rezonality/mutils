@@ -69,7 +69,9 @@
 #include <climits>		// for CHAR_BIT
 #include <array>
 #include <thread>		// partly for __WINPTHREADS_VERSION if on MinGW-w64 w/ POSIX threading
-
+#ifdef WIN32
+#pragma warning (disable : 4127)
+#endif
 // Platform-specific definitions of a numeric thread ID type and an invalid value
 namespace moodycamel { namespace details {
 	template<typename thread_id_t> struct thread_id_converter {
@@ -3684,4 +3686,8 @@ inline void swap(typename ConcurrentQueue<T, Traits>::ImplicitProducerKVP& a, ty
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic pop
+#endif
+
+#ifdef WIN32
+#pragma warning (default : 4127)
 #endif

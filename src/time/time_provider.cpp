@@ -1,36 +1,10 @@
 #include <algorithm>
 
-#include "mutils/time/time_provider.h"
-#include "mutils/profile/profile.h"
 #include "mutils/logger/logger.h"
+#include "mutils/profile/profile.h"
+#include "mutils/time/time_provider.h"
 
-template <typename T, typename Total, size_t N>
-class Moving_Average
-{
-  public:
-    void operator()(T sample)
-    {
-        if (num_samples_ < N)
-        {
-            samples_[num_samples_++] = sample;
-            total_ += sample;
-        }
-        else
-        {
-            T& oldest = samples_[num_samples_++ % N];
-            total_ += sample - oldest;
-            oldest = sample;
-        }
-    }
-
-    operator double() const { return total_ / std::min(num_samples_, N); }
-
-  private:
-    T samples_[N];
-    size_t num_samples_{0};
-    Total total_{0};
-};
-
+using namespace std::chrono;
 namespace MUtils
 {
 
@@ -41,9 +15,25 @@ TimeProvider& TimeProvider::Instance()
 }
 
 TimeProvider::TimeProvider()
+    : m_timeEventPool(0)
 {
     m_startTime = Now();
-    SetTickRate(120, 4);
+    SetTempo(120.0, 4.0);
+}
+
+void TimeProvider::Free()
+{
+    EndThread();
+
+    // Free all outstanding time events
+    for (auto& [t, pEv] : m_timeEvents)
+    {
+        pEv->Free();
+    }
+    m_timeEvents.clear();
+
+    // Clear the pool
+    m_timeEventPool.Clear();
 }
 
 TimePoint TimeProvider::Now() const
@@ -63,30 +53,37 @@ void TimeProvider::ResetStartTime()
 
 void TimeProvider::RegisterConsumer(ITimeConsumer* pConsumer)
 {
-    std::unique_lock<std::mutex> lock(m_mutex);
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
     m_consumers.insert(pConsumer);
 }
 
 void TimeProvider::UnRegisterConsumer(ITimeConsumer* pConsumer)
 {
-    std::unique_lock<std::mutex> lock(m_mutex);
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
     m_consumers.erase(pConsumer);
 }
 
-void TimeProvider::Tick()
+void TimeProvider::Beat()
 {
-    auto beat = m_tickCount % m_beatsPerBar.load();
-    TimeEvent ev{ TimeProvider::Instance().Now(), m_tickCount++, beat };
-    std::unique_lock<std::mutex> lock(m_mutex);
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+
+    auto pEv = m_timeEventPool.Alloc(TimeProvider::Instance().Now());
+    StoreTimeEvent(pEv);
+
+    auto beat = m_beat.load();
+    auto frame = m_frame.load();
     for (auto& consumer : m_consumers)
     {
-        consumer->AddTimeEvent(ev);
+        consumer->AddTickEvent(pEv);
     }
+
+    m_frame.store(frame + 1);
+    m_beat.store(beat + 1);
 }
 
 void TimeProvider::StartThread()
 {
-//    static Moving_Average<uint64_t, uint64_t, 100> av;
+    //    static Moving_Average<uint64_t, uint64_t, 100> av;
 
     MUtilsNameThread("Time Provider");
     auto lastTime = TimeProvider::Instance().Now();
@@ -96,31 +93,43 @@ void TimeProvider::StartThread()
     m_tickThread = std::thread([&]() {
         for (;;)
         {
-            MUtilsZoneScopedN("TimeProvider Tick");
-            // Tick at regular intervals, no matter how long our operation takes
+            MUtilsZoneScopedN("TimeProvider Beat");
+            // Beat at regular intervals, no matter how long our operation takes
             auto startTime = TimeProvider::Instance().Now();
-            auto nextTime = startTime + std::chrono::milliseconds(m_timePerBeat);
+            auto nextTime = startTime + m_timePerBeat;
+            auto beat = m_beat.load();
+            auto frame = m_frame.load();
 
-            //av(startTime.time_since_epoch().count() - lastTime.time_since_epoch().count());
-            //lastTime = startTime;
-
-            auto tick = m_tickCount.load();
-            auto beat = tick % m_beatsPerBar.load();
-            
-            /*if (tick % 10 == 0)
             {
-                LOG(WARNING) << ((long long)(uint64_t)av - std::chrono::nanoseconds(std::chrono::milliseconds(m_timePerBeat)).count());
-            }
-            */
+                std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
 
-            TimeEvent ev{ startTime, tick, beat };
-            
-            {
-                std::unique_lock<std::mutex> lock(m_mutex);
-                for (auto& consumer : m_consumers)
+                // Remove time events older than 8 beats before now
+                // TODO: Lifetime?  When to destroy these?
+                auto itrEv = m_timeEvents.begin();
+                while (itrEv != m_timeEvents.end())
                 {
-                    consumer->AddTimeEvent(ev);
+                    if ((startTime - itrEv->first) > seconds(16))
+                    {
+                        itrEv->second->Free();
+                        itrEv = m_timeEvents.erase(itrEv);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
+
+                auto pEv = m_timeEventPool.Alloc(startTime);
+                StoreTimeEvent(pEv);
+                {
+                    for (auto& consumer : m_consumers)
+                    {
+                        consumer->AddTickEvent(pEv);
+                    }
+                }
+
+                m_frame.store(frame + 1);
+                m_beat.store(beat + 1);
             }
 
             if (m_quitTimer.load())
@@ -129,7 +138,6 @@ void TimeProvider::StartThread()
             }
 
             std::this_thread::sleep_until(nextTime);
-            m_tickCount++;
         }
     });
 }
@@ -137,37 +145,73 @@ void TimeProvider::StartThread()
 void TimeProvider::EndThread()
 {
     m_quitTimer = true;
-    m_tickThread.join();
+    if (m_tickThread.joinable())
+    {
+        m_tickThread.join();
+    }
 }
 
-uint32_t TimeProvider::GetTickCount() const
+double TimeProvider::GetBeat() const
 {
-    return m_tickCount;
+    return m_beat;
 }
 
-uint32_t TimeProvider::GetBeatsPerMinute() const
+double TimeProvider::GetTempo() const
 {
-    return m_beatsPerMinute;
+    return m_tempo;
 }
 
-uint32_t TimeProvider::GetBeat() const
+double TimeProvider::GetQuantum() const
 {
-    auto tick = m_tickCount.load();
-    auto beat = m_beatsPerBar.load();
-    return tick % beat;
+    return m_quantum;
 }
 
-
-void TimeProvider::SetTickRate(uint32_t bpm, uint32_t beatsPerBar)
+void TimeProvider::SetTempo(double tempo, double quantum)
 {
-    m_beatsPerBar = beatsPerBar;
-    m_beatsPerMinute = bpm;
-    m_timePerBeat = float(60000.0 / (double)(bpm * beatsPerBar));
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    m_quantum = quantum;
+    m_tempo = tempo;
+    m_timePerBeat = microseconds((uint64_t)(60000000.0 / tempo));
 }
 
-void TimeProvider::SetTickCount(uint32_t tick)
+void TimeProvider::SetBeat(double beat)
 {
-    m_tickCount = tick;
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    m_beat = beat;
+}
+
+void TimeProvider::StoreTimeEvent(TimeLineEvent* ev)
+{
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    m_timeEvents[ev->m_time] = ev;
+}
+
+void TimeProvider::GetTimeEvents(std::vector<TimeLineEvent*>& ev)
+{
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    ev.resize(m_timeEvents.size());
+
+    uint32_t i = 0;
+    for (auto& [t, e] : m_timeEvents)
+    {
+        ev[i++] = e;
+    }
+}
+
+void TimeProvider::SetFrame(uint32_t frame)
+{
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    m_frame.store(frame);
+}
+
+uint32_t TimeProvider::GetFrame() const
+{
+    return m_frame.load();
+}
+
+std::chrono::microseconds TimeProvider::GetTimePerBeat() const
+{
+    return m_timePerBeat;
 }
 
 } // namespace MUtils
