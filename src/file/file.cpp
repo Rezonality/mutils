@@ -3,6 +3,11 @@
 #include <set>
 #include <cassert>
 
+#ifdef __APPLE__
+#include <sysdir.h>
+#include <unistd.h>
+#endif
+
 // For logging events to file
 #include "tinydir.h"
 
@@ -240,6 +245,70 @@ fs::path file_documents_path()
     }
     return fs::path();
 }
+#elif __APPLE__
+fs::path file_exe_path()
+{
+    char result[ PATH_MAX ];
+    ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+    return fs::path(std::string( result, (count > 0) ? count : 0 ));
+}
+
+fs::path file_documents_path()
+{
+	char pathChars[PATH_MAX];
+	if (&sysdir_start_search_path_enumeration != NULL) 
+    {
+		sysdir_search_path_enumeration_state state;
+
+		state = sysdir_start_search_path_enumeration(
+		    SYSDIR_DIRECTORY_DOCUMENT,
+		    SYSDIR_DOMAIN_MASK_USER);
+		if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
+        {
+            return fs::path(pathChars);
+        }
+	} 
+    LOG(ERROR) << "Search path not found";
+    return fs::path();
+}
+
+fs::path file_roaming_path()
+{
+	char pathChars[PATH_MAX];
+	if (&sysdir_start_search_path_enumeration != NULL) 
+    {
+		sysdir_search_path_enumeration_state state;
+
+		state = sysdir_start_search_path_enumeration(
+		    SYSDIR_DIRECTORY_AUTOSAVED_INFORMATION,
+		    SYSDIR_DOMAIN_MASK_USER);
+		if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
+        {
+            return fs::path(pathChars);
+        }
+	} 
+    LOG(ERROR) << "Search path not found";
+    return fs::path();
+}
+
+fs::path file_appdata_path()
+{
+	char pathChars[PATH_MAX];
+	if (&sysdir_start_search_path_enumeration != NULL) 
+    {
+		sysdir_search_path_enumeration_state state;
+
+		state = sysdir_start_search_path_enumeration(
+		    SYSDIR_DIRECTORY_APPLICATION,
+		    SYSDIR_DOMAIN_MASK_USER);
+		if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
+        {
+            return fs::path(pathChars);
+        }
+	} 
+    LOG(ERROR) << "Search path not found";
+    return fs::path();
+}
 #else
 fs::path file_exe_path()
 {
@@ -250,7 +319,6 @@ fs::path file_exe_path()
 
 fs::path file_documents_path()
 {
-    // TODO Fix file stuff on linux
     assert(!"Fixme");
     return fs::path();
 }
@@ -267,6 +335,5 @@ fs::path file_appdata_path()
     return fs::path();
 }
 #endif
-
 
 } // namespace Utils
