@@ -17,30 +17,39 @@ namespace MUtils
 
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
+enum TimeEventKinds
+{
+    TimeLine = 0,
+    Orca = 1,
+    SP = 2,
+    JPat = 3,
+    Ixi = 4
+};
+
 struct IEventPool
 {
     virtual void Free(void* pEv) = 0;
 };
 
+static const uint32_t TimeLineStorageSpace = 4;
 struct TimeLineEvent
 {
-    TimeLineEvent(IEventPool* pPool, uint32_t type, uint64_t id, TimePoint t, std::chrono::milliseconds d = std::chrono::milliseconds(0), const char* n = "Ev")
+    TimeLineEvent(IEventPool* pPool, uint32_t type, uint64_t id)
         : m_pPool(pPool)
         , m_type(type)
         , m_id(id)
     {
-        SetArgs(t, d, n);
     }
 
-    virtual void SetArgs(TimePoint t, std::chrono::milliseconds d = std::chrono::milliseconds(0), const char* n = "Ev")
+    void SetTime(TimePoint t, std::chrono::milliseconds d = std::chrono::milliseconds(0))
     {
-        for (uint32_t i = 0; i < StorageSpace; i++)
-        {
-            m_storage[i] = (uint32_t)-1;
-        }
         m_time = t;
         m_duration = d;
-        m_pszName = n;
+    }
+
+    void SetName(const char* pszName)
+    {
+        m_pszName = pszName;
     }
 
     virtual void Free()
@@ -53,18 +62,29 @@ struct TimeLineEvent
     uint64_t m_id;
     TimePoint m_time;
     std::chrono::milliseconds m_duration;
+    bool m_triggered = false;
     const char* m_pszName;
 
     // Spare
-    static const uint32_t StorageSpace = 4;
-    uint32_t m_storage[StorageSpace];
+    uint32_t m_storage[TimeLineStorageSpace];
+};
+
+struct NoteEvent : MUtils::TimeLineEvent
+{
+    NoteEvent(MUtils::IEventPool* pPool, uint32_t type, uint64_t id)
+        : MUtils::TimeLineEvent(pPool, type, id)
+    {
+    }
+
+    float velocity;
+    uint32_t midiNote;
 };
 
 template <class T>
 class EventPool : public IEventPool
 {
 public:
-    EventPool(uint64_t type)
+    EventPool(uint32_t type)
         : m_type(type)
     {
     }
@@ -83,21 +103,27 @@ public:
         }
     }
 
-    template <typename... Args>
-    T* Alloc(Args... args)
+    T* Alloc()
     {
         T* pRet = nullptr;
 
         if (!m_freeItems.try_dequeue(pRet))
         {
-            pRet = new T(this, m_type, m_nextId++, args...);
-            return pRet;
+            pRet = new T(this, m_type, m_nextId++);
         }
         else
         {
             pRet->m_id = m_nextId++;
-            pRet->SetArgs(args...);
 
+        }
+
+        pRet->m_triggered = false;
+
+        // TODO: Cludge for now; used by note display: remove it
+        for (uint32_t i = 0; i < TimeLineStorageSpace; i++)
+        {
+            pRet->m_storage[i] = (uint32_t)-1;
+ 
         }
         return pRet;
     }
@@ -113,7 +139,7 @@ public:
 
 private:
     moodycamel::ConcurrentQueue<T*> m_freeItems;
-    uint64_t m_type;
+    uint32_t m_type;
     uint64_t m_nextId = 0;
 };
 
@@ -153,6 +179,7 @@ public:
 
     void StoreTimeEvent(TimeLineEvent* event);
     void GetTimeEvents(std::vector<TimeLineEvent*>& events);
+    void DequeTimeEvents(std::vector<TimeLineEvent*>& events, uint32_t type, TimePoint upTo);
 
     EventPool<TimeLineEvent>& GetEventPool() { return m_timeEventPool; };
 

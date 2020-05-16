@@ -15,7 +15,7 @@ TimeProvider& TimeProvider::Instance()
 }
 
 TimeProvider::TimeProvider()
-    : m_timeEventPool(0)
+    : m_timeEventPool(TimeEventKinds::TimeLine)
 {
     m_startTime = Now();
     SetTempo(120.0, 4.0);
@@ -67,7 +67,9 @@ void TimeProvider::Beat()
 {
     std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
 
-    auto pEv = m_timeEventPool.Alloc(TimeProvider::Instance().Now());
+    auto pEv = m_timeEventPool.Alloc();
+    pEv->SetTime(TimeProvider::Instance().Now());
+
     StoreTimeEvent(pEv);
 
     auto beat = m_beat.load();
@@ -119,7 +121,9 @@ void TimeProvider::StartThread()
                     }
                 }
 
-                auto pEv = m_timeEventPool.Alloc(startTime);
+                auto pEv = m_timeEventPool.Alloc();
+                pEv->SetTime(startTime);
+
                 StoreTimeEvent(pEv);
                 {
                     for (auto& consumer : m_consumers)
@@ -195,6 +199,37 @@ void TimeProvider::GetTimeEvents(std::vector<TimeLineEvent*>& ev)
     for (auto& [t, e] : m_timeEvents)
     {
         ev[i++] = e;
+    }
+}
+
+void TimeProvider::DequeTimeEvents(std::vector<TimeLineEvent*>& ev, uint32_t type, TimePoint upTo)
+{
+    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    ev.clear();
+
+    auto itrEv = m_timeEvents.begin();
+    while (itrEv != m_timeEvents.end())
+    {
+        if (itrEv->second->m_triggered)
+        {
+            itrEv++;
+            continue;
+        }
+
+        if (itrEv->second->m_time > upTo)
+        {
+            break;
+        }
+        
+        if (itrEv->second->m_type == type)
+        {
+            itrEv->second->m_triggered = true;
+            ev.push_back(itrEv->second);
+        }
+        else
+        {
+            itrEv++;
+        }
     }
 }
 
