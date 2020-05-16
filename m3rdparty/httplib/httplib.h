@@ -1318,7 +1318,7 @@ inline std::string get_remote_addr(socket_t sock) {
   if (!getpeername(sock, reinterpret_cast<struct sockaddr *>(&addr), &len)) {
     std::array<char, NI_MAXHOST> ipstr{};
 
-    if (!getnameinfo(reinterpret_cast<struct sockaddr *>(&addr), len, ipstr.data(), (DWORD)ipstr.size(),
+    if (!getnameinfo(reinterpret_cast<struct sockaddr *>(&addr), len, ipstr.data(), (uint32_t)ipstr.size(),
                      nullptr, 0, NI_NUMERICHOST)) {
       return ipstr.data();
     }
