@@ -1,9 +1,9 @@
 #pragma once
 
 #include <functional>
-#include <experimental/filesystem>
+#include <filesystem>
 
-namespace fs = std::experimental::filesystem::v1;
+namespace fs = std::filesystem;
 
 namespace MUtils
 {
