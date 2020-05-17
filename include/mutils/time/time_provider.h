@@ -6,6 +6,7 @@
 #include <map>
 #include <mutex>
 #include <thread>
+#include <vector>
 #include <unordered_set>
 
 #include <mutils/profile/profile.h>
