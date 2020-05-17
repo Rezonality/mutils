@@ -110,7 +110,8 @@ void TimeProvider::StartThread()
                 auto itrEv = m_timeEvents.begin();
                 while (itrEv != m_timeEvents.end())
                 {
-                    if ((startTime - itrEv->first) > seconds(16))
+                    auto pEv = itrEv->second;
+                    if ((startTime - (pEv->m_time + pEv->m_duration)) > seconds(16))
                     {
                         itrEv->second->Free();
                         itrEv = m_timeEvents.erase(itrEv);
