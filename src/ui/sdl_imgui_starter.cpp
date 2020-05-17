@@ -157,7 +157,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
-        auto displaySize = glm::ivec2(w, h);
+        auto displaySize = NVec2i(w, h);
 
         glViewport(0, 0, (int)displaySize.x, (int)displaySize.y);
         glClearColor(settings.clearColor.x, settings.clearColor.y, settings.clearColor.z, settings.clearColor.w);
