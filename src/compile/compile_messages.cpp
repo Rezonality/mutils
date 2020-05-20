@@ -107,8 +107,26 @@ void compile_parse_shader_errors(gsl::not_null<CompileResult*> pResult, const st
             pMsg->line = 0;
             pMsg->msgType = CompileMessageType::Error;
         }
+
+        pResult->messages.push_back(pMsg);
+    }
+
+    if (pResult->messages.empty())
+    {
+        auto pMsg = std::make_shared<CompileMessage>();
+        pMsg->filePath = pResult->fileSource.string();
+        pMsg->rawText = messages;
+        pMsg->msgType = CompileMessageType::Error;
+        if (!strUnknown.str().empty())
+        {
+            pMsg->text = strUnknown.str();
+        }
+        else
+        {
+            pMsg->text = messages;
+        }
         pResult->messages.push_back(pMsg);
     }
 }
 
-}
+} // MUtils
