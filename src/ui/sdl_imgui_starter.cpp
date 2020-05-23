@@ -5,17 +5,17 @@
 
 #include "mutils/ui/sdl_imgui_starter.h"
 
-#include "mutils/ui/dpi.h"
-#include "mutils/logger/logger.h"
 #include "mutils/file/runtree.h"
-#include "mutils/time/timer.h"
+#include "mutils/logger/logger.h"
 #include "mutils/profile/profile.h"
+#include "mutils/time/timer.h"
+#include "mutils/ui/dpi.h"
 
-#include <GL/gl3w.h> 
-#include <imgui/examples/imgui_impl_sdl.h>
 #include <imgui/examples/imgui_impl_opengl3.h>
+#include <imgui/examples/imgui_impl_sdl.h>
 #include <imgui/misc/freetype/imgui_freetype.h>
 
+#include <GL/gl3w.h>
 using namespace gsl;
 
 namespace MUtils
@@ -28,7 +28,6 @@ Logger logger = { true, DEBUG };
 Logger logger = { true, INFO };
 #endif
 bool LOG::disabled = false;
-
 
 IAppStarterClient* pClient = nullptr;
 int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pClient)
@@ -87,11 +86,12 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     ImGui::CreateContext();
     ImGui::GetStyle().ScaleAllSizes(dpi.scaleFactor);
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     if (settings.flags & AppStarterFlags::DockingEnable)
     {
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
     }
     ImGui::StyleColorsDark();
 
@@ -119,13 +119,13 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     config.DstFont = ImGui::GetFont();
     io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/ProggyClean.ttf").string().c_str(), 13 * dpi.scaleFactor, &config, ranges);
 
-    unsigned int flags = 0;// ImGuiFreeType::NoHinting;
+    unsigned int flags = 0; // ImGuiFreeType::NoHinting;
     ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
 
     // Our state
     bool show_demo_window = false;
     bool firstInit = true;
-    
+
     timer theTimer;
     timer_start(theTimer);
 
@@ -163,8 +163,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         glClearColor(settings.clearColor.x, settings.clearColor.y, settings.clearColor.z, settings.clearColor.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (displaySize.x > 0 && 
-            displaySize.y > 0)
+        if (displaySize.x > 0 && displaySize.y > 0)
         {
             pClient->Update(timer_get_elapsed_seconds(theTimer), displaySize);
             pClient->Draw(displaySize);
@@ -228,4 +227,80 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     return 0;
 }
 
-} // MUtils
+void fbo_bind(const AppFBO& fbo)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
+    glViewport(0, 0, (int)fbo.fboSize.x, (int)fbo.fboSize.y);
+}
+
+void fbo_unbind(const AppFBO& fbo, const NVec2i& displaySize)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, (int)displaySize.x, (int)displaySize.y);
+}
+
+AppFBO fbo_create()
+{
+    AppFBO fbo;
+    glGenFramebuffers(1, &fbo.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
+
+    // The texture we're going to render to
+    glGenTextures(1, &fbo.fboTexture);
+
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, fbo.fboTexture);
+
+    glGenRenderbuffers(1, &fbo.fboDepth);
+    return fbo;
+}
+
+void sdl_imgui_clear(const NVec4f& color)
+{
+    glClearColor(color.x, color.y, color.z, color.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void fbo_resize(AppFBO& fbo, const NVec2i& newFboSize)
+{
+    if (fbo.fboSize == newFboSize)
+    {
+        return;
+    }
+
+    fbo.fboSize = newFboSize;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
+    glBindTexture(GL_TEXTURE_2D, fbo.fboTexture);
+
+    // Give an empty image to OpenGL ( the last "0" )
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, fbo.fboSize.x, fbo.fboSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fbo.fboTexture, 0);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, fbo.fboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, fbo.fboSize.x, fbo.fboSize.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo.fboDepth);
+
+    // Set the list of draw buffers.
+    GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(1, DrawBuffers);
+
+    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        LOG(ERROR) << "FBO Error: " << status;
+    }
+}
+
+void fbo_destroy(const AppFBO& fbo)
+{
+    glDeleteFramebuffers(1, &fbo.fbo);
+    glDeleteRenderbuffers(1, &fbo.fboDepth);
+    glDeleteTextures(1, &fbo.fboTexture);
+}
+
+} // namespace MUtils
