@@ -247,3 +247,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+compile_commands.json
