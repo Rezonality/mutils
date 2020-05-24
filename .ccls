@@ -1,0 +1,25 @@
+-I
+./include
+-I
+./include/src
+-isystem
+/usr/local/include
+-isystem
+/Library/Developer/CommandLineTools/usr/bin/../include/c++/v1
+-isystem
+/Library/Developer/CommandLineTools/usr/lib/clang/11.0.3/include
+-isystem
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+-isystem
+/Library/Developer/CommandLineTools/usr/include
+-isystem
+/Library/Developer/CommandLineTools/usr/local/include
+-isystem
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
+-isystem
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+-isystem
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys
+-std=c++17
+-stdlib=libc++
+-fPIC
