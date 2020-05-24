@@ -278,12 +278,15 @@ void fbo_resize(AppFBO& fbo, const NVec2i& newFboSize)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, fbo.fboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, fbo.fboSize.x, fbo.fboSize.y);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, fbo.fboTexture, 0);
 
-    glBindRenderbuffer(GL_RENDERBUFFER, fbo.fboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, fbo.fboSize.x, fbo.fboSize.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo.fboDepth);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, fbo.fboDepth);
 
     // Set the list of draw buffers.
     GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
