@@ -58,6 +58,11 @@ struct TimeLineEvent
         m_pPool->Free(this);
     }
 
+    TimePoint EndTime() const
+    {
+        return m_time + m_duration;
+    }
+
     IEventPool* m_pPool;
     uint32_t m_type;
     uint64_t m_id;
@@ -77,8 +82,12 @@ struct NoteEvent : MUtils::TimeLineEvent
     {
     }
 
-    float velocity;
-    uint32_t midiNote;
+    float velocity = 1.0f;
+    uint32_t midiNote = 0;
+    uint32_t instrumentId = 0;
+    uint32_t channelId = 0;
+    float frequency = 440.0f;
+    bool pressed = false;
 };
 
 template <class T>
