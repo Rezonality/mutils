@@ -6,40 +6,54 @@
 #include <map>
 #include <mutex>
 #include <thread>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
+#include <mutils/logger/logger.h>
 #include <mutils/profile/profile.h>
+#include <mutils/thread/mempool.h>
 
 #include <concurrentqueue/concurrentqueue.h>
 
+#include <ctti/type_id.hpp>
+
+#undef ERROR
 namespace MUtils
 {
 
 using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-enum TimeEventKinds
-{
-    TimeLine = 0,
-    Orca = 1,
-    SP = 2,
-    JPat = 3,
-    Ixi = 4
-};
-
-struct IEventPool
-{
-    virtual void Free(void* pEv) = 0;
-};
-
 static const uint32_t TimeLineStorageSpace = 4;
-struct TimeLineEvent
+
+inline float ToFloatSeconds(const TimePoint& pt)
 {
-    TimeLineEvent(IEventPool* pPool, uint32_t type, uint64_t id)
-        : m_pPool(pPool)
-        , m_type(type)
-        , m_id(id)
+    return std::chrono::duration_cast<std::chrono::milliseconds>(pt.time_since_epoch()).count() / 1000.0f;
+}
+
+class TimeLineEvent : public MUtils::PoolItem
+{
+public:
+    DECLARE_POOL_ITEM(TimeLineEvent);
+
+    TimeLineEvent(IMemoryPool* pPool, uint64_t id)
+        : PoolItem(pPool, id)
     {
+    }
+
+    using TFreeCallback = std::function<void(TimeLineEvent*)>;
+    void SetFreeCallback(TFreeCallback cb)
+    {
+        m_freeCallback = cb;
+    }
+
+    virtual void Free() override
+    {
+        if (m_freeCallback)
+        {
+            m_freeCallback(this);
+        }
+        PoolItem::Free();
+        m_freeCallback = nullptr;
     }
 
     void SetTime(TimePoint t, std::chrono::milliseconds d = std::chrono::milliseconds(0))
@@ -53,32 +67,54 @@ struct TimeLineEvent
         m_pszName = pszName;
     }
 
-    virtual void Free()
-    {
-        m_pPool->Free(this);
-    }
-
     TimePoint EndTime() const
     {
         return m_time + m_duration;
     }
 
-    IEventPool* m_pPool;
-    uint32_t m_type;
-    uint64_t m_id;
+    virtual void Init() override
+    {
+        // TODO: Cludge for now; used by note display: remove it
+        for (uint32_t i = 0; i < TimeLineStorageSpace; i++)
+        {
+            m_storage[i] = (uint32_t)-1;
+        }
+        m_triggered = false;
+        m_pNext = nullptr;
+        m_pPrevious = nullptr;
+    }
+
     TimePoint m_time;
     std::chrono::milliseconds m_duration;
     bool m_triggered = false;
-    const char* m_pszName;
+
+    const char* m_pszName = nullptr;
+
+    TimeLineEvent* m_pNext = nullptr;
+    TimeLineEvent* m_pPrevious = nullptr;
 
     // Spare
     uint32_t m_storage[TimeLineStorageSpace];
+
+    TFreeCallback m_freeCallback;
 };
 
-struct NoteEvent : MUtils::TimeLineEvent
+TimeLineEvent* timeline_root(TimeLineEvent* pEvent);
+bool timeline_validate(TimeLineEvent* pEvent);
+void timeline_dump(TimeLineEvent* pRoot, TimeLineEvent* pCheckAbsent = nullptr);
+void timeline_insert_after(TimeLineEvent* pPos, TimeLineEvent* pInsert);
+void timeline_insert_before(TimeLineEvent* pPos, TimeLineEvent* pInsert);
+TimeLineEvent* timeline_disconnect(TimeLineEvent* pEvent);
+TimeLineEvent* timeline_disconnect_range(TimeLineEvent* pBegin, TimeLineEvent* pEnd);
+TimeLineEvent* timeline_end(TimeLineEvent* pEvent);
+
+class NoteEvent : public MUtils::TimeLineEvent
 {
-    NoteEvent(MUtils::IEventPool* pPool, uint32_t type, uint64_t id)
-        : MUtils::TimeLineEvent(pPool, type, id)
+public:
+    DECLARE_POOL_ITEM(NoteEvent);
+
+    NoteEvent(MUtils::IMemoryPool* pPool, uint64_t id)
+        : MUtils::TimeLineEvent(pPool, id)
     {
     }
 
@@ -86,71 +122,8 @@ struct NoteEvent : MUtils::TimeLineEvent
     uint32_t midiNote = 0;
     uint32_t instrumentId = 0;
     uint32_t channelId = 0;
-    float frequency = 440.0f;
+    float frequency = 0.0f;
     bool pressed = false;
-};
-
-template <class T>
-class EventPool : public IEventPool
-{
-public:
-    EventPool(uint32_t type)
-        : m_type(type)
-    {
-    }
-
-    ~EventPool()
-    {
-        Clear();
-    }
-
-    void Clear()
-    {
-        T* pVictim = nullptr;
-        while (m_freeItems.try_dequeue(pVictim))
-        {
-            delete pVictim;
-        }
-    }
-
-    T* Alloc()
-    {
-        T* pRet = nullptr;
-
-        if (!m_freeItems.try_dequeue(pRet))
-        {
-            pRet = new T(this, m_type, m_nextId++);
-        }
-        else
-        {
-            pRet->m_id = m_nextId++;
-
-        }
-
-        pRet->m_triggered = false;
-
-        // TODO: Cludge for now; used by note display: remove it
-        for (uint32_t i = 0; i < TimeLineStorageSpace; i++)
-        {
-            pRet->m_storage[i] = (uint32_t)-1;
- 
-        }
-        return pRet;
-    }
-
-    void Free(void* pVal)
-    {
-        // store the free item for later
-        auto pTyped = (T*)pVal;
-        pTyped->m_id = (uint64_t)-1;
-        assert(pTyped->m_type == m_type);
-        m_freeItems.enqueue(pTyped);
-    }
-
-private:
-    moodycamel::ConcurrentQueue<T*> m_freeItems;
-    uint32_t m_type;
-    uint64_t m_nextId = 0;
 };
 
 struct ITimeConsumer
@@ -189,9 +162,19 @@ public:
 
     void StoreTimeEvent(TimeLineEvent* event);
     void GetTimeEvents(std::vector<TimeLineEvent*>& events);
-    void DequeTimeEvents(std::vector<TimeLineEvent*>& events, uint32_t type, TimePoint upTo);
+    void DequeTimeEvents(std::vector<TimeLineEvent*>& events, ctti::type_id_t type, TimePoint upTo);
 
-    EventPool<TimeLineEvent>& GetEventPool() { return m_timeEventPool; };
+    MemoryPool<TimeLineEvent>& GetEventPool()
+    {
+        return m_timeEventPool;
+    };
+
+    TimeLineEvent* Disconnect(TimeLineEvent* pEvent);
+    TimeLineEvent* DisconnectRange(TimeLineEvent* pBegin, TimeLineEvent* pEnd);
+    void InsertAfter(TimeLineEvent* pPos, TimeLineEvent* pItem);
+    void InsertBefore(TimeLineEvent* pPos, TimeLineEvent* pItem);
+    bool Validate() const;
+    void Dump();
 
 private:
     TimePoint m_startTime;
@@ -205,8 +188,10 @@ private:
     std::atomic<double> m_beat = 0;
     std::atomic<uint32_t> m_frame = 0;
 
-    EventPool<TimeLineEvent> m_timeEventPool;
-    std::map<TimePoint, TimeLineEvent*> m_timeEvents;
+    MemoryPool<TimeLineEvent> m_timeEventPool;
+
+    TimeLineEvent* m_pRoot = nullptr;
+    TimeLineEvent* m_pLast = nullptr;
 
     std::chrono::microseconds m_timePerBeat = std::chrono::microseconds(1000000 / 120);
 };

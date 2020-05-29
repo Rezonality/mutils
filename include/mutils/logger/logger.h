@@ -10,6 +10,7 @@
 #pragma once
 #include <iostream>
 #include <sstream>
+#include <thread>
 
 #ifdef WIN32
 // A reference to the debug API on windows, to help the logger output in VC.  This is better
@@ -55,6 +56,7 @@ public:
         {
             operator<<("[" + getLabel(type) + "] ");
         }
+        out << "(T:" << std::this_thread::get_id() << ") ";
     }
     ~LOG()
     {

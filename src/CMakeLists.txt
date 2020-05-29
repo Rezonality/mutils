@@ -230,6 +230,7 @@ target_include_directories(MUtils
     PRIVATE
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty>
     ${MUTILS_ROOT}/m3rdparty/tinydir
+    ${MUTILS_ROOT}/m3rdparty/ctti/include
     ${MUTILS_ROOT}/include
     ${MUTILS_ROOT}/include/mutils
     ${IMGUI_DIR}
