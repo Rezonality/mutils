@@ -158,6 +158,8 @@ public:
     double GetQuantum() const;
     std::chrono::microseconds GetTimePerBeat() const;
 
+    double GetBeatAtTime(TimePoint time);
+
     void Beat();
 
     void StoreTimeEvent(TimeLineEvent* event);
@@ -187,6 +189,9 @@ private:
     std::atomic<double> m_tempo = 120;
     std::atomic<double> m_beat = 0;
     std::atomic<uint32_t> m_frame = 0;
+
+    std::atomic<TimePoint> m_lastTime;
+    std::atomic<double> m_lastBeat;
 
     MemoryPool<TimeLineEvent> m_timeEventPool;
 

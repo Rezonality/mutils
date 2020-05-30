@@ -252,6 +252,9 @@ void TimeProvider::StartThread()
             {
                 std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
 
+                m_lastTime = startTime;
+                m_lastBeat = beat;
+
                 // Remove time events older than 8 beats before now
                 // TODO: Lifetime?  When to destroy these?
 
@@ -307,6 +310,15 @@ void TimeProvider::EndThread()
     {
         m_tickThread.join();
     }
+}
+
+double TimeProvider::GetBeatAtTime(TimePoint time)
+{
+    auto d = duration_cast<microseconds>(time - m_lastTime.load()).count();
+    auto beat = m_lastBeat.load();
+
+    auto beatsPerTime = (double)d / (double)duration_cast<microseconds>(GetTimePerBeat()).count();
+    return beat + beatsPerTime;
 }
 
 double TimeProvider::GetBeat() const
@@ -566,5 +578,6 @@ void TimeProvider::Dump()
 {
     timeline_dump(m_pRoot);
 }
+    
 
 } // namespace MUtils
