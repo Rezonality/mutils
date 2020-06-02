@@ -848,7 +848,6 @@
 #define SHUT_WR 1 /* SD_SEND */
 #define SHUT_RDWR 2 /* SD_BOTH */
 #ifdef _MSC_VER
-#define _CRT_SECURE_NO_WARNINGS 1
 #define _CRT_NONSTDC_NO_DEPRECATE 1
 #define _USE_MATH_DEFINES /* For M_LN10 */
 #define strcasecmp _stricmp

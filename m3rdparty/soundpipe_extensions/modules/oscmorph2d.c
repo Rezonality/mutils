@@ -105,7 +105,7 @@ int sp_oscmorph2d_compute(sp_data *sp, sp_oscmorph2d *osc, SPFLOAT *in, SPFLOAT 
         ft2 = osc->tbl[index + 1]->tbl;
     }
     
-    osc->inc = (int32_t)lrintf(cps * sicvt);  
+    osc->inc = (int32_t)((cps * sicvt) + .5f);
 
     fract = ((phs) & ftp1->lomask) * ftp1->lodiv;
 
