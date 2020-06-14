@@ -124,6 +124,7 @@ public:
     uint32_t channelId = 0;
     float frequency = 0.0f;
     bool pressed = false;
+    bool transition = true;
 };
 
 struct ITimeConsumer
