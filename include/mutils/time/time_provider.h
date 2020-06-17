@@ -118,13 +118,13 @@ public:
     {
     }
 
-    float velocity = 1.0f;
-    uint32_t midiNote = 0;
-    uint32_t instrumentId = 0;
-    uint32_t channelId = 0;
-    float frequency = 0.0f;
+    float velocity = 1.0f;      // Velocity note was hit with; also like amplitude
+    uint32_t midiNote = 0;      // Midi note
+    int64_t instrumentId = -1;  // Unique Id, -1 for all
+    int32_t channelId = -1;     // Assigned channel, or just use Midi
+    float frequency = 0.0f;     // Frequency; if 0, then use midi
     bool pressed = false;
-    bool transition = true;
+    bool transition = true;     // Transitioned to press or release
 };
 
 struct ITimeConsumer
@@ -191,7 +191,7 @@ private:
     std::atomic<double> m_beat = 0;
     std::atomic<uint32_t> m_frame = 0;
 
-    std::atomic<TimePoint> m_lastTime;
+    TimePoint m_lastTime; // Should probably be atomic, but compile error on GCC?
     std::atomic<double> m_lastBeat;
 
     MemoryPool<TimeLineEvent> m_timeEventPool;

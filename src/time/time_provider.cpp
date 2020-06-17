@@ -314,7 +314,7 @@ void TimeProvider::EndThread()
 
 double TimeProvider::GetBeatAtTime(TimePoint time)
 {
-    auto d = duration_cast<microseconds>(time - m_lastTime.load()).count();
+    auto d = duration_cast<microseconds>(time - m_lastTime).count();
     auto beat = m_lastBeat.load();
 
     auto beatsPerTime = (double)d / (double)duration_cast<microseconds>(GetTimePerBeat()).count();
