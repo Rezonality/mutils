@@ -30,6 +30,8 @@ inline float ToFloatSeconds(const TimePoint& pt)
     return std::chrono::duration_cast<std::chrono::milliseconds>(pt.time_since_epoch()).count() / 1000.0f;
 }
 
+// TODO: Seperate events from the timeline; time line should be a global/clean time ticker.
+// Events should be seperate I think
 class TimeLineEvent : public MUtils::PoolItem
 {
 public:
@@ -38,22 +40,6 @@ public:
     TimeLineEvent(IMemoryPool* pPool, uint64_t id)
         : PoolItem(pPool, id)
     {
-    }
-
-    using TFreeCallback = std::function<void(TimeLineEvent*)>;
-    void SetFreeCallback(TFreeCallback cb)
-    {
-        m_freeCallback = cb;
-    }
-
-    virtual void Free() override
-    {
-        if (m_freeCallback)
-        {
-            m_freeCallback(this);
-        }
-        PoolItem::Free();
-        m_freeCallback = nullptr;
     }
 
     void SetTime(TimePoint t, std::chrono::milliseconds d = std::chrono::milliseconds(0))
@@ -90,24 +76,14 @@ public:
 
     const char* m_pszName = nullptr;
 
-    TimeLineEvent* m_pNext = nullptr;
-    TimeLineEvent* m_pPrevious = nullptr;
-
     // Spare
     uint32_t m_storage[TimeLineStorageSpace];
-
-    TFreeCallback m_freeCallback;
 };
 
-TimeLineEvent* timeline_root(TimeLineEvent* pEvent);
 bool timeline_validate(TimeLineEvent* pEvent);
 void timeline_dump(TimeLineEvent* pRoot, TimeLineEvent* pCheckAbsent = nullptr);
-void timeline_insert_after(TimeLineEvent* pPos, TimeLineEvent* pInsert);
-void timeline_insert_before(TimeLineEvent* pPos, TimeLineEvent* pInsert);
-TimeLineEvent* timeline_disconnect(TimeLineEvent* pEvent);
-TimeLineEvent* timeline_disconnect_range(TimeLineEvent* pBegin, TimeLineEvent* pEnd);
-TimeLineEvent* timeline_end(TimeLineEvent* pEvent);
 
+// TODO: Extract note event from timeline; they are different concepts?
 class NoteEvent : public MUtils::TimeLineEvent
 {
 public:
@@ -125,6 +101,7 @@ public:
     float frequency = 0.0f;     // Frequency; if 0, then use midi
     bool pressed = false;
     bool transition = true;     // Transitioned to press or release
+    bool inactive = false;      // Has this note gone inactive due to finishing being played?
 };
 
 struct ITimeConsumer
@@ -167,15 +144,12 @@ public:
     void GetTimeEvents(std::vector<TimeLineEvent*>& events);
     void DequeTimeEvents(std::vector<TimeLineEvent*>& events, ctti::type_id_t type, TimePoint upTo);
 
-    MemoryPool<TimeLineEvent>& GetEventPool()
+    TSMemoryPool<TimeLineEvent>& GetEventPool()
     {
         return m_timeEventPool;
     };
 
-    TimeLineEvent* Disconnect(TimeLineEvent* pEvent);
-    TimeLineEvent* DisconnectRange(TimeLineEvent* pBegin, TimeLineEvent* pEnd);
-    void InsertAfter(TimeLineEvent* pPos, TimeLineEvent* pItem);
-    void InsertBefore(TimeLineEvent* pPos, TimeLineEvent* pItem);
+    void InsertBefore(IListItem* pPos, IListItem* pItem);
     bool Validate() const;
     void Dump();
 
@@ -194,10 +168,7 @@ private:
     TimePoint m_lastTime; // Should probably be atomic, but compile error on GCC?
     std::atomic<double> m_lastBeat;
 
-    MemoryPool<TimeLineEvent> m_timeEventPool;
-
-    TimeLineEvent* m_pRoot = nullptr;
-    TimeLineEvent* m_pLast = nullptr;
+    TSMemoryPool<TimeLineEvent> m_timeEventPool;
 
     std::chrono::microseconds m_timePerBeat = std::chrono::microseconds(1000000 / 120);
 };

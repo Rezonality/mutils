@@ -25,6 +25,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/string/tomlutils.cpp
     ${MUTILS_ROOT}/src/string/murmur_hash.cpp
     ${MUTILS_ROOT}/src/math/mathutils.cpp
+    ${MUTILS_ROOT}/src/thread/mempool.cpp
     ${MUTILS_ROOT}/src/algorithm/containerutils.cpp
     ${MUTILS_ROOT}/src/chibi/chibi.cpp
 
@@ -99,6 +100,9 @@ endif() # UNIX
 # Tracy
 set(TRACY_SOURCE
     ${M3RDPARTY_DIR}/tracy/TracyClient.cpp)
+
+set (JANET_SOURCE
+    ${M3RDPARTY_DIR}/janet/janet.c)
 
 # Tiny File Dialogs
 set(TFD_SOURCE
@@ -197,6 +201,7 @@ SET(NANOVG_SOURCE
 add_library(MUtils STATIC 
     ${UTILS_SOURCES}
     ${TRACY_SOURCE}
+    ${JANET_SOURCE}
     ${FMT_SOURCE}
     ${KISFFT_SOURCE}
     ${MPC_SOURCE}
@@ -230,6 +235,7 @@ target_include_directories(MUtils
     PRIVATE
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty>
     ${MUTILS_ROOT}/m3rdparty/tinydir
+    ${MUTILS_ROOT}/m3rdparty/janet
     ${MUTILS_ROOT}/m3rdparty/ctti/include
     ${MUTILS_ROOT}/include
     ${MUTILS_ROOT}/include/mutils
@@ -238,6 +244,7 @@ target_include_directories(MUtils
     PUBLIC 
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/glm>
+    $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/janet>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/tfd>
     $<BUILD_INTERFACE:${MUILTS_ROOT}/m3rdparty/ctti/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/chibi/include>
@@ -374,6 +381,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/json/single_include/nlohmann
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/glm
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/janet
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 

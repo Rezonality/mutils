@@ -10,20 +10,10 @@ using namespace std::chrono;
 namespace MUtils
 {
 
-TimeLineEvent* timeline_root(TimeLineEvent* pEvent)
-{
-    auto pCheck = pEvent;
-    while (pEvent && pEvent->m_pPrevious)
-    {
-        pEvent = pEvent->m_pPrevious;
-        assert(pEvent != pCheck);
-    }
-    return pEvent;
-}
-
 bool timeline_validate(TimeLineEvent* pEvent)
 {
-    auto pRoot = timeline_root(pEvent);
+    /*
+    auto pRoot = list_root(pEvent);
     if (!pRoot)
         return true;
 
@@ -42,6 +32,7 @@ bool timeline_validate(TimeLineEvent* pEvent)
         time = pCurrent->m_pNext->m_time;
         pCurrent = pCurrent->m_pNext;
     }
+    */
     return true;
 }
 
@@ -52,6 +43,10 @@ void event_dump(const char* pszType, TimeLineEvent* pRoot)
 
 void timeline_dump(TimeLineEvent* pRoot, TimeLineEvent* pCheckAbsent)
 {
+    //TODO: Fix
+    (void)&pRoot;
+    (void)&pCheckAbsent;
+    /*
     while (pRoot)
     {
         event_dump("Dump: ", pRoot);
@@ -62,105 +57,9 @@ void timeline_dump(TimeLineEvent* pRoot, TimeLineEvent* pCheckAbsent)
         }
         pRoot = pRoot->m_pNext;
     }
+    */
 }
 
-void timeline_insert_after(TimeLineEvent* pPos, TimeLineEvent* pInsert)
-{
-    assert(pPos);
-    assert(pInsert);
-    auto pAfter = pPos->m_pNext; // After insertion point
-    pPos->m_pNext = pInsert; // Point insertion point to new node
-    pInsert->m_pPrevious = pPos; // Point new node back at insertion point
-    if (pAfter) // If something after us, point it back to us
-    {
-        pAfter->m_pPrevious = pInsert;
-    }
-    pInsert->m_pNext = pAfter; // Point us at the thing after
-
-#ifdef _DEBUG
-    timeline_validate(pInsert);
-#endif
-}
-
-void timeline_insert_before(TimeLineEvent* pPos, TimeLineEvent* pInsert)
-{
-    assert(pPos);
-    assert(pInsert);
-    auto pBefore = pPos->m_pPrevious;
-    pPos->m_pPrevious = pInsert;
-    pInsert->m_pPrevious = pBefore;
-    if (pBefore)
-    {
-        pBefore->m_pNext = pInsert;
-    }
-    pInsert->m_pNext = pPos;
-
-#ifdef _DEBUG
-    timeline_validate(pInsert);
-#endif
-}
-
-TimeLineEvent* timeline_disconnect(TimeLineEvent* pEvent)
-{
-    auto pNext = pEvent->m_pNext;
-    if (pEvent->m_pPrevious)
-    {
-        pEvent->m_pPrevious->m_pNext = pEvent->m_pNext;
-    }
-
-    if (pNext)
-    {
-        pNext->m_pPrevious = pEvent->m_pPrevious;
-    }
-
-    pEvent->m_pPrevious = nullptr;
-    pEvent->m_pNext = nullptr;
-
-#ifdef _DEBUG
-    timeline_validate(pEvent);
-#endif
-    return pNext;
-}
-
-TimeLineEvent* timeline_disconnect_range(TimeLineEvent* pBegin, TimeLineEvent* pEnd)
-{
-    if (pBegin == nullptr || pEnd == nullptr)
-        return nullptr;
-
-    auto pNext = pEnd->m_pNext;
-
-    assert(pBegin->m_time <= pEnd->m_time);
-    assert(pBegin != pEnd);
-
-    if (pBegin->m_pPrevious)
-    {
-        pBegin->m_pPrevious->m_pNext = pEnd->m_pNext;
-    }
-
-    if (pEnd->m_pNext)
-    {
-        pEnd->m_pNext->m_pPrevious = pBegin->m_pPrevious;
-    }
-
-    pBegin->m_pPrevious = nullptr;
-    pEnd->m_pNext = nullptr;
-
-    // Validate the new chain; it has been sliced out
-#ifdef _DEBUG
-    timeline_validate(pBegin);
-#endif
-
-    return pNext;
-}
-
-TimeLineEvent* timeline_end(TimeLineEvent* pEvent)
-{
-    while (pEvent && pEvent->m_pNext)
-    {
-        pEvent = pEvent->m_pNext;
-    }
-    return pEvent;
-}
 TimeProvider& TimeProvider::Instance()
 {
     static TimeProvider provider;
@@ -258,7 +157,7 @@ void TimeProvider::StartThread()
                 // Remove time events older than 8 beats before now
                 // TODO: Lifetime?  When to destroy these?
 
-                auto pCurrent = m_pRoot;
+                auto pCurrent = (TimeLineEvent*)m_timeEventPool.m_pRoot;
                 while (pCurrent)
                 {
                     // TODO: this is broken if the duration is long!
@@ -266,7 +165,7 @@ void TimeProvider::StartThread()
                     if ((startTime - (pCurrent->m_time + pCurrent->m_duration)) > seconds(16))
                     {
                         auto pVictim = pCurrent;
-                        pCurrent = Disconnect(pCurrent);
+                        pCurrent = (TimeLineEvent*)list_disconnect((IListItem*)pCurrent);
                         pVictim->Free();
                         continue;
                     }
@@ -274,7 +173,7 @@ void TimeProvider::StartThread()
                     {
                         break;
                     }
-                    pCurrent = pCurrent->m_pNext;
+                    pCurrent = (TimeLineEvent*)pCurrent->m_pNext;
                 }
 
                 auto pEv = m_timeEventPool.Alloc();
@@ -358,28 +257,26 @@ void TimeProvider::StoreTimeEvent(TimeLineEvent* ev)
     assert(ev->m_pPrevious == nullptr);
     //timeline_dump(m_pRoot, ev);
 
-    ev->SetFreeCallback([=](TimeLineEvent* pEv)
-    {
-        Disconnect(pEv);
-    });
-
-    InsertAfter(m_pLast, ev);
+    list_insert_after(m_timeEventPool.m_pLast, ev);
 
 }
 
+// TODO: Don't think this is necessary any more; since time events have linked lists
 void TimeProvider::GetTimeEvents(std::vector<TimeLineEvent*>& ev)
 {
     std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
     ev.clear();
 
-    auto pCurrent = m_pRoot;
+    auto pCurrent = m_timeEventPool.m_pRoot;
     while (pCurrent)
     {
-        ev.push_back(pCurrent);
+        ev.push_back((TimeLineEvent*)pCurrent);
         pCurrent = pCurrent->m_pNext;
     }
 }
 
+// Returns events before the time, in an array
+// TODO: Just return links to begin/end?
 void TimeProvider::DequeTimeEvents(std::vector<TimeLineEvent*>& ev, ctti::type_id_t type, TimePoint upTo)
 {
     std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
@@ -388,13 +285,13 @@ void TimeProvider::DequeTimeEvents(std::vector<TimeLineEvent*>& ev, ctti::type_i
     //LOG(DEBUG) << "T: " << ToFloatSeconds(upTo);
 
     TimePoint last = TimePoint::min();
-    auto pCurrent = m_pRoot;
+    auto pCurrent = (TimeLineEvent*)m_timeEventPool.m_pRoot;
     while (pCurrent)
     {
         //LOG(DEBUG) << "E: " << pCurrent->m_time.time_since_epoch().count();
         if (pCurrent->m_triggered)
         {
-            pCurrent = pCurrent->m_pNext;
+            pCurrent = (TimeLineEvent*)pCurrent->m_pNext;
             continue;
         }
 
@@ -411,7 +308,7 @@ void TimeProvider::DequeTimeEvents(std::vector<TimeLineEvent*>& ev, ctti::type_i
             last = pCurrent->m_time;
             //event_dump("DQ: ", pCurrent);
         }
-        pCurrent = pCurrent->m_pNext;
+        pCurrent = (TimeLineEvent*)pCurrent->m_pNext;
     }
 }
 
@@ -431,152 +328,14 @@ std::chrono::microseconds TimeProvider::GetTimePerBeat() const
     return m_timePerBeat;
 }
 
-TimeLineEvent* TimeProvider::Disconnect(TimeLineEvent* pEvent)
-{
-    if (pEvent == m_pRoot)
-    {
-        if (pEvent->m_pNext)
-        {
-            m_pRoot = pEvent->m_pNext;
-        }
-        else
-        {
-            m_pRoot = nullptr;
-        }
-    }
-
-    if (pEvent == m_pLast)
-    {
-        if (pEvent->m_pPrevious)
-        {
-            m_pLast = pEvent->m_pPrevious;
-        }
-        else
-        {
-            m_pLast = nullptr;
-        }
-    }
-
-    auto pRet = timeline_disconnect(pEvent);
-
-    if (m_pRoot)
-    {
-        m_pRoot->m_pPrevious = nullptr;
-    }
-    
-    if (m_pLast)
-    {
-        m_pLast->m_pNext = nullptr;
-    }
-
-    return pRet;
-}
-
-TimeLineEvent* TimeProvider::DisconnectRange(TimeLineEvent* pBegin, TimeLineEvent* pEnd)
-{ 
-    // Find the end if null
-    if (pEnd == nullptr)
-    {
-        pEnd = pBegin;
-        while (pEnd && pEnd->m_pNext)
-        {
-            pEnd = pEnd->m_pNext;
-        }
-    }
-
-    if (pBegin == nullptr)
-    {
-        pBegin = pEnd;
-        while (pBegin && pBegin->m_pPrevious)
-        {
-            pBegin = pBegin->m_pPrevious;
-        }
-    }
-
-    if (pBegin == nullptr || pEnd == nullptr)
-    {
-        return nullptr;
-    }
-
-    if (pBegin == m_pRoot)
-    {
-        if (pBegin->m_pNext)
-        {
-            m_pRoot = pBegin->m_pNext;
-        }
-        else
-        {
-            m_pRoot = nullptr;
-        }
-        assert(m_pRoot == nullptr || m_pRoot->m_pPrevious == nullptr);
-    }
-
-    if (pEnd == m_pLast)
-    {
-        if (pEnd->m_pPrevious)
-        {
-            m_pLast = pEnd->m_pPrevious;
-        }
-        else
-        {
-            m_pLast = nullptr;
-        }
-        assert(m_pLast == nullptr || m_pLast->m_pNext == nullptr);
-    }
-
-    return timeline_disconnect_range(pBegin, pEnd);
-}
-
-void TimeProvider::InsertAfter(TimeLineEvent* pPos, TimeLineEvent* pItem)
-{
-    if (pPos == nullptr)
-    {
-        assert(m_pRoot == nullptr);
-        assert(m_pLast == nullptr);
-        m_pRoot = pItem;
-        m_pLast = pItem;
-        return;
-    }
-
-    if (m_pLast == pPos)
-    {
-        m_pLast = pItem;
-    }
-
-    timeline_insert_after(pPos, pItem);
-    
-    assert(m_pRoot->m_pPrevious == nullptr);
-    assert(m_pLast->m_pNext == nullptr);
-}
-
-void TimeProvider::InsertBefore(TimeLineEvent* pPos, TimeLineEvent* pItem)
-{
-    if (pPos == nullptr)
-    {
-        assert(m_pRoot == nullptr);
-        assert(m_pLast == nullptr);
-        m_pRoot = pItem;
-        m_pLast = pItem;
-        return;
-    }
-
-    timeline_insert_before(pPos, pItem);
-    if (m_pRoot == pPos)
-    {
-        m_pRoot = pItem;
-    }
-    assert(m_pRoot->m_pPrevious == nullptr);
-    assert(m_pLast->m_pNext == nullptr);
-}
-
 bool TimeProvider::Validate() const
 {
-    return timeline_validate(m_pRoot);
+    return timeline_validate((TimeLineEvent*)m_timeEventPool.m_pRoot);
 }
 
 void TimeProvider::Dump()
 {
-    timeline_dump(m_pRoot);
+    timeline_dump((TimeLineEvent*)m_timeEventPool.m_pRoot);
 }
     
 
