@@ -1,7 +1,7 @@
 [MUtils](https://github.com/cmaughan/MUtils) - Useful C++
 ===================================================================================================
 
-[![Build Status](https://travis-ci.org/cmaughan/MUtils.svg?branch=master)](https://travis-ci.org/cmaughan/MUtils)
+[![Build Status](https://travis-ci.org/cmaughan/mutils.svg?branch=master)](https://travis-ci.org/cmaughan/mutils)
 [![Build status](https://ci.appveyor.com/api/projects/status/bwyabd9j6j77mes9?svg=true)](https://ci.appveyor.com/project/cmaughan/MUtils)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cmaughan/zep/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/cmaughan/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/cmaughan/MUtils)
