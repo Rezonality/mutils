@@ -1,16 +1,48 @@
-#include <string>
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <codecvt>
-#include <locale>
 #include <cstring>
+#include <iomanip>
+#include <locale>
+#include <sstream>
+#include <string>
 
 #include "mutils/string/stringutils.h"
+
+using namespace std;
 
 // StringUtils.
 // Note, simple, effective string utilities which concentrate on useful functinality and correctness and not on speed!
 namespace MUtils
 {
+
+// https://stackoverflow.com/a/17708801/18942
+string string_url_encode(const string& value)
+{
+    ostringstream escaped;
+    escaped.fill('0');
+    escaped << hex;
+
+    for (string::const_iterator i = value.begin(), n = value.end(); i != n; ++i)
+    {
+        string::value_type c = (*i);
+
+        // Keep alphanumeric and other accepted characters intact
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << uppercase;
+        escaped << '%' << setw(2) << int((unsigned char)c);
+        escaped << nouppercase;
+    }
+
+    return escaped.str();
+}
 
 std::unordered_map<uint32_t, std::string> StringId::stringLookup;
 std::string string_tolower(const std::string& str)
@@ -92,13 +124,13 @@ uint32_t murmur_hash(const void* key, int len, uint32_t seed)
 
     switch (len)
     {
-        case 3:
-            h ^= data[2] << 16;
-        case 2:
-            h ^= data[1] << 8;
-        case 1:
-            h ^= data[0];
-            h *= m;
+    case 3:
+        h ^= data[2] << 16;
+    case 2:
+        h ^= data[1] << 8;
+    case 1:
+        h ^= data[0];
+        h *= m;
     };
 
     // Do a few final mixes of the hash to ensure the last few
@@ -196,21 +228,21 @@ uint64_t murmur_hash_64(const void* key, uint32_t len, uint64_t seed)
 
     switch (len & 7)
     {
-        case 7:
-            h ^= uint64_t(data2[6]) << 48;
-        case 6:
-            h ^= uint64_t(data2[5]) << 40;
-        case 5:
-            h ^= uint64_t(data2[4]) << 32;
-        case 4:
-            h ^= uint64_t(data2[3]) << 24;
-        case 3:
-            h ^= uint64_t(data2[2]) << 16;
-        case 2:
-            h ^= uint64_t(data2[1]) << 8;
-        case 1:
-            h ^= uint64_t(data2[0]);
-            h *= m;
+    case 7:
+        h ^= uint64_t(data2[6]) << 48;
+    case 6:
+        h ^= uint64_t(data2[5]) << 40;
+    case 5:
+        h ^= uint64_t(data2[4]) << 32;
+    case 4:
+        h ^= uint64_t(data2[3]) << 24;
+    case 3:
+        h ^= uint64_t(data2[2]) << 16;
+    case 2:
+        h ^= uint64_t(data2[1]) << 8;
+    case 1:
+        h ^= uint64_t(data2[0]);
+        h *= m;
     };
 
     h ^= h >> r;
@@ -350,7 +382,7 @@ std::pair<uint32_t, uint32_t> string_convert_index_to_line_offset(const std::str
             return std::make_pair(line, index - lineRange.first);
         }
 
-        // Find line end 
+        // Find line end
         if (*itr == '\r' || *itr == '\n')
         {
             bool isR = (*itr == '\r');
@@ -359,9 +391,7 @@ std::pair<uint32_t, uint32_t> string_convert_index_to_line_offset(const std::str
             currentIndex++;
 
             // Not at end and a '\r\n'
-            if (itr != str.end() &&
-                isR &&
-                *itr == '\n')
+            if (itr != str.end() && isR && *itr == '\n')
             {
                 // Skip another
                 itr++;

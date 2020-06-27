@@ -131,6 +131,7 @@ inline std::ostream& operator<<(std::ostream& str, StringId id)
     return str;
 }
 
+std::string string_url_encode(const std::string& value);
 void string_split(const std::string& text, const char* delims, std::vector<std::string>& tokens);
 std::vector<std::string> string_split(const std::string& text, const char* delims);
 void string_split_lines(const std::string& text, std::vector<std::string>& tokens);
