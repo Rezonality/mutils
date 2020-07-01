@@ -396,6 +396,11 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/stb
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
+install(DIRECTORY 
+        ${MUTILS_ROOT}/m3rdparty/libcuckoo/libcuckoo
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/kiss_fft
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
