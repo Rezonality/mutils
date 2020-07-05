@@ -334,6 +334,7 @@ install(FILES ${MUTILS_ROOT}/cmake/utils.cmake
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/cmake
     )
 
+if (WIN32)
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/packages/build/rtaudio-install/include
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/rtaudio
     )
@@ -347,6 +348,8 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/packages/build/openssl-install/includ
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/packages/build/openssl-install/lib
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/openssl
     )
+endif()
+
 # Install the include files
 install(DIRECTORY ${MUTILS_ROOT}/include/mutils
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
