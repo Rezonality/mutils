@@ -35,18 +35,6 @@ ExternalProject_Add(
     CMAKE_ARGS -DFT2_BUILD_LIBRARY=ON -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_LIST_DIR}/build/freetype-install
     INSTALL_COMMAND ${INST_CMD}
     )
-else()
-ExternalProject_Add(
-    freetype
-    GIT_REPOSITORY "https://github.com/aseprite/freetype2.git"
-    GIT_SHALLOW TRUE
-    GIT_PROGRESS TRUE
-    GIT_TAG VER-2-10-0
-    CMAKE_ARGS -DFT2_BUILD_LIBRARY=ON 
-    INSTALL_COMMAND ${INST_CMD}
-    )
-endif()
-
 ExternalProject_Add(
     OpenSSL
     GIT_REPOSITORY https://github.com/cmaughan/openssl-cmake.git
@@ -68,6 +56,36 @@ ExternalProject_Add(
     CMAKE_ARGS -DRTAUDIO_BUILD_STATIC_LIBS=ON -DRTAUDIO_BUILD_TESTING=OFF -DCMAKE_DEBUG_POSTFIX=-debug -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ${INST_CMD}
 )
+else()
+ExternalProject_Add(
+    freetype
+    GIT_REPOSITORY "https://github.com/aseprite/freetype2.git"
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+    GIT_TAG VER-2-10-0
+    CMAKE_ARGS -DFT2_BUILD_LIBRARY=ON
+    INSTALL_COMMAND ${INST_CMD}
+    )
+ExternalProject_Add(
+    OpenSSL
+    GIT_REPOSITORY https://github.com/cmaughan/openssl-cmake.git
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+    GIT_TAG 1.1.1b
+    CMAKE_ARGS -DWITH_APPS=OFF -DCMAKE_DEBUG_POSTFIX=-debug
+    INSTALL_COMMAND ${INST_CMD}
+)
+
+ExternalProject_Add(
+    RtAudio
+    GIT_REPOSITORY "https://github.com/thestk/rtaudio.git"
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+    GIT_TAG 5.1.0
+    CMAKE_ARGS -DRTAUDIO_BUILD_STATIC_LIBS=ON -DRTAUDIO_BUILD_TESTING=OFF -DCMAKE_DEBUG_POSTFIX=-debug
+    INSTALL_COMMAND ${INST_CMD}
+)
+endif()
 
 add_library(PackageBuilder STATIC builder.cpp)
 add_dependencies(PackageBuilder sdl2 freetype RtAudio OpenSSL)
