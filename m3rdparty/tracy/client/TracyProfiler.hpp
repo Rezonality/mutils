@@ -28,7 +28,7 @@
 #  define TRACY_HW_TIMER
 #endif
 
-#if !defined TRACY_HW_TIMER || ( __ARM_ARCH >= 6 && !defined CLOCK_MONOTONIC_RAW )
+#if !defined TRACY_HW_TIMER || ( defined __ARM_ARCH && __ARM_ARCH >= 6 && !defined CLOCK_MONOTONIC_RAW )
   #include <chrono>
 #endif
 
@@ -59,6 +59,7 @@ TRACY_API std::atomic<uint8_t>& GetGpuCtxCounter();
 TRACY_API GpuCtxWrapper& GetGpuCtx();
 TRACY_API uint64_t GetThreadHandle();
 TRACY_API void InitRPMallocThread();
+TRACY_API bool ProfilerAvailable();
 
 struct SourceLocationData
 {
@@ -120,9 +121,9 @@ public:
     static tracy_force_inline int64_t GetTime()
     {
 #ifdef TRACY_HW_TIMER
-#  if TARGET_OS_IOS == 1
+#  if defined TARGET_OS_IOS && TARGET_OS_IOS == 1
         return mach_absolute_time();
-#  elif __ARM_ARCH >= 6
+#  elif defined __ARM_ARCH && __ARM_ARCH >= 6
 #    ifdef CLOCK_MONOTONIC_RAW
         struct timespec ts;
         clock_gettime( CLOCK_MONOTONIC_RAW, &ts );
@@ -272,10 +273,10 @@ public:
 #ifdef TRACY_ON_DEMAND
         if( !GetProfiler().IsConnected() ) return;
 #endif
+        TracyLfqPrepare( callstack == 0 ? QueueType::Message : QueueType::MessageCallstack );
         auto ptr = (char*)tracy_malloc( size+1 );
         memcpy( ptr, txt, size );
         ptr[size] = '\0';
-        TracyLfqPrepare( callstack == 0 ? QueueType::Message : QueueType::MessageCallstack );
         MemWrite( &item->message.time, GetTime() );
         MemWrite( &item->message.text, (uint64_t)ptr );
         TracyLfqCommit;
@@ -301,10 +302,10 @@ public:
 #ifdef TRACY_ON_DEMAND
         if( !GetProfiler().IsConnected() ) return;
 #endif
+        TracyLfqPrepare( callstack == 0 ? QueueType::MessageColor : QueueType::MessageColorCallstack );
         auto ptr = (char*)tracy_malloc( size+1 );
         memcpy( ptr, txt, size );
         ptr[size] = '\0';
-        TracyLfqPrepare( callstack == 0 ? QueueType::MessageColor : QueueType::MessageColorCallstack );
         MemWrite( &item->messageColor.time, GetTime() );
         MemWrite( &item->messageColor.text, (uint64_t)ptr );
         MemWrite( &item->messageColor.r, uint8_t( ( color       ) & 0xFF ) );
@@ -333,6 +334,7 @@ public:
 
     static tracy_force_inline void MessageAppInfo( const char* txt, size_t size )
     {
+        InitRPMallocThread();
         auto ptr = (char*)tracy_malloc( size+1 );
         memcpy( ptr, txt, size );
         ptr[size] = '\0';
@@ -347,8 +349,9 @@ public:
         TracyLfqCommit;
     }
 
-    static tracy_force_inline void MemAlloc( const void* ptr, size_t size )
+    static tracy_force_inline void MemAlloc( const void* ptr, size_t size, bool secure )
     {
+        if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_ON_DEMAND
         if( !GetProfiler().IsConnected() ) return;
 #endif
@@ -359,8 +362,9 @@ public:
         GetProfiler().m_serialLock.unlock();
     }
 
-    static tracy_force_inline void MemFree( const void* ptr )
+    static tracy_force_inline void MemFree( const void* ptr, bool secure )
     {
+        if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_ON_DEMAND
         if( !GetProfiler().IsConnected() ) return;
 #endif
@@ -371,8 +375,9 @@ public:
         GetProfiler().m_serialLock.unlock();
     }
 
-    static tracy_force_inline void MemAllocCallstack( const void* ptr, size_t size, int depth )
+    static tracy_force_inline void MemAllocCallstack( const void* ptr, size_t size, int depth, bool secure )
     {
+        if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_HAS_CALLSTACK
         auto& profiler = GetProfiler();
 #  ifdef TRACY_ON_DEMAND
@@ -388,12 +393,13 @@ public:
         SendCallstackMemory( callstack );
         profiler.m_serialLock.unlock();
 #else
-        MemAlloc( ptr, size );
+        MemAlloc( ptr, size, secure );
 #endif
     }
 
-    static tracy_force_inline void MemFreeCallstack( const void* ptr, int depth )
+    static tracy_force_inline void MemFreeCallstack( const void* ptr, int depth, bool secure )
     {
+        if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_HAS_CALLSTACK
         auto& profiler = GetProfiler();
 #  ifdef TRACY_ON_DEMAND
@@ -409,7 +415,7 @@ public:
         SendCallstackMemory( callstack );
         profiler.m_serialLock.unlock();
 #else
-        MemFree( ptr );
+        MemFree( ptr, secure );
 #endif
     }
 
@@ -471,7 +477,7 @@ public:
 
 
     // Allocated source location data layout:
-    //  4b  payload size
+    //  2b  payload size
     //  4b  color
     //  4b  source line
     //  fsz function name
@@ -482,30 +488,36 @@ public:
 
     static tracy_force_inline uint64_t AllocSourceLocation( uint32_t line, const char* source, const char* function )
     {
-        const auto fsz = strlen( function );
-        const auto ssz = strlen( source );
-        const uint32_t sz = uint32_t( 4 + 4 + 4 + fsz + 1 + ssz + 1 );
-        auto ptr = (char*)tracy_malloc( sz );
-        memcpy( ptr, &sz, 4 );
-        memset( ptr + 4, 0, 4 );
-        memcpy( ptr + 8, &line, 4 );
-        memcpy( ptr + 12, function, fsz+1 );
-        memcpy( ptr + 12 + fsz + 1, source, ssz + 1 );
-        return uint64_t( ptr );
+        return AllocSourceLocation( line, source, function, nullptr, 0 );
     }
 
     static tracy_force_inline uint64_t AllocSourceLocation( uint32_t line, const char* source, const char* function, const char* name, size_t nameSz )
     {
-        const auto fsz = strlen( function );
-        const auto ssz = strlen( source );
-        const uint32_t sz = uint32_t( 4 + 4 + 4 + fsz + 1 + ssz + 1 + nameSz );
+        return AllocSourceLocation( line, source, strlen(source), function, strlen(function), name, nameSz );
+    }
+
+    static tracy_force_inline uint64_t AllocSourceLocation( uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz )
+    {
+        return AllocSourceLocation( line, source, sourceSz, function, functionSz, nullptr, 0 );
+    }
+
+    static tracy_force_inline uint64_t AllocSourceLocation( uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz )
+    {
+        const auto sz32 = uint32_t( 2 + 4 + 4 + functionSz + 1 + sourceSz + 1 + nameSz );
+        assert( sz32 <= std::numeric_limits<uint16_t>::max() );
+        const auto sz = uint16_t( sz32 );
         auto ptr = (char*)tracy_malloc( sz );
-        memcpy( ptr, &sz, 4 );
-        memset( ptr + 4, 0, 4 );
-        memcpy( ptr + 8, &line, 4 );
-        memcpy( ptr + 12, function, fsz+1 );
-        memcpy( ptr + 12 + fsz + 1, source, ssz + 1 );
-        memcpy( ptr + 12 + fsz + 1 + ssz + 1, name, nameSz );
+        memcpy( ptr, &sz, 2 );
+        memset( ptr + 2, 0, 4 );
+        memcpy( ptr + 6, &line, 4 );
+        memcpy( ptr + 10, function, functionSz );
+        ptr[10 + functionSz] = '\0';
+        memcpy( ptr + 10 + functionSz + 1, source, sourceSz );
+        ptr[10 + functionSz + 1 + sourceSz] = '\0';
+        if( nameSz != 0 )
+        {
+            memcpy( ptr + 10 + functionSz + 1 + sourceSz + 1, name, nameSz );
+        }
         return uint64_t( ptr );
     }
 

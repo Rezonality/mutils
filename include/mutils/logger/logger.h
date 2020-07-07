@@ -43,6 +43,7 @@ struct Logger
 
 extern Logger logger;
 
+#ifndef DEBUG
 class LOG
 {
 public:
@@ -110,5 +111,8 @@ private:
     }
     std::ostringstream out;
 };
+#else
+#define LOG(a)
+#endif
 
 } // namespace MUtils

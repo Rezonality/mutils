@@ -1,10 +1,12 @@
 #ifndef __TRACYSOCKET_HPP__
 #define __TRACYSOCKET_HPP__
 
+#include <atomic>
 #include <stdint.h>
 
 #include "TracyForceInline.hpp"
 
+struct addrinfo;
 struct sockaddr;
 
 namespace tracy
@@ -58,8 +60,12 @@ private:
 
     char* m_buf;
     char* m_bufPtr;
-    int m_sock;
+    std::atomic<int> m_sock;
     int m_bufLeft;
+
+    struct addrinfo *m_res;
+    struct addrinfo *m_ptr;
+    int m_connSock;
 };
 
 class ListenSocket

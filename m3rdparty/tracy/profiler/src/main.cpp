@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <assert.h>
+#include <atomic>
 #include <chrono>
 #include <inttypes.h>
 #include <imgui.h>
@@ -21,6 +22,8 @@
 #ifdef _WIN32
 #  include <windows.h>
 #  include <shellapi.h>
+#  define GLFW_EXPOSE_NATIVE_WIN32
+#  include <GLFW/glfw3native.h>
 #endif
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -82,6 +85,15 @@ static void WindowRefreshCallback( GLFWwindow* window )
     DrawContents();
 }
 
+void* GetMainWindowNative()
+{
+#ifdef _WIN32
+    return (void*)glfwGetWin32Window( s_glfwWindow );
+#else
+    return nullptr;
+#endif
+}
+
 std::vector<std::unordered_map<std::string, uint64_t>::const_iterator> RebuildConnectionHistory( const std::unordered_map<std::string, uint64_t>& connHistMap )
 {
     std::vector<std::unordered_map<std::string, uint64_t>::const_iterator> ret;
@@ -123,47 +135,13 @@ static ImFont* fixedWidth;
 static char addr[1024] = { "127.0.0.1" };
 static std::unordered_map<std::string, uint64_t> connHistMap;
 static std::vector<std::unordered_map<std::string, uint64_t>::const_iterator> connHistVec;
-static ViewShutdown viewShutdown = ViewShutdown::False;
+static std::atomic<ViewShutdown> viewShutdown { ViewShutdown::False };
 static double animTime = 0;
 static float dpiScale = 1.f;
 static ImGuiTextFilter addrFilter, portFilter, progFilter;
 
 int main( int argc, char** argv )
 {
-    if( argc == 2 )
-    {
-        auto f = std::unique_ptr<tracy::FileRead>( tracy::FileRead::Open( argv[1] ) );
-        if( f )
-        {
-            view = std::make_unique<tracy::View>( *f );
-        }
-    }
-    else
-    {
-        while( argc >= 3 )
-        {
-            if( strcmp( argv[1], "-a" ) == 0 )
-            {
-                connectTo = argv[2];
-            }
-            else if( strcmp( argv[1], "-p" ) == 0 )
-            {
-                port = atoi( argv[2] );
-            }
-            else
-            {
-                fprintf( stderr, "Bad parameter: %s", argv[1] );
-                exit( 1 );
-            }
-            argc -= 2;
-            argv += 2;
-        }
-    }
-    if( connectTo )
-    {
-        view = std::make_unique<tracy::View>( connectTo, port );
-    }
-
     sprintf( title, "Tracy Profiler %i.%i.%i", tracy::Version::Major, tracy::Version::Minor, tracy::Version::Patch );
 
     std::string winPosFile = tracy::GetSavePath( "window.position" );
@@ -318,6 +296,40 @@ int main( int argc, char** argv )
     style.Colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
     style.Colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.45f);
     style.ScaleAllSizes( dpiScale );
+
+    if( argc == 2 )
+    {
+        auto f = std::unique_ptr<tracy::FileRead>( tracy::FileRead::Open( argv[1] ) );
+        if( f )
+        {
+            view = std::make_unique<tracy::View>( *f, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
+        }
+    }
+    else
+    {
+        while( argc >= 3 )
+        {
+            if( strcmp( argv[1], "-a" ) == 0 )
+            {
+                connectTo = argv[2];
+            }
+            else if( strcmp( argv[1], "-p" ) == 0 )
+            {
+                port = atoi( argv[2] );
+            }
+            else
+            {
+                fprintf( stderr, "Bad parameter: %s", argv[1] );
+                exit( 1 );
+            }
+            argc -= 2;
+            argv += 2;
+        }
+    }
+    if( connectTo )
+    {
+        view = std::make_unique<tracy::View>( connectTo, port, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
+    }
 
     glfwShowWindow( window );
 
@@ -547,6 +559,10 @@ static void DrawContents()
             {
                 OpenWebpage( "https://www.youtube.com/watch?v=uJkrFgriuOo" );
             }
+            if( ImGui::Selectable( ICON_FA_VIDEO " New features in v0.7" ) )
+            {
+                OpenWebpage( "https://www.youtube.com/watch?v=_hU7vw00MZ4" );
+            }
             ImGui::EndPopup();
         }
         ImGui::SameLine();
@@ -612,18 +628,18 @@ static void DrawContents()
             {
                 std::string addrPart = std::string( addr, ptr );
                 uint32_t portPart = atoi( ptr+1 );
-                view = std::make_unique<tracy::View>( addrPart.c_str(), portPart, fixedWidth, smallFont, bigFont, SetWindowTitleCallback );
+                view = std::make_unique<tracy::View>( addrPart.c_str(), portPart, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
             }
             else
             {
-                view = std::make_unique<tracy::View>( addr, port, fixedWidth, smallFont, bigFont, SetWindowTitleCallback );
+                view = std::make_unique<tracy::View>( addr, port, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
             }
         }
         ImGui::SameLine( 0, ImGui::GetFontSize() * 2 );
         if( ImGui::Button( ICON_FA_FOLDER_OPEN " Open saved trace" ) && !loadThread.joinable() )
         {
             nfdchar_t* fn;
-            auto res = NFD_OpenDialog( "tracy", nullptr, &fn );
+            auto res = NFD_OpenDialog( "tracy", nullptr, &fn, GetMainWindowNative() );
             if( res == NFD_OKAY )
             {
                 try
@@ -634,7 +650,7 @@ static void DrawContents()
                         loadThread = std::thread( [f] {
                             try
                             {
-                                view = std::make_unique<tracy::View>( *f, fixedWidth, smallFont, bigFont, SetWindowTitleCallback );
+                                view = std::make_unique<tracy::View>( *f, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
                             }
                             catch( const tracy::UnsupportedVersion& e )
                             {
@@ -739,6 +755,12 @@ static void DrawContents()
                     char portstr[32];
                     sprintf( portstr, "%" PRIu32, v.second.port );
                     ImGui::BeginTooltip();
+                    if( badProto )
+                    {
+                        tracy::TextColoredUnformatted( 0xFF0000FF, "Incompatible protocol!" );
+                        ImGui::SameLine();
+                        ImGui::TextDisabled( "(used: %i, required: %i)", v.second.protocolVersion, tracy::ProtocolVersion );
+                    }
                     tracy::TextFocused( "IP:", v.second.address.c_str() );
                     tracy::TextFocused( "Port:", portstr );
                     ImGui::EndTooltip();
@@ -750,7 +772,7 @@ static void DrawContents()
                 }
                 if( selected && !loadThread.joinable() )
                 {
-                    view = std::make_unique<tracy::View>( v.second.address.c_str(), v.second.port, fixedWidth, smallFont, bigFont, SetWindowTitleCallback );
+                    view = std::make_unique<tracy::View>( v.second.address.c_str(), v.second.port, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
                 }
                 ImGui::NextColumn();
                 const auto acttime = ( v.second.activeTime + ( time - v.second.time ) / 1000 ) * 1000000000ll;
@@ -794,7 +816,7 @@ static void DrawContents()
         view->NotifyRootWindowSize( display_w, display_h );
         if( !view->Draw() )
         {
-            viewShutdown = ViewShutdown::True;
+            viewShutdown.store( ViewShutdown::True, std::memory_order_relaxed );
             reconnect = view->ReconnectRequested();
             if( reconnect )
             {
@@ -803,7 +825,7 @@ static void DrawContents()
             }
             loadThread = std::thread( [view = std::move( view )] () mutable {
                 view.reset();
-                viewShutdown = ViewShutdown::Join;
+                viewShutdown.store( ViewShutdown::Join, std::memory_order_relaxed );
             } );
         }
     }
@@ -880,17 +902,17 @@ static void DrawContents()
         }
         ImGui::EndPopup();
     }
-    switch( viewShutdown )
+    switch( viewShutdown.load( std::memory_order_relaxed ) )
     {
     case ViewShutdown::True:
         ImGui::OpenPopup( "Capture cleanup..." );
         break;
     case ViewShutdown::Join:
         loadThread.join();
-        viewShutdown = ViewShutdown::False;
+        viewShutdown.store( ViewShutdown::False, std::memory_order_relaxed );
         if( reconnect )
         {
-            view = std::make_unique<tracy::View>( reconnectAddr.c_str(), reconnectPort, fixedWidth, smallFont, bigFont, SetWindowTitleCallback );
+            view = std::make_unique<tracy::View>( reconnectAddr.c_str(), reconnectPort, fixedWidth, smallFont, bigFont, SetWindowTitleCallback, GetMainWindowNative );
         }
         break;
     default:
@@ -898,7 +920,7 @@ static void DrawContents()
     }
     if( ImGui::BeginPopupModal( "Capture cleanup...", nullptr, ImGuiWindowFlags_AlwaysAutoResize ) )
     {
-        if( viewShutdown != ViewShutdown::True ) ImGui::CloseCurrentPopup();
+        if( viewShutdown.load( std::memory_order_relaxed ) != ViewShutdown::True ) ImGui::CloseCurrentPopup();
         tracy::TextCentered( ICON_FA_BROOM );
         animTime += ImGui::GetIO().DeltaTime;
         tracy::DrawWaitingDots( animTime );

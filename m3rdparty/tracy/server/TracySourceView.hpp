@@ -1,6 +1,7 @@
 #ifndef __TRACYSOURCEVIEW_HPP__
 #define __TRACYSOURCEVIEW_HPP__
 
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -126,19 +127,21 @@ private:
     };
 
 public:
-    SourceView( ImFont* font );
+    using GetWindowCallback = void*(*)();
+
+    SourceView( ImFont* font, GetWindowCallback gwcb );
     ~SourceView();
 
     void SetCpuId( uint32_t cpuid );
 
-    void OpenSource( const char* fileName, int line, const View& view );
+    void OpenSource( const char* fileName, int line, const View& view, const Worker& worker );
     void OpenSymbol( const char* fileName, int line, uint64_t baseAddr, uint64_t symAddr, const Worker& worker, const View& view );
     void Render( const Worker& worker, View& view );
 
     void CalcInlineStats( bool val ) { m_calcInlineStats = val; }
 
 private:
-    void ParseSource( const char* fileName, const Worker* worker, const View& view );
+    void ParseSource( const char* fileName, const Worker& worker, const View& view );
     bool Disassemble( uint64_t symAddr, const Worker& worker );
 
     void RenderSimpleSourceView();
@@ -167,6 +170,10 @@ private:
     void CheckRead( int line, RegsX86 reg, int limit );
     void CheckWrite( int line, RegsX86 reg, int limit );
 
+#ifndef TRACY_NO_FILESELECTOR
+    void Save( const Worker& worker, size_t start = 0, size_t stop = std::numeric_limits<size_t>::max() );
+#endif
+
     struct TokenizerState
     {
         void Reset()
@@ -185,7 +192,8 @@ private:
     uint64_t m_symAddr;
     uint64_t m_baseAddr;
     uint64_t m_targetAddr;
-    char* m_data;
+    const char* m_data;
+    char* m_dataBuf;
     size_t m_dataSize;
     int m_targetLine;
     int m_selectedLine;
@@ -196,12 +204,14 @@ private:
     uint32_t m_codeLen;
     int32_t m_disasmFail;
     DecayValue<uint64_t> m_highlightAddr;
+    int m_asmCountBase;
     bool m_asmRelative;
     bool m_asmBytes;
     bool m_asmShowSourceLocation;
     bool m_calcInlineStats;
     uint8_t m_maxAsmBytes;
     bool m_atnt;
+    uint64_t m_jumpPopupAddr;
 
     std::vector<Line> m_lines;
     std::vector<AsmLine> m_asm;
@@ -231,6 +241,11 @@ private:
     unordered_flat_set<uint32_t> m_srcSampleSelect;
     uint32_t m_asmGroupSelect = -1;
     uint32_t m_srcGroupSelect = -1;
+
+    float m_srcWidth;
+    float m_asmWidth;
+
+    GetWindowCallback m_gwcb;
 };
 
 }

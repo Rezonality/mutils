@@ -44,6 +44,7 @@ namespace EventType
         ContextSwitches = 1 << 5,
         Samples         = 1 << 6,
         SymbolCode      = 1 << 7,
+        SourceCache     = 1 << 8,
 
         None            = 0,
         All             = std::numeric_limits<uint32_t>::max()
@@ -95,6 +96,7 @@ public:
         uint64_t tid;
         uint64_t timestamp;
         std::string name;
+        std::string text;
         bool isEnd;
     };
 
@@ -103,6 +105,13 @@ public:
         uint64_t tid;
         uint64_t timestamp;
         std::string message;
+    };
+
+    struct ImportEventPlots
+    {
+        std::string name;
+        PlotValueFormatting format;
+        std::vector<std::pair<int64_t, double>> data;
     };
 
     struct ZoneThreadData
@@ -122,10 +131,41 @@ public:
         uint32_t core;
     };
 
-    struct SymbolCodeData
+    struct MemoryBlock
     {
         const char* data;
         uint32_t len;
+    };
+
+    struct InlineStackData
+    {
+        uint64_t symAddr;
+        CallstackFrameId frame;
+        uint8_t inlineFrame;
+    };
+
+#pragma pack( 1 )
+    struct GhostKey
+    {
+        CallstackFrameId frame;
+        uint8_t inlineFrame;
+    };
+#pragma pack()
+
+    struct GhostKeyHasher
+    {
+        size_t operator()( const GhostKey& key ) const
+        {
+            return charutil::hash( (const char*)&key, sizeof( GhostKey ) );
+        }
+    };
+
+    struct GhostKeyComparator
+    {
+        bool operator()( const GhostKey& lhs, const GhostKey& rhs ) const
+        {
+            return memcmp( &lhs, &rhs, sizeof( GhostKey ) ) == 0;
+        }
     };
 
 private:
@@ -251,6 +291,7 @@ private:
         bool newFramesWereReceived = false;
         bool callstackSamplesReady = false;
         bool ghostZonesReady = false;
+        bool ghostZonesPostponed = false;
 #endif
 
         unordered_flat_map<uint32_t, LockMap*> lockMap;
@@ -262,8 +303,8 @@ private:
         Vector<Vector<short_ptr<GpuEvent>>> gpuChildren;
 #ifndef TRACY_NO_STATISTICS
         Vector<Vector<GhostZone>> ghostChildren;
-        Vector<CallstackFrameId> ghostFrames;
-        unordered_flat_map<uint64_t, uint32_t> ghostFramesMap;
+        Vector<GhostKey> ghostFrames;
+        unordered_flat_map<GhostKey, uint32_t, GhostKeyHasher, GhostKeyComparator> ghostFramesMap;
 #endif
 
         Vector<Vector<short_ptr<ZoneEvent>>> zoneVectorCache;
@@ -298,11 +339,13 @@ private:
         unordered_flat_map<uint32_t, unordered_flat_map<uint32_t, std::vector<uint32_t>>> cpuTopology;
         unordered_flat_map<uint32_t, CpuThreadTopology> cpuTopologyMap;
 
-        unordered_flat_map<uint64_t, SymbolCodeData> symbolCode;
+        unordered_flat_map<uint64_t, MemoryBlock> symbolCode;
         uint64_t symbolCodeSize = 0;
 
         unordered_flat_map<uint64_t, uint64_t> codeAddressToLocation;
         unordered_flat_map<uint64_t, Vector<uint64_t>> locationCodeAddressList;
+
+        unordered_flat_map<const char*, MemoryBlock, charutil::Hasher, charutil::Comparator> sourceFileCache;
     };
 
     struct MbpsBlock
@@ -363,7 +406,7 @@ public:
     };
 
     Worker( const char* addr, int port );
-    Worker( const std::string& program, const std::vector<ImportEventTimeline>& timeline, const std::vector<ImportEventMessages>& messages );
+    Worker( const std::string& program, const std::vector<ImportEventTimeline>& timeline, const std::vector<ImportEventMessages>& messages, const std::vector<ImportEventPlots>& plots );
     Worker( FileRead& f, EventType::Type eventMask = EventType::All, bool bgTasks = true );
     ~Worker();
 
@@ -421,6 +464,10 @@ public:
     uint64_t GetPidFromTid( uint64_t tid ) const;
     const unordered_flat_map<uint64_t, CpuThreadData>& GetCpuThreadData() const { return m_data.cpuThreadData; }
     void GetCpuUsageAtTime( int64_t time, int& own, int& other ) const;
+    const unordered_flat_map<const char*, MemoryBlock, charutil::Hasher, charutil::Comparator>& GetSourceFileCache() const { return m_data.sourceFileCache; }
+    uint64_t GetSourceFileCacheCount() const { return m_data.sourceFileCache.size(); }
+    uint64_t GetSourceFileCacheSize() const;
+    MemoryBlock GetSourceFileFromCache( const char* file ) const;
 
     int64_t GetFrameTime( const FrameData& fd, size_t idx ) const;
     int64_t GetFrameBegin( const FrameData& fd, size_t idx ) const;
@@ -485,7 +532,7 @@ public:
     tracy_force_inline const Vector<short_ptr<GpuEvent>>& GetGpuChildren( int32_t idx ) const { return m_data.gpuChildren[idx]; }
 #ifndef TRACY_NO_STATISTICS
     tracy_force_inline const Vector<GhostZone>& GetGhostChildren( int32_t idx ) const { return m_data.ghostChildren[idx]; }
-    tracy_force_inline const CallstackFrameId& GetGhostFrame( const Int24& frame ) const { return m_data.ghostFrames[frame.Val()]; }
+    tracy_force_inline const GhostKey& GetGhostFrame( const Int24& frame ) const { return m_data.ghostFrames[frame.Val()]; }
 #endif
 
     tracy_force_inline const bool HasZoneExtra( const ZoneEvent& ev ) const { return ev.extra != 0; }
@@ -569,6 +616,7 @@ private:
     tracy_force_inline void ProcessFrameImage( const QueueFrameImageLean& ev );
     tracy_force_inline void ProcessZoneText( const QueueZoneText& ev );
     tracy_force_inline void ProcessZoneName( const QueueZoneText& ev );
+    tracy_force_inline void ProcessZoneValue( const QueueZoneValue& ev );
     tracy_force_inline void ProcessLockAnnounce( const QueueLockAnnounce& ev );
     tracy_force_inline void ProcessLockTerminate( const QueueLockTerminate& ev );
     tracy_force_inline void ProcessLockWait( const QueueLockWait& ev );
@@ -679,7 +727,7 @@ private:
 
     void InsertLockEvent( LockMap& lockmap, LockEvent* lev, uint64_t thread, int64_t time );
 
-    void CheckString( uint64_t ptr );
+    bool CheckString( uint64_t ptr );
     void CheckThreadString( uint64_t id );
     void CheckExternalName( uint64_t id );
 
@@ -703,6 +751,7 @@ private:
 
     void HandlePostponedPlots();
     void HandlePostponedSamples();
+    void HandlePostponedGhostZones();
 
     bool IsThreadStringRetrieved( uint64_t id );
     bool IsSourceLocationRetrieved( int16_t srcloc );
@@ -713,6 +762,8 @@ private:
     StringLocation StoreString( const char* str, size_t sz );
     const ContextSwitch* const GetContextSwitchDataImpl( uint64_t thread );
 
+    void CacheSource( const StringRef& str );
+
     tracy_force_inline Vector<short_ptr<ZoneEvent>>& GetZoneChildrenMutable( int32_t idx ) { return m_data.zoneChildren[idx]; }
 #ifndef TRACY_NO_STATISTICS
     tracy_force_inline Vector<GhostZone>& GetGhostChildrenMutable( int32_t idx ) { return m_data.ghostChildren[idx]; }
@@ -720,9 +771,11 @@ private:
 
 #ifndef TRACY_NO_STATISTICS
     void ReconstructContextSwitchUsage();
-    void UpdateSampleStatistics( uint32_t callstack, uint32_t count, bool canPostpone );
+    bool UpdateSampleStatistics( uint32_t callstack, uint32_t count, bool canPostpone );
     void UpdateSampleStatisticsPostponed( decltype(Worker::DataBlock::postponedSamples.begin())& it );
     void UpdateSampleStatisticsImpl( const CallstackFrameData** frames, uint16_t framesCount, uint32_t count, const VarArray<CallstackFrameId>& cs );
+    tracy_force_inline void GetStackWithInlines( Vector<InlineStackData>& ret, const VarArray<CallstackFrameId>& cs );
+    tracy_force_inline int AddGhostZone( const VarArray<CallstackFrameId>& cs, Vector<GhostZone>* vec, uint64_t t );
 #endif
 
     tracy_force_inline int64_t ReadTimeline( FileRead& f, ZoneEvent* zone, int64_t refTime, int32_t& childIdx );
@@ -730,7 +783,6 @@ private:
     tracy_force_inline void ReadTimelinePre063( FileRead& f, ZoneEvent* zone, int64_t& refTime, int32_t& childIdx, int fileVer );
     tracy_force_inline void ReadTimeline( FileRead& f, GpuEvent* zone, int64_t& refTime, int64_t& refGpuTime, int32_t& childIdx );
     tracy_force_inline void ReadTimelineHaveSize( FileRead& f, GpuEvent* zone, int64_t& refTime, int64_t& refGpuTime, int32_t& childIdx, uint64_t sz );
-    tracy_force_inline void ReadTimelinePre0510( FileRead& f, GpuEvent* zone, int64_t& refTime, int64_t& refGpuTime, int fileVer );
 
 #ifndef TRACY_NO_STATISTICS
     tracy_force_inline void ReconstructZoneStatistics( ZoneEvent& zone, uint16_t thread );
@@ -747,7 +799,6 @@ private:
     int64_t ReadTimeline( FileRead& f, Vector<short_ptr<ZoneEvent>>& vec, uint32_t size, int64_t refTime, int32_t& childIdx );
     void ReadTimelinePre063( FileRead& f, Vector<short_ptr<ZoneEvent>>& vec, uint64_t size, int64_t& refTime, int32_t& childIdx, int fileVer );
     void ReadTimeline( FileRead& f, Vector<short_ptr<GpuEvent>>& vec, uint64_t size, int64_t& refTime, int64_t& refGpuTime, int32_t& childIdx );
-    void ReadTimelinePre0510( FileRead& f, Vector<short_ptr<GpuEvent>>& vec, uint64_t size, int64_t& refTime, int64_t& refGpuTime, int fileVer );
 
     tracy_force_inline void WriteTimeline( FileWrite& f, const Vector<short_ptr<ZoneEvent>>& vec, int64_t& refTime );
     tracy_force_inline void WriteTimeline( FileWrite& f, const Vector<short_ptr<GpuEvent>>& vec, int64_t& refTime, int64_t& refGpuTime );
@@ -802,6 +853,8 @@ private:
     FrameImagePending m_pendingFrameImageData = {};
     unordered_flat_map<uint64_t, SymbolPending> m_pendingSymbols;
     unordered_flat_set<uint64_t> m_pendingSymbolCode;
+    unordered_flat_set<StringRef, StringRefHasher, StringRefComparator> m_pendingFileStrings;
+    unordered_flat_set<StringRef, StringRefHasher, StringRefComparator> m_checkedFileStrings;
 
     uint32_t m_pendingStrings;
     uint32_t m_pendingThreads;
@@ -872,6 +925,9 @@ private:
 #endif
 
     Vector<Parameter> m_params;
+
+    char* m_tmpBuf = nullptr;
+    size_t m_tmpBufSize = 0;
 };
 
 }

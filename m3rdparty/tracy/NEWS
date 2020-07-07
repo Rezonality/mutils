@@ -6,9 +6,27 @@ Note: Release numbers are nothing more than numbers. There are some
 "missing" versions due to trace file changes during development. This is not
 a mistake.
 
-v0.7 (xxxx-xx-xx)
+v0.7.1 (xxxx-xx-xx)
+-------------------
+
+- Dropped support for pre-v0.6 traces.
+- Fixed regression on non-AVX2 CPUs.
+- Fixed incorrect calculation of some ghost zones.
+- Added list of cached source files.
+- Added import of plot data.
+- Secure versions of alloc/free macros.
+- Automated tracing of vertical synchronization on Windows.
+- Fixed attachment of postponed frame images.
+- Source location data can be now copied to clipboard from zone info window.
+- Zones in find zones menu can be now grouped by zone name.
+
+v0.7 (2020-06-11)
 -----------------
 
+This is the last release which will be able to load pre-v0.6 traces. Use the
+update utility to convert your old traces now!
+
+- chrome:tracing importer now imports zone metadata from "args" key.
 - Added display of statistical mode to find zone menu.
 - Automatic stack sampling is now available on windows.
 - Properly handle tracing on long-running systems.
@@ -55,6 +73,13 @@ v0.7 (xxxx-xx-xx)
 - Profiler windows can be now docked.
 - CPU usage tooltip now displays a list of running threads.
 - Added possibility to filter discovered clients list.
+- Source files are now cached during capture.
+- Profiler will now display a popup when application crashes.
+- Added ability to send simple integral values as extra payload for zones.
+- Per-frame zone times on the frames plot can now display self time.
+- Ability to bind only on localhost interface.
+- OpenCL profiling.
+- Direct3D 12 profiling.
 
 v0.6.3 (2020-02-13)
 -------------------
