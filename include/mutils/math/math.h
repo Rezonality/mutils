@@ -148,6 +148,254 @@ using NVec2i = NVec2<int>;
 using NVec2l = NVec2<long>;
 
 template <class T>
+struct NVec3
+{
+    NVec3(T xVal, T yVal, T zVal)
+        : x(xVal)
+        , y(yVal)
+        , z(zVal)
+    {
+    }
+
+    explicit NVec3(T val)
+        : NVec3(val, val, val)
+    {
+    }
+
+    template <class Y>
+    explicit NVec3(NVec3<Y> val)
+        : x((T)val.x)
+        , y((T)val.y)
+        , z((T)val.z)
+    {
+    }
+
+    NVec3()
+        : x(0)
+        , y(0)
+        , z(0)
+    {
+    }
+
+    T x;
+    T y;
+    T z;
+
+    bool operator==(const NVec3<T>& rhs) const
+    {
+        if (x == rhs.x && y == rhs.y && z == rhs.z)
+            return true;
+        return false;
+    }
+
+    bool operator!=(const NVec3<T>& rhs) const
+    {
+        return !(*this = rhs);
+    }
+
+    T& operator[](size_t index)
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        default:
+            assert(!"Invalid index");
+            return x;
+        }
+    }
+    
+    const T& operator[](size_t index) const
+    {
+        switch (index)
+        {
+        case 0:
+            return x;
+        case 1:
+            return y;
+        case 2:
+            return z;
+        default:
+            assert(!"Invalid index");
+            return x;
+        }
+    }
+};
+template <class T>
+inline NVec3<T> operator+(const NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    return NVec3<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+}
+template <class T>
+inline NVec3<T> operator-(const NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    return NVec3<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+}
+template <class T>
+inline NVec3<T>& operator+=(NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    lhs.x += rhs.x;
+    lhs.y += rhs.y;
+    lhs.z += rhs.z;
+    return lhs;
+}
+template <class T>
+inline NVec3<T>& operator-=(NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    lhs.x -= rhs.x;
+    lhs.y -= rhs.y;
+    lhs.z -= rhs.z;
+    return lhs;
+}
+template <class T>
+inline NVec3<T> operator*(const NVec3<T>& lhs, T val)
+{
+    return NVec3<T>(lhs.x * val, lhs.y * val, lhs.z * val);
+}
+
+template <class T>
+inline NVec3<T> operator*(const NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    return NVec3<T>(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
+}
+
+
+template <class T>
+inline NVec3<T> operator/(const NVec3<T>& lhs, T val)
+{
+    return NVec3<T>(lhs.x / val, lhs.y / val, lhs.z / val);
+}
+
+template <class T>
+inline NVec3<T> operator/(const NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    return NVec3<T>(lhs.x / rhs.x, lhs.y / rhs.y, lhs.z / rhs.z);
+}
+
+template <class T>
+inline NVec3<T>& operator*=(NVec3<T>& lhs, float val)
+{
+    lhs.x *= val;
+    lhs.y *= val;
+    lhs.z *= val;
+    return lhs;
+}
+
+template <class T>
+inline NVec3<T>& operator*=(NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    lhs.x *= rhs.x;
+    lhs.y *= rhs.y;
+    lhs.z *= rhs.z;
+    return lhs;
+}
+
+template <class T>
+inline NVec3<T>& operator/=(NVec3<T>& lhs, T val)
+{
+    lhs.x /= val;
+    lhs.y /= val;
+    lhs.z /= val;
+    return lhs;
+}
+
+template <class T>
+inline NVec3<T>& operator/=(NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    lhs.x /= rhs.x;
+    lhs.y /= rhs.y;
+    lhs.z /= rhs.z;
+    return lhs;
+}
+template <class T>
+inline NVec3<T> Clamp(const NVec3<T>& val, const NVec3<T>& min, const NVec3<T>& max)
+{
+    return NVec3<T>(std::min(max.x, std::max(min.x, val.x)),
+        std::min(max.y, std::max(min.y, val.y)),
+        std::min(max.z, std::max(min.z, val.z)));
+}
+
+template <class T>
+inline NVec3<T> Min(const NVec3<T>& val, const NVec3<T>& c)
+{
+    return NVec3<T>(std::min(val.x, c.x), std::min(val.y, c.y), std::min(val.z, c.z));
+}
+
+template <class T>
+inline NVec3<T> Max(const NVec3<T>& val, const NVec3<T>& c)
+{
+    return NVec3<T>(std::max(val.x, c.x), std::max(val.y, c.y), std::max(val.z, c.z));
+}
+
+inline uint32_t ToPacked(const NVec3<float>& val)
+{
+    uint32_t col = 0;
+    col |= uint32_t(val.x * 255.0f) << 24;
+    col |= uint32_t(val.y * 255.0f) << 16;
+    col |= uint32_t(val.z * 255.0f) << 8;
+    col |= 0xFF;
+    return col;
+}
+
+inline uint32_t ToPackedARGB(const NVec3<float>& val)
+{
+    uint32_t col = 0;
+    col |= 0xFF000000;
+    col |= uint32_t(val.x * 255.0f) << 16;
+    col |= uint32_t(val.y * 255.0f) << 8;
+    col |= uint32_t(val.z * 255.0f);
+    return col;
+}
+
+inline uint32_t ToPackedABGR(const NVec3<float>& val)
+{
+    uint32_t col = 0;
+    col |= 0xFF000000;
+    col |= uint32_t(val.x * 255.0f);
+    col |= uint32_t(val.y * 255.0f) << 8;
+    col |= uint32_t(val.z * 255.0f) << 16;
+    return col;
+}
+
+inline uint32_t ToPackedBGRA(const NVec3<float>& val)
+{
+    uint32_t col = 0;
+    col |= uint32_t(0xFF);
+    col |= uint32_t(val.x * 255.0f) << 16;
+    col |= uint32_t(val.y * 255.0f) << 24;
+    col |= uint32_t(val.z * 255.0f) << 8;
+    return col;
+}
+
+inline float Luminosity(const NVec3<float>& intensity)
+{
+    return (0.2126f * intensity.x + 0.7152f * intensity.y + 0.0722f * intensity.z);
+}
+
+inline NVec3<float> Mix(const NVec3<float>& c1, const NVec3<float>& c2, float factor)
+{
+    NVec3<float> ret = c1 * (1.0f - factor);
+    ret = ret + (c2 * factor);
+    return ret;
+}
+
+template <class T>
+inline std::ostream& operator<<(std::ostream& str, const NVec3<T>& region)
+{
+    str << "(" << region.x << ", " << region.y << ", " << region.z << ")";
+    return str;
+}
+
+using NVec3f = NVec3<float>;
+using NVec3d = NVec3<double>;
+using NVec3i = NVec3<int>;
+using NVec3l = NVec3<long>;
+
+template <class T>
 struct NVec4
 {
     NVec4(T xVal, T yVal, T zVal, T wVal)
@@ -479,11 +727,6 @@ using NVec4f = NVec4<float>;
 using NVec4d = NVec4<double>;
 using NVec4i = NVec4<int>;
 using NVec4l = NVec4<long>;
-
-using NVec3f = NVec4<float>;
-using NVec3d = NVec4<double>;
-using NVec3i = NVec4<int>;
-using NVec3l = NVec4<long>;
 
 template <class T>
 struct NRect
