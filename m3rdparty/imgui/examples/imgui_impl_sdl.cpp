@@ -452,8 +452,6 @@ void ImGui_ImplSDL2_NewFrame(SDL_Window* window)
     int display_w, display_h;
     SDL_GetWindowSize(window, &w, &h);
     SDL_GL_GetDrawableSize(window, &display_w, &display_h);
-    w = display_w;
-    h = display_h;
     io.DisplaySize = ImVec2((float)w, (float)h);
     if (w > 0 && h > 0)
         io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);

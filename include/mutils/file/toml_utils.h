@@ -208,7 +208,8 @@ inline void toml_set(toml::table& table, const char* pszName, const T& val = T{}
     auto itr = table.find(pszName);
     if (itr != table.end())
     {
-        return toml::set<T>(itr->second, val);
+        //return toml::set<T>(itr->second, val);
+        assert(!"Implement me!");
     }
     table[pszName] = val;
 }

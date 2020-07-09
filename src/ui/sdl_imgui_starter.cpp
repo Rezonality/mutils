@@ -63,12 +63,22 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     auto& settings = pClient->GetSettings();
 
+    LOG(INFO) << "Start Size: " << settings.startSize;
+
     // Create window with graphics context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     SDL_Window* window = SDL_CreateWindow(settings.appName.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, settings.startSize.x, settings.startSize.y, window_flags);
+    NVec2i winSize;
+    NVec2i targetSize;
+    SDL_GetWindowSize(window, &winSize.x, &winSize.y);
+    SDL_GL_GetDrawableSize(window, &targetSize.x, &targetSize.y);
+
+    LOG(INFO) << "Screen Window Size: " << winSize; 
+    LOG(INFO) << "Drawable Size: " << targetSize;
+
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
