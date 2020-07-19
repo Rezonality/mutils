@@ -102,6 +102,7 @@ public:
     bool pressed = false;
     bool transition = true;     // Transitioned to press or release
     bool inactive = false;      // Has this note gone inactive due to finishing being played?
+    float activeAmplitude = 0.0f; // Amplitude of active note
 };
 
 struct ITimeConsumer
