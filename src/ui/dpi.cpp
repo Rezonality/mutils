@@ -37,7 +37,21 @@ void check_dpi()
     }
     auto d = GetSystemDpiForProcess(nullptr);
     dpi.scaleFactor = d / 96.0f;
+    dpi.scaleFactorXY = NVec2f(dpi.scaleFactor);
 #endif
+}
+
+void set_dpi(const NVec2f& value)
+{
+    dpi.scaleFactorXY = value;
+    dpi.scaleFactor = value.x;
+}
+
+float dpi_pixel_height_from_point_size(float pointSize, float pixelScaleY)
+{
+    const auto fontDotsPerInch = 72.0f;
+    auto inches = pointSize / fontDotsPerInch;
+    return inches * (pixelScaleY * 96.0f);
 }
 
 } // MUtils

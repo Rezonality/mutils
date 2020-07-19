@@ -29,17 +29,30 @@ Logger logger = { true, INFO };
 #endif
 bool LOG::disabled = false;
 
+NVec2f GetDisplayScale()
+{
+    float ddpi = 0.0f;
+    float hdpi = 0.0f;
+    float vdpi = 0.0f;
+    auto res = SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi);
+    if (res == 0 && hdpi != 0)
+    {
+        return NVec2f(hdpi, vdpi) / 96.0f;
+    }
+    return NVec2f(1.0f);
+}
+
 IAppStarterClient* pClient = nullptr;
 int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pClient)
 {
-    check_dpi();
-
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
     {
         printf("Error: %s\n", SDL_GetError());
         return -1;
     }
+
+    set_dpi(GetDisplayScale());
 
     // Setup app runtree
     runtree_init(pClient->GetRootPath());
@@ -123,11 +136,14 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         0x00FF, // Basic Latin + Latin Supplement
         0,
     };
+
+    static const float DemoFontPtSize = 12.0f;
     ImFontConfig config;
     config.OversampleH = 3;
-    config.OversampleV = 1;
+    config.OversampleV = 3;
     config.DstFont = ImGui::GetFont();
-    io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/ProggyClean.ttf").string().c_str(), 13 * dpi.scaleFactor, &config, ranges);
+    float fontPixelHeight = dpi_pixel_height_from_point_size(DemoFontPtSize, dpi.scaleFactorXY.y);
+    io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/Cousine-Regular.ttf").string().c_str(), fontPixelHeight, &config, ranges);
 
     unsigned int flags = 0; // ImGuiFreeType::NoHinting;
     ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
