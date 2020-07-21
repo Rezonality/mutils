@@ -26,10 +26,10 @@ __declspec(dllimport) void __stdcall OutputDebugStringA(_In_opt_ const char* psz
 namespace MUtils
 {
 
-enum LogType
+enum class LT
 {
     NONE,
-    DEBUG,
+    DBG,
     INFO,
     WARNING,
     ERROR
@@ -38,19 +38,18 @@ enum LogType
 struct Logger
 {
     bool headers = false;
-    LogType level = WARNING;
+    LT level = LT::WARNING;
 };
 
 extern Logger logger;
 
-#ifndef DEBUG
-class LOG
+class Log
 {
 public:
-    LOG()
+    Log()
     {
     }
-    LOG(LogType type)
+    Log(LT type)
     {
         msglevel = type;
         if (logger.headers && msglevel >= logger.level)
@@ -59,7 +58,7 @@ public:
         }
         out << "(T:" << std::this_thread::get_id() << ") ";
     }
-    ~LOG()
+    ~Log()
     {
         if (opened)
         {
@@ -73,7 +72,7 @@ public:
         opened = false;
     }
     template <class T>
-    LOG& operator<<(const T& msg)
+    Log& operator<<(const T& msg)
     {
         if (disabled || msglevel < logger.level)
             return *this;
@@ -85,25 +84,25 @@ public:
     static bool disabled;
 private:
     bool opened = false;
-    LogType msglevel = DEBUG;
-    inline std::string getLabel(LogType type)
+    LT msglevel = LT::DBG;
+    inline std::string getLabel(LT type)
     {
         std::string label;
         switch (type)
         {
-            case DEBUG:
+        case LT::DBG:
                 label = "DEBUG";
                 break;
-            case INFO:
+        case LT::INFO:
                 label = "INFO ";
                 break;
-            case WARNING:
+        case LT::WARNING:
                 label = "WARN ";
                 break;
-            case ERROR:
+        case LT::ERROR:
                 label = "ERROR";
                 break;
-            case NONE:
+        case LT::NONE:
                 label = "NONE";
                 break;
         }
@@ -111,8 +110,13 @@ private:
     }
     std::ostringstream out;
 };
+
+#ifndef LOG
+#ifdef _DEBUG
+#define LOG(a, b) Log(MUtils::LT::a) << b
 #else
-#define LOG(a)
+#define LOG(a, b)
+#endif
 #endif
 
 } // namespace MUtils

@@ -24,14 +24,14 @@ void check_dpi()
         {
         default:
         case PROCESS_DPI_UNAWARE:
-            LOG(DEBUG) << "Not DPI Aware";
+            LOG(DBG, "Not DPI Aware");
             assert(!"Unexpected!");
             break;
         case PROCESS_SYSTEM_DPI_AWARE:
-            LOG(DEBUG) << "DPI Aware";
+            LOG(DBG, "DPI Aware");
             break;
         case PROCESS_PER_MONITOR_DPI_AWARE:
-            LOG(DEBUG) << "Per Monitor Aware";
+            LOG(DBG, "Per Monitor Aware");
             break;
         }
     }

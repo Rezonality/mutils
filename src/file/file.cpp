@@ -38,7 +38,7 @@ std::string file_read(const fs::path& fileName)
     }
     else
     {
-        LOG(LogType::ERROR) << "File Not Found: " << fileName.string();
+        LOG(ERROR, "File Not Found: " << fileName.string());
     }
     return std::string();
 }
@@ -106,7 +106,7 @@ std::vector<fs::path> file_gather_files(const fs::path& root)
     tinydir_dir dir;
     if (tinydir_open(&dir, root.string().c_str()) == -1)
     {
-        LOG(LogType::ERROR) << "Gather Files, Start Path Invalid: " << root.string();
+        LOG(ERROR, "Gather Files, Start Path Invalid: " << root.string());
         return ret;
     }
 
@@ -123,7 +123,7 @@ std::vector<fs::path> file_gather_files(const fs::path& root)
             tinydir_file file;
             if (tinydir_readfile(&thisDir, &file) == -1)
             {
-                LOG(LogType::ERROR) << "Couldn't read: " << thisDir.path;
+                LOG(ERROR, "Couldn't read: " << thisDir.path);
                 tinydir_next(&thisDir);
                 continue;
             }
@@ -145,7 +145,7 @@ std::vector<fs::path> file_gather_files(const fs::path& root)
                 filePath = fs::canonical(filePath);
                 if (checkedPaths.find(filePath) != checkedPaths.end())
                 {
-                    LOG(DEBUG) << "Already checked: " << filePath.string();
+                    LOG(DBG, "Already checked: " << filePath.string());
                     tinydir_next(&thisDir);
                     continue;
                 }
@@ -168,7 +168,8 @@ std::vector<fs::path> file_gather_files(const fs::path& root)
             }
             catch (fs::filesystem_error& err)
             {
-                LOG(LogType::ERROR) << err.what();
+                (void*)&err;
+                LOG(ERROR, err.what());
             }
 
             tinydir_next(&thisDir);

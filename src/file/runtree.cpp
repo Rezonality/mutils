@@ -12,7 +12,7 @@ void runtree_init(const fs::path& appRoot)
     fs::path basePath = appRoot;
     basePath = basePath / "run_tree";
     runtreePath = fs::canonical(fs::absolute(basePath));
-    LOG(DEBUG) << "runtree Path: " << runtreePath.string();
+    LOG(DBG, "runtree Path: " << runtreePath.string());
 }
 
 void runtree_destroy()
@@ -29,7 +29,7 @@ fs::path runtree_find_asset_internal(const fs::path& searchPath)
         return fs::canonical(fs::absolute(found));
     }
 
-    LOG(DEBUG) << "** File not found: " << searchPath.string();
+    LOG(DBG, "** File not found: " << searchPath.string());
     return fs::path();
 }
 

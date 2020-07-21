@@ -38,7 +38,7 @@ bool timeline_validate(TimeLineEvent* pEvent)
 
 void event_dump(const char* pszType, TimeLineEvent* pRoot)
 {
-    LOG(DEBUG) << pszType << ToFloatSeconds(pRoot->m_time) << " ID: " << pRoot->m_id << " Trig: " << pRoot->m_triggered << " p:" << pRoot << " pN:" << pRoot->m_pNext << " pP:" << pRoot->m_pPrevious;
+    LOG(DBG, pszType << ToFloatSeconds(pRoot->m_time) << " ID: " << pRoot->m_id << " Trig: " << pRoot->m_triggered << " p:" << pRoot << " pN:" << pRoot->m_pNext << " pP:" << pRoot->m_pPrevious);
 }
 
 void timeline_dump(TimeLineEvent* pRoot, TimeLineEvent* pCheckAbsent)

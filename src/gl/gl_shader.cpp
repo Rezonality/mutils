@@ -143,7 +143,8 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const Shader
     }
     catch (std::exception& ex)
     {
-        LOG(ERROR) << "Exception compiling shader: " << ex.what();
+        (void*)&ex;
+        LOG(ERROR, "Exception compiling shader: " << ex.what());
     }
     return spResult;
 }

@@ -23,11 +23,11 @@ namespace MUtils
 
 #undef ERROR
 #ifdef _DEBUG
-Logger logger = { true, DEBUG };
+Logger logger = { true, LT::DBG };
 #else
-Logger logger = { true, INFO };
+Logger logger = { true, LT::INFO };
 #endif
-bool LOG::disabled = false;
+bool Log::disabled = false;
 
 NVec2f GetDisplayScale()
 {
@@ -76,7 +76,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     auto& settings = pClient->GetSettings();
 
-    LOG(INFO) << "Start Size: " << settings.startSize;
+    LOG(INFO, "Start Size: " << settings.startSize);
 
     // Create window with graphics context
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -89,8 +89,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     SDL_GetWindowSize(window, &winSize.x, &winSize.y);
     SDL_GL_GetDrawableSize(window, &targetSize.x, &targetSize.y);
 
-    LOG(INFO) << "Screen Window Size: " << winSize; 
-    LOG(INFO) << "Drawable Size: " << targetSize;
+    LOG(INFO, "Screen Window Size: " << winSize);
+    LOG(INFO, "Drawable Size: " << targetSize);
 
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
@@ -321,7 +321,7 @@ void fbo_resize(AppFBO& fbo, const NVec2i& newFboSize)
     auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        LOG(ERROR) << "FBO Error: " << status;
+        LOG(ERROR, "FBO Error: " << status);
     }
 }
 

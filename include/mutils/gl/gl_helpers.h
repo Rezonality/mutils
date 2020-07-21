@@ -9,7 +9,7 @@ inline void CheckGL(const char* call, const char* file, int line)
     GLenum err = glGetError();
     if (err != GL_NO_ERROR)
     {
-        LOG(ERROR) << std::hex << err << ", " << file << "(" << line << "): " << call;
+        LOG(ERROR, std::hex << err << ", " << file << "(" << line << "): " << call);
     }
 }
 
