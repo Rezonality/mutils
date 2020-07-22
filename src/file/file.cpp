@@ -136,7 +136,6 @@ std::vector<fs::path> file_gather_files(const fs::path& root)
                 // Otherwise we walk forever.  Do this before absolute path!
                 if (filePath.string().find("\\.") != std::string::npos || filePath.string().find("..") != std::string::npos)
                 {
-                    //LOG(DEBUG) << "Skipping: " << filePath.string();
                     tinydir_next(&thisDir);
                     continue;
                 }
@@ -269,7 +268,7 @@ fs::path file_documents_path()
             return fs::path(pathChars);
         }
 	} 
-    LOG(ERROR) << "Search path not found";
+    LOG(ERROR, "Search path not found");
     return fs::path();
 }
 
@@ -288,7 +287,7 @@ fs::path file_roaming_path()
             return fs::path(pathChars);
         }
 	} 
-    LOG(ERROR) << "Search path not found";
+    LOG(ERROR, "Search path not found");
     return fs::path();
 }
 
@@ -307,7 +306,7 @@ fs::path file_appdata_path()
             return fs::path(pathChars);
         }
 	} 
-    LOG(ERROR) << "Search path not found";
+    LOG(ERROR, "Search path not found");
     return fs::path();
 }
 #else
