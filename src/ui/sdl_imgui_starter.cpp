@@ -137,7 +137,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         0,
     };
 
-    static const float DemoFontPtSize = 12.0f;
+    static const float DemoFontPtSize = 11.0f;
     ImFontConfig config;
     config.OversampleH = 3;
     config.OversampleV = 3;
