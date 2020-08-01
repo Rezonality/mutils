@@ -70,7 +70,10 @@ public:
 
     virtual void Free()
     {
+        // When freed, disonnect from the chain we are in
         list_disconnect(this);
+
+        // And return to the pool
         m_pPool->Free(this);
     }
 
@@ -80,6 +83,7 @@ public:
     uint64_t m_id = (uint64_t)-1;
 };
 
+// Thread safe memory pool
 template <class T>
 class TSMemoryPool : public IMemoryPool
 {
@@ -137,6 +141,7 @@ private:
     uint64_t m_nextId = 0;
 };
 
+// Memory pool, not thread safe
 template <class T>
 class MemoryPool : public IMemoryPool
 {
