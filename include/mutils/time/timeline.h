@@ -92,6 +92,7 @@ public:
     bool transition = true; // Transitioned to press or release
     bool inactive = false; // Has this note gone inactive due to finishing being played?
     float activeAmplitude = 0.0f; // Amplitude of active note
+    uint64_t groupId = 0;
 };
 
 template <class T>
@@ -150,12 +151,16 @@ public:
     void StoreTimeEvent(T* ev)
     {
         std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
-        //event_dump("Store: ", ev);
         assert(ev->m_pNext == nullptr);
         assert(ev->m_pPrevious == nullptr);
-        //timeline_dump(m_pRoot, ev);
 
-        list_insert_after(m_timeEventPool.m_pLast, ev);
+        // Add on the end, but keep events ordered in time
+        auto pCurrent = (T*)m_timeEventPool.m_pLast;
+        while (pCurrent && (ev->m_time < pCurrent->m_time))
+        {
+            pCurrent = (T*)pCurrent->m_pPrevious;
+        }
+        list_insert_after(pCurrent, ev);
     }
 
     // TODO: Don't think this is necessary any more; since time events have linked lists

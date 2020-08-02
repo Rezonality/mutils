@@ -10,6 +10,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/compile/meta_tags.cpp
     ${MUTILS_ROOT}/src/compile/compile_messages.cpp
     ${MUTILS_ROOT}/src/ui/dpi.cpp
+    ${MUTILS_ROOT}/src/ui/colors.cpp
     ${MUTILS_ROOT}/src/ui/sdl_imgui_starter.cpp
     ${MUTILS_ROOT}/src/ui/imgui_extras.cpp
     ${MUTILS_ROOT}/src/geometry/standard_shapes.cpp
@@ -35,6 +36,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/ui/dpi.h
     ${MUTILS_ROOT}/include/mutils/ui/sdl_imgui_starter.h
     ${MUTILS_ROOT}/include/mutils/ui/imgui_extras.h
+    ${MUTILS_ROOT}/include/mutils/ui/colors.h
     ${MUTILS_ROOT}/include/mutils/file/runtree.h
     ${MUTILS_ROOT}/include/mutils/ui/ui_manager.h
     ${MUTILS_ROOT}/include/mutils/compile/compile_messages.h
