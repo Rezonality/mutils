@@ -112,6 +112,10 @@ double TimeProvider::GetBeatAtTime(TimePoint time)
     return beat + beatsPerTime;
 }
 
+// TODO:
+// Current m_beat is actualy an integer value which increments every tick.
+// The ticks are designed to be very regular, but should the tick event
+// broadcast the time and beat?
 double TimeProvider::GetBeat() const
 {
     return m_beat;

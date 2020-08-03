@@ -160,6 +160,7 @@ public:
         {
             pCurrent = (T*)pCurrent->m_pPrevious;
         }
+        assert(pCurrent == nullptr || (pCurrent->m_time <= ev->m_time));
         list_insert_after(pCurrent, ev);
     }
 

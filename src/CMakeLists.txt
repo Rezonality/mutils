@@ -387,6 +387,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/json/single_include/nlohmann
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/date/include/date
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/glm
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
