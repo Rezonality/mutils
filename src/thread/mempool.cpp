@@ -22,7 +22,14 @@ void list_insert_after(IListItem* pPos, gsl::not_null<IListItem*> pInsert)
     {
         if (pPool)
         {
-            assert(pPool->m_pRoot == nullptr);
+            // Insert after NULL means insert before first
+            if (pPool->m_pRoot)
+            {
+                list_insert_before(pPool->m_pRoot, pInsert);
+                return;
+            }
+
+            // Or start again
             assert(pPool->m_pLast == nullptr);
             pPool->m_pRoot = pInsert;
             pPool->m_pLast = pInsert;
