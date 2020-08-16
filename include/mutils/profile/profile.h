@@ -9,6 +9,7 @@
 #define MUtilsZoneScopedN(a) ZoneScopedN(a)
 #define MUtilsFrameMark FrameMark
 #define MUtilsNameThread(a) tracy::SetThreadName(a)
+#define MUtilsMessage(a, b) TracyMessage(a, b)
 #else
 #define MUtilsPlot(a, b)
 #define MUtilsLockable(a, b) a b
@@ -19,4 +20,5 @@
 #define MUtilsZoneScopedN(a)
 #define MUtilsFrameMark
 #define MUtilsNameThread(a)
+#define MUtilsMessage(a, b) 
 #endif
