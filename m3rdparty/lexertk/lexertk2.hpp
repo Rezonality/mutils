@@ -224,6 +224,10 @@ struct token
         e_ne = 14,
         e_gte = 15,
         e_produces = 16,
+        e_bracket_string = 17,
+        e_square_bracket_string = 18,
+        e_curl_bracket_string = 19,
+        e_line_bracket_string = 20,
         e_lt = '<',
         e_gt = '>',
         e_eq = '=',
@@ -290,18 +294,18 @@ struct token
     }
 
     template <typename Iterator>
-    inline token& set_string(const Iterator begin, const Iterator end, const Iterator base_begin = Iterator(0))
+    inline token& set_string(token::token_type string_type, const Iterator begin, const Iterator end, const Iterator base_begin = Iterator(0))
     {
-        type = e_string;
+        type = string_type;
         value.assign(begin, end);
         if (base_begin)
             position = std::distance(base_begin, begin);
         return *this;
     }
 
-    inline token& set_string(const std::string& s, const std::size_t p)
+    inline token& set_string(token::token_type string_type, const std::string& s, const std::size_t p)
     {
-        type = e_string;
+        type = string_type;
         value = s;
         position = p;
         return *this;
@@ -422,6 +426,7 @@ public:
     typedef token token_t;
     typedef std::deque<token_t> token_list_t;
     typedef std::deque<token_t>::iterator token_list_itr_t;
+    bool bracket_strings = false;
 
     generator()
         : base_itr_(0)
@@ -429,6 +434,11 @@ public:
         , s_end_(0)
     {
         clear();
+    }
+
+    void set_bracket_strings()
+    {
+        bracket_strings = true;
     }
 
     inline void clear()
@@ -661,6 +671,26 @@ private:
         {
             return;
         }
+        else if (bracket_strings && '(' == (*s_itr_))
+        {
+            scan_string(token::e_bracket_string);
+            return;
+        }
+        else if (bracket_strings && '[' == (*s_itr_))
+        {
+            scan_string(token::e_square_bracket_string);
+            return;
+        }
+        else if (bracket_strings && '{' == (*s_itr_))
+        {
+            scan_string(token::e_curl_bracket_string);
+            return;
+        }
+        else if (bracket_strings && '|' == (*s_itr_))
+        {
+            scan_string(token::e_line_bracket_string);
+            return;
+        }
         else if (details::is_operator_char(*s_itr_))
         {
             scan_operator();
@@ -679,7 +709,7 @@ private:
         else if ('\'' == (*s_itr_) ||
             '\"' == (*s_itr_))
         {
-            scan_string();
+            scan_string(token::e_string);
             return;
         }
         else
@@ -880,7 +910,7 @@ private:
         return;
     }
 
-    inline void scan_string()
+    inline void scan_string(token::token_type string_type)
     {
         const char* begin = s_itr_ + 1;
 
@@ -911,9 +941,43 @@ private:
             }
             else if (!escaped)
             {
-                if ('\'' == *s_itr_ ||
-                    '\"' == *s_itr_)
-                    break;
+                if (string_type == token::e_string)
+                {
+                    if ('\'' == *s_itr_ ||
+                        '\"' == *s_itr_)
+                        break;
+                }
+                if (bracket_strings)
+                {
+                    if (string_type == token::e_bracket_string)
+                    {
+                        if (')' == *s_itr_)
+                        {
+                            break;
+                        }
+                    }
+                    else if (string_type == token::e_square_bracket_string)
+                    {
+                        if (']' == *s_itr_)
+                        {
+                            break;
+                        }
+                    }
+                    else if (string_type == token::e_curl_bracket_string)
+                    {
+                        if ('}' == *s_itr_)
+                        {
+                            break;
+                        }
+                    }
+                    else if (string_type == token::e_line_bracket_string)
+                    {
+                        if ('|' == *s_itr_)
+                        {
+                            break;
+                        }
+                    }
+                }
             }
             else if (escaped)
                 escaped = false;
@@ -930,12 +994,12 @@ private:
         }
 
         if (!escaped_found)
-            t.set_string(begin, s_itr_, base_itr_);
+            t.set_string(string_type, begin, s_itr_, base_itr_);
         else
         {
             std::string parsed_string(begin, s_itr_);
             details::cleanup_escapes(parsed_string);
-            t.set_string(parsed_string, std::distance(base_itr_, begin));
+            t.set_string(string_type, parsed_string, std::distance(base_itr_, begin));
         }
 
         token_list_.push_back(t);
