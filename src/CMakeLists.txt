@@ -279,8 +279,10 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include/imgui/misc/freetype>
     $<INSTALL_INTERFACE:include/glm>
+    $<INSTALL_INTERFACE:include/nod>
     $<INSTALL_INTERFACE:include/soundpipe/h>
-    $<INSTALL_INTERFACE:include/ctti/include>)
+    $<INSTALL_INTERFACE:include/ctti>
+)
 
 target_link_libraries(MUtils 
     PRIVATE
@@ -366,6 +368,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/FileWatcher
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/toml11
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/nod/include/nod
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
@@ -500,7 +506,8 @@ install(FILES ${MUTILS_ROOT}/m3rdparty/soundpipe_extensions/soundpipeextension.h
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/soundpipe/lib
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/soundpipe
     )
-install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/ctti
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/ctti/include/ctti
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
