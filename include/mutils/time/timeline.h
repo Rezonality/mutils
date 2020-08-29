@@ -119,28 +119,28 @@ public:
 
     void ResetStartTime()
     {
-        m_startTime = Now();
+        m_startTime = TimeProvider::Instance().Now();
     }
 
     void ExpireEvents(int secondsOld)
     {
         std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
 
-        auto startTime = Timeline::Instance().Now();
+        auto startTime = TimeProvider::Instance().Now();
 
         auto pCurrent = (T*)m_timeEventPool.m_pRoot;
         while (pCurrent)
         {
             // TODO: this is broken if the duration is long!
             // Need to track and remove long events
-            if ((startTime - (pCurrent->m_time + pCurrent->m_duration)) > seconds(secondsOld))
+            if ((startTime - (pCurrent->m_time + pCurrent->m_duration)) > std::chrono::seconds(secondsOld))
             {
                 auto pVictim = pCurrent;
                 pCurrent = (T*)list_disconnect((IListItem*)pCurrent);
                 pVictim->Free();
                 continue;
             }
-            else if ((startTime - pCurrent->m_time) < seconds(16))
+            else if ((startTime - pCurrent->m_time) < std::chrono::seconds(16))
             {
                 break;
             }
@@ -229,56 +229,4 @@ private:
 };
 
 }; // namespace MUtils
-
-
-
-/*
-    bool Validate(T* pEvent)
-    {
-        /*
-            auto pRoot = list_root(pEvent);
-            if (!pRoot)
-                return true;
-
-            auto pCurrent = pRoot;
-
-            auto time = pCurrent->m_time;
-            while (pCurrent->m_pNext)
-            {
-                if (pCurrent->m_pNext->m_time < time)
-                {
-                    LOG(ERROR) << "Timeline not ordered!";
-                    timeline_dump(pRoot);
-                    assert(!"Timeline corrupt?");
-                    return false;
-                }
-                time = pCurrent->m_pNext->m_time;
-                pCurrent = pCurrent->m_pNext;
-            }
-        return true;
-    }
-
-    void Dump(const char* pszType, T* pRoot)
-    {
-        LOG(DBG, pszType << time_to_float_seconds(pRoot->m_time) << " ID: " << pRoot->m_id << " Trig: " << pRoot->m_triggered << " p:" << pRoot << " pN:" << pRoot->m_pNext << " pP:" << pRoot->m_pPrevious);
-    }
-
-    void TimelineDump(T* pRoot, T* pCheckAbsent)
-    {
-        //TODO: Fix
-        (void)&pRoot;
-        (void)&pCheckAbsent;
-            /*
-        while (pRoot)
-        {
-            event_dump("Dump: ", pRoot);
-            if (pCheckAbsent != nullptr && pRoot == pCheckAbsent)
-            {
-                LOG(ERROR) << "Already in timeline!";
-                assert(!"Alread in timeline?");
-            }
-            pRoot = pRoot->m_pNext;
-        }
-    }
-    */
 

@@ -50,7 +50,7 @@ MetaTags_t parse_meta_tags(const std::string& text)
     }
     catch (std::exception & ex)
     {
-        (void*)&ex;
+        (void)&ex;
         LOG(DBG, ex.what());
     }
     return tags;

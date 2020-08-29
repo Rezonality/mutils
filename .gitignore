@@ -8,6 +8,7 @@
 tags
 *.userosscache
 *.sln.docstates
+cmake-build-debug
 **/build/*
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

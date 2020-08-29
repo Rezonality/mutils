@@ -1,4 +1,6 @@
+#include <vector>
 #include <mutils/ui/colors.h>
+#include <mutils/math/math.h>
 
 namespace MUtils
 {
