@@ -4,6 +4,7 @@
 #include <cmath>
 #include <functional>
 #include <ostream>
+#include <cassert>
 
 // This just saves using a library like glm (my personal preference)
 namespace MUtils
