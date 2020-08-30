@@ -167,7 +167,7 @@ std::vector<fs::path> file_gather_files(const fs::path& root)
             }
             catch (fs::filesystem_error& err)
             {
-                (void*)&err;
+                (void)&err;
                 LOG(ERROR, err.what());
             }
 
