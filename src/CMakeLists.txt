@@ -267,7 +267,6 @@ target_include_directories(MUtils
     $<BUILD_INTERFACE:${IMGUI_DIR}/examples/libs/gl3w>
     $<BUILD_INTERFACE:${IMGUI_DIR}/misc/freetype>
 
-    $<INSTALL_INTERFACE:include/rtaudio>
     $<INSTALL_INTERFACE:include/openssl>
     $<INSTALL_INTERFACE:include/toml11>
     $<INSTALL_INTERFACE:include/utfcpp/source>
@@ -289,12 +288,14 @@ target_link_libraries(MUtils
     SDL2::SDL2-static)
 
 # Windows find_package(freetype) is broken.
+# Rtaudio installs to a different place on Mac/Linux
 if (WIN32)
     target_include_directories(MUtils
         PRIVATE
         ${MUTILS_ROOT}/m3rdparty/packages/build/freetype-install/include/freetype2
         PUBLIC
         $<INSTALL_INTERFACE:include/freetype2>
+        $<INSTALL_INTERFACE:include/rtaudio>
         )
     target_link_libraries(MUtils
         PUBLIC
