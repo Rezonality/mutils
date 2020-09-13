@@ -1,11 +1,11 @@
-[MUtils](https://github.com/cmaughan/MUtils) - Useful C++
+[MUtils](https://github.com/Rezonality/MUtils) - Useful C++
 ===================================================================================================
 
-[![Build Status](https://travis-ci.org/cmaughan/mutils.svg?branch=master)](https://travis-ci.org/cmaughan/mutils)
-[![Build status](https://ci.appveyor.com/api/projects/status/bwyabd9j6j77mes9?svg=true)](https://ci.appveyor.com/project/cmaughan/MUtils)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/cmaughan/zep/blob/master/LICENSE)
-[![codecov](https://codecov.io/gh/cmaughan/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/cmaughan/MUtils)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ea66b760a217428c996b131bc183072f)](https://www.codacy.com/app/cmaughan/MUtils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=cmaughan/MUtils&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.org/Rezonality/mutils.svg?branch=master)](https://travis-ci.org/Rezonality/mutils)
+[![Build status](https://ci.appveyor.com/api/projects/status/bwyabd9j6j77mes9?svg=true)](https://ci.appveyor.com/project/Rezonality/MUtils)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Rezonality/zep/blob/master/LICENSE)
+[![codecov](https://codecov.io/gh/Rezonality/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/Rezonality/MUtils)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ea66b760a217428c996b131bc183072f)](https://www.codacy.com/app/Rezonality/MUtils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Rezonality/MUtils&amp;utm_campaign=Badge_Grade)
 
 This project contains useful things that are often needed in bigger c++ projects.  If something is in here, it helps save time when teaching coding or building apps.  The point of this big static library and associated modules is that when you have built it, you can make apps quickly without figuring out how to compile and get everything to work cross platform (On Windows, Mac and Linux)
 
