@@ -2,7 +2,7 @@
 ===================================================================================================
 
 [![Build Status](https://travis-ci.org/Rezonality/mutils.svg?branch=master)](https://travis-ci.org/Rezonality/mutils)
-[![Build status](https://ci.appveyor.com/api/projects/status/bwyabd9j6j77mes9?svg=true)](https://ci.appveyor.com/project/Rezonality/MUtils)
+[![Build status](https://ci.appveyor.com/api/projects/status/lm9p5djinghjfo40?svg=true)](https://ci.appveyor.com/project/cmaughan/mutils)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Rezonality/zep/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/Rezonality/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/Rezonality/MUtils)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ea66b760a217428c996b131bc183072f)](https://www.codacy.com/app/Rezonality/MUtils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Rezonality/MUtils&amp;utm_campaign=Badge_Grade)
