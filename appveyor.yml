@@ -64,7 +64,7 @@ after_build:
   # set compiler var
   - if "%generator%"=="Visual Studio 16 2019" (set COMPILER="VC19")
   # switch to project build folder and zip "tutorials" folder
-  - cd $env:APPVEYOR_BUILD_FOLDER
+  - cd %APPVEYOR_BUILD_FOLDER%
   - dir
   - cd build
   - 7z a -tzip -mx9 "mutils-%APPVEYOR_BUILD_VERSION%-%COMPILER%.zip" %configuration%
