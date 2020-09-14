@@ -37,21 +37,14 @@ build_script:
   # generate build script
   - cd %APPVEYOR_BUILD_FOLDER%
   - dir
-  # create folder for an out-of-source-tree build: "c:\projects\build"
   - prebuild.bat & exit 0
-  - cd.. 
   - mkdir build
   - cd build
   - >
     cmake %APPVEYOR_BUILD_FOLDER%
     -G "%generator%" -A x64 
     -DCMAKE_INSTALL_PREFIX=./mutils
-  # build
   - cmake --build . --target ALL_BUILD --config %configuration% -- /nologo /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  # install
-  # - cmake --build . --target INSTALL --config %configuration% -- /nologo
-  # package (with cpack)
-  #- cmake --build ./build --target PACKAGE --config %configuration% -- /nologo
 
 test_script:
     - ps: |
