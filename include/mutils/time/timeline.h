@@ -14,6 +14,7 @@
 #include <mutils/thread/mempool.h>
 #include <mutils/time/time_utils.h>
 #include <mutils/time/time_provider.h>
+#include <mutils/string/stringutils.h>
 
 #include <concurrentqueue/concurrentqueue.h>
 
@@ -73,6 +74,10 @@ public:
     uint32_t m_storage[TimeLineStorageSpace];
 };
 
+struct INoteOwner
+{
+}
+
 class NoteEvent : public MUtils::TimeLineEvent
 {
 public:
@@ -93,6 +98,10 @@ public:
     bool inactive = false; // Has this note gone inactive due to finishing being played?
     float activeAmplitude = 0.0f; // Amplitude of active note
     uint64_t groupId = 0;
+
+    INoteOwner* pOwner = nullptr; // An owner for this note; perhaps a pattern processor or something else
+    uint32_t ownerOffset = 0;     // Offset inside the owner
+    uint32_t ownerSize = 0;       // Size inside the owner
 };
 
 template <class T>
