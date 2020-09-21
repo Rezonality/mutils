@@ -74,10 +74,6 @@ public:
     uint32_t m_storage[TimeLineStorageSpace];
 };
 
-struct INoteOwner
-{
-}
-
 class NoteEvent : public MUtils::TimeLineEvent
 {
 public:
@@ -99,7 +95,7 @@ public:
     float activeAmplitude = 0.0f; // Amplitude of active note
     uint64_t groupId = 0;
 
-    INoteOwner* pOwner = nullptr; // An owner for this note; perhaps a pattern processor or something else
+    uint32_t ownerId;             // A unique owner for this note
     uint32_t ownerOffset = 0;     // Offset inside the owner
     uint32_t ownerSize = 0;       // Size inside the owner
 };
