@@ -95,7 +95,7 @@ public:
     float activeAmplitude = 0.0f; // Amplitude of active note
     uint64_t groupId = 0;
 
-    uint32_t ownerId;             // A unique owner for this note
+    uint64_t ownerId = 0;         // A unique owner for this note
     uint32_t ownerOffset = 0;     // Offset inside the owner
     uint32_t ownerSize = 0;       // Size inside the owner
 };
