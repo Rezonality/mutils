@@ -137,10 +137,10 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         0,
     };
 
-    static const float DemoFontPtSize = 11.0f;
+    static const float DemoFontPtSize = 14.0f;
     ImFontConfig config;
-    config.OversampleH = 3;
-    config.OversampleV = 3;
+    config.OversampleH = 4;
+    config.OversampleV = 4;
     config.DstFont = ImGui::GetFont();
     float fontPixelHeight = dpi_pixel_height_from_point_size(DemoFontPtSize, dpi.scaleFactorXY.y);
     io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/Cousine-Regular.ttf").string().c_str(), fontPixelHeight, &config, ranges);
