@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-#include <gsl/gsl.hpp>
+#include <gsl-lite/gsl-lite.hpp>
 
 #include "mutils/geometry/geometry.h"
 

@@ -2,12 +2,12 @@
 
 #include <SDL.h>
 
-#include <imgui/imgui.h>
+#include <imgui.h>
 
 #include <mutils/file/file.h>
 #include <mutils/math/math.h>
 
-#include <gsl/gsl.hpp>
+#include <gsl-lite/gsl-lite.hpp>
 
 namespace MUtils
 {

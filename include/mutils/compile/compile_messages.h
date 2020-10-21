@@ -1,8 +1,10 @@
 #pragma once
 
+#include <vector>
+#include <memory>
 #include "mutils/file/file.h"
 #include "mutils/compile/meta_tags.h"
-#include "gsl/gsl.hpp"
+#include <gsl-lite/gsl-lite.hpp>
 
 namespace MUtils
 {

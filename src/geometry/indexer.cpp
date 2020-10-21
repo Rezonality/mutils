@@ -1,5 +1,6 @@
 #include <bitset>
 #include <glm/gtc/epsilon.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "mutils/geometry/indexer.h"
 #include "mutils/geometry/vertex_spacial_sort.h"

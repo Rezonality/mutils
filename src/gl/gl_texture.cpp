@@ -1,5 +1,5 @@
 #include <mutils/gl/gl_texture.h>
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
 #include <cassert>
 

@@ -4,7 +4,7 @@
 #include "mutils/ui/ui_manager.h"
 #include "mutils/logger/logger.h"
 
-#include "tfd/tinyfiledialogs.h"
+#include "tinyfiledialogs/tinyfiledialogs.h"
 
 namespace MUtils
 {

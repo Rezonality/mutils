@@ -8,7 +8,7 @@ IListItem* list_root(gsl::not_null<IListItem*> pEvent)
     auto pCheck = pEvent;
     while (pEvent && pEvent->m_pPrevious)
     {
-        pEvent = pEvent->m_pPrevious;
+        pEvent = gsl::not_null<IListItem*>(pEvent->m_pPrevious);
         assert(pEvent != pCheck);
     }
     return pEvent;
@@ -278,7 +278,7 @@ IListItem* list_end(gsl::not_null<IListItem*> pEvent)
 {
     while (pEvent && pEvent->m_pNext)
     {
-        pEvent = pEvent->m_pNext;
+        pEvent = gsl::not_null<IListItem*>(pEvent->m_pNext);
     }
     return pEvent;
 }

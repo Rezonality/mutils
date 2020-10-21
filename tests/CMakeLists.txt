@@ -1,5 +1,7 @@
 if(BUILD_TESTS)
 
+find_package(Catch2 CONFIG REQUIRED)
+
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 
@@ -37,6 +39,7 @@ endif()
 target_link_libraries(unittests
     PRIVATE
         MUtils::MUtils
+        Catch2::Catch2
         ${PLATFORM_LINKLIBS}
         ${CMAKE_THREAD_LIBS_INIT})
 

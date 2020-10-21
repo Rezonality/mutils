@@ -111,7 +111,7 @@ std::shared_ptr<GLCompileResult> gl_compile_shader(ShaderType type, const Shader
         {
             std::vector<char> errorMessage(InfoLogLength + 1);
             glGetShaderInfoLog(spResult->Id, InfoLogLength, NULL, &errorMessage[0]);
-            compile_parse_shader_errors(spResult.get(), &errorMessage[0]);
+            compile_parse_shader_errors(gsl::not_null<MUtils::CompileResult*>(spResult.get()), &errorMessage[0]);
 
             //file_write("d:/dev/test.txt", shader.c_str());
             // Fix up line numbers
@@ -191,7 +191,7 @@ std::shared_ptr<GLCompileResult> gl_link_shaders(std::shared_ptr<GLCompileResult
     {
         std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
         glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-        compile_parse_shader_errors(spResult.get(), &ProgramErrorMessage[0]);
+        compile_parse_shader_errors(gsl::not_null<MUtils::CompileResult*>(spResult.get()), &ProgramErrorMessage[0]);
         for (auto& msg : spResult->messages)
         {
             msg->filePath = spResult->fileSource;

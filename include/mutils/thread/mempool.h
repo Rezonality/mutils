@@ -8,7 +8,7 @@
 
 #include <ctti/type_id.hpp>
 
-#include "gsl/gsl.hpp"
+#include <gsl-lite/gsl-lite.hpp>
 
 namespace MUtils
 {
@@ -71,7 +71,7 @@ public:
     virtual void Free()
     {
         // When freed, disonnect from the chain we are in
-        list_disconnect(this);
+        list_disconnect(gsl::not_null<IListItem*>(this));
 
         // And return to the pool
         m_pPool->Free(this);

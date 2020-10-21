@@ -10,6 +10,7 @@ init:
 branches:
   only:
   - master
+  - vcpkg
 
 clone_depth: 5
 

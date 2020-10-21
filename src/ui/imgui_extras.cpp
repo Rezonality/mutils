@@ -1,7 +1,7 @@
 #include <algorithm>
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #include "mutils/ui/imgui_extras.h"
 

@@ -11,9 +11,9 @@
 #include "mutils/time/timer.h"
 #include "mutils/ui/dpi.h"
 
-#include <imgui/examples/imgui_impl_opengl3.h>
-#include <imgui/examples/imgui_impl_sdl.h>
-#include <imgui/misc/freetype/imgui_freetype.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_freetype.h>
 
 #include <GL/gl3w.h>
 using namespace gsl;
@@ -115,6 +115,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     if (settings.flags & AppStarterFlags::DockingEnable)
     {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     }
     ImGui::StyleColorsDark();
 

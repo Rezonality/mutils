@@ -141,7 +141,7 @@ public:
             if ((startTime - (pCurrent->m_time + pCurrent->m_duration)) > std::chrono::seconds(secondsOld))
             {
                 auto pVictim = pCurrent;
-                pCurrent = (T*)list_disconnect((IListItem*)pCurrent);
+                pCurrent = (T*)list_disconnect(gsl::not_null<IListItem*>(pCurrent));
                 pVictim->Free();
                 continue;
             }
@@ -166,7 +166,7 @@ public:
             pCurrent = (T*)pCurrent->m_pPrevious;
         }
         assert(pCurrent == nullptr || (pCurrent->m_time <= ev->m_time));
-        list_insert_after(pCurrent, ev);
+        list_insert_after(pCurrent, gsl::not_null<IListItem*>(ev));
     }
 
     // TODO: Don't think this is necessary any more; since time events have linked lists
