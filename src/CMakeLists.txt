@@ -2,7 +2,6 @@ find_package(freetype CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(gsl-lite CONFIG REQUIRED)
 find_package(unofficial-concurrentqueue CONFIG REQUIRED)
-find_package(unofficial-kissfft CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -232,7 +231,6 @@ target_link_libraries(MUtils PUBLIC
     gsl::gsl-lite-v1
     fmt::fmt-header-only
     unofficial::gl3w::gl3w
-    unofficial::kissfft::kissfft
     unofficial::concurrentqueue::concurrentqueue
     tinyfiledialogs::tinyfiledialogs
     freetype
