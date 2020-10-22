@@ -6,7 +6,7 @@
 #include <map>
 #include <functional>
 
-#include <toml11/toml.hpp>
+#include <toml.hpp>
 
 #include <mutils/math/math.h>
 
