@@ -11,10 +11,6 @@ find_package(gl3w CONFIG REQUIRED)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-if(NOT WIN32)
-find_package(OpenGL REQUIRED)
-endif()
-
 set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/CMakeLists.txt
     ${MUTILS_ROOT}/src/algorithm/containerutils.cpp

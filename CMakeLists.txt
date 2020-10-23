@@ -29,8 +29,8 @@ project(MUtils
 # config_app.h checks
 # This makes a config_shared.h file which can be included for system settings
 #  Must be after setting up the platforms
-set (MUTILS_ROOT ${CMAKE_CURRENT_LIST_DIR})
-set (M3RDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/m3rdparty)
+set(MUTILS_ROOT ${CMAKE_CURRENT_LIST_DIR})
+set(M3RDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/m3rdparty)
 set(MUTILS_INCLUDE_DIR include)
 set(MUTILS_LIB_DIR lib)
 include(cmake/all.cmake)
