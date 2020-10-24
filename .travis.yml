@@ -17,7 +17,7 @@ matrix:
       script:
         - cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
         - make
-        - make test
+        - ./unittests
     - os: linux
       dist: bionic
       addons:
@@ -33,7 +33,7 @@ matrix:
       script:
         - cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
         - make
-        - make test
+        - ./unittests
 
       # Coverage
     - os: linux
@@ -52,7 +52,7 @@ matrix:
         - pip install --upgrade --user git+git://github.com/eddyxu/cpp-coveralls.git
         - cmake -DENABLE_COVERAGE=ON -DCMAKE_CXX_COMPILER="g++" ..
         - make
-        - make test
+        - ./unittests
         - cd ..
         - |
           coveralls --build-root build --gcov-options '\-lp' \
@@ -78,7 +78,7 @@ matrix:
       script:
         - cmake -DENABLE_ASAN=ON -DCMAKE_CXX_COMPILER="g++" ..
         - make
-        - make test
+        - ./unittests
 
       # Google Undefined Sanitizer
     - os: linux
@@ -96,7 +96,7 @@ matrix:
       script:
         - cmake -DENABLE_USAN=ON -DCMAKE_CXX_COMPILER="g++" ..
         - make
-        - make test
+        - ./unittests
 
       # Google Thread Sanitizer
     - os: linux
@@ -114,4 +114,4 @@ matrix:
       script:
         - cmake -DENABLE_TSAN=ON -DCMAKE_CXX_COMPILER="g++" ..
         - make
-        - make test
+        - ./unittests
