@@ -60,6 +60,8 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/gl/gl_buffer.h
     ${MUTILS_ROOT}/include/mutils/gl/gl_shader.h
     ${MUTILS_ROOT}/include/mutils/gl/gl_texture.h
+    ${MUTILS_ROOT}/include/mutils/thread/threadutils.h
+    ${MUTILS_ROOT}/include/mutils/thread/mempool.h
     ${MUTILS_ROOT}/include/mutils/ui/colors.h
     ${MUTILS_ROOT}/include/mutils/ui/dpi.h
     ${MUTILS_ROOT}/include/mutils/ui/fbo.h
@@ -94,6 +96,11 @@ set(TRACY_SOURCE
 
 set (JANET_SOURCE
     ${M3RDPARTY_DIR}/janet/janet.c)
+
+set (THREADPOOL_SOURCE
+    # SEXP
+    ${M3RDPARTY_DIR}/threadpool/threadpool.h
+    )
 
 set (CHIBI_SCHEME_SOURCE
     # SEXP
@@ -164,6 +171,7 @@ add_library(MUtils STATIC
     ${CHIBI_SCHEME_SOURCE}
     ${ORCA_SOURCE}
     ${CLIP_SOURCE}
+    ${THREADPOOL_SOURCE}
     )
 
 target_compile_definitions(MUtils
@@ -338,6 +346,28 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/pfd
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
-source_group ("Utils" FILES ${UTILS_SOURCES})
+source_group ("Chibi" FILES ${CHIBI_SCHEME_SOURCE})
+source_group ("Orca" FILES ${ORCA_SOURCE})
+source_group ("Janet" FILES ${JANET_SOURCE})
+source_group ("mpc" FILES ${MPC_SOURCE})
+source_group ("Tracy" FILES ${TRACY_SOURCE})
+source_group ("Clip" FILES ${CLIP_SOURCE})
+source_group ("MUtils\\Timing" .*time.*)
+source_group ("MUtils\\String" .*string.*)
+source_group ("MUtils\\Math" .*math.*)
+source_group ("MUtils\\Geometry" .*geometry.*)
+source_group ("MUtils\\File" .*file.*)
+source_group ("MUtils\\Compile" .*compile.*)
+source_group ("MUtils\\Chibi" .*chibi.*)
+source_group ("MUtils\\Callback" .*callback.*)
+source_group ("MUtils\\GL" .*gl.*)
+source_group ("MUtils\\Thread" .*thread.*)
+source_group ("MUtils\\UI" .*ui.*)
+source_group ("MUtils\\VM" .*vm.*)
+source_group ("MUtils\\Device" .*device.*)
+source_group ("MUtils\\Algorithm" .*algorithm.*)
+
+#source_group ("Utils" FILES ${UTILS_SOURCES})
 source_group ("SoundPipe" FILES ${SOUNDPIPE_SOURCE})
+source_group ("ThreadPool" FILES ${THREADPOOL_SOURCE})
 
