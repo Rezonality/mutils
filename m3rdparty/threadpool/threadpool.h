@@ -154,7 +154,7 @@ public:
     {
         for (int i = 0; i < iterations[0]; ++i)
         {
-            if (queue_mutex.try_lock())
+            if (task_mutex.try_lock())
             {
                 return true;
             }
@@ -166,7 +166,7 @@ public:
     {
         for (int i = 0; i < iterations[1]; ++i)
         {
-            if (queue_mutex.try_lock())
+            if (task_mutex.try_lock())
             {
                 return true;
             }
@@ -180,7 +180,7 @@ public:
     {
         for (int i = 0; i < iterations[2]; ++i)
         {
-            if (queue_mutex.try_lock())
+            if (task_mutex.try_lock())
                 return true;
 
             _mm_pause();
@@ -195,10 +195,6 @@ public:
             _mm_pause();
         }
 
-        // waiting longer than we should, let's give other threads
-        // a chance to recover
-        std::this_thread::yield();
-
         return false;
     }
 
@@ -206,6 +202,7 @@ public:
     TAudioThreadPool(size_t threads_n = std::thread::hardware_concurrency())
         : stop(false)
     {
+        running.store(0);
         // If not enough threads, the pool will just execute all tasks immediately
         if (threads_n > 1)
         {
@@ -216,6 +213,8 @@ public:
 #if TRACY_ENABLE
                         tracy::SetThreadName("worker");
 #endif
+                        WaitPhase waitPhase = WaitPhase::Short;
+
                         // Wait in phases, taking longer each time, but then
                         // going short when we manage it
                         while (true)
@@ -249,7 +248,7 @@ public:
                             // This is the finalize/exit path
                             if (this->stop && this->tasks.empty())
                             {
-                                queue_mutex.unlock();
+                                task_mutex.unlock();
                                 return;
                             }
 
@@ -257,11 +256,17 @@ public:
                             std::function<void()> task = std::move(this->tasks.front());
                             this->tasks.pop();
 
+                            // Must increment inside the mutex
+                            running++;
+
                             // Unlock so that other threads can queue
-                            queue_mutex.unlock();
+                            task_mutex.unlock();
 
                             // Do the work
                             task();
+
+                            // Done, reduce running to 0
+                            running--;
                         }
                     });
         }
@@ -272,6 +277,40 @@ public:
     TAudioThreadPool& operator=(const TPool&) = delete;
     TAudioThreadPool(TPool&&) = delete;
     TAudioThreadPool& operator=(TPool&&) = delete;
+
+    void BlockingTryLock()
+    {
+        WaitPhase waitPhase = WaitPhase::Short;
+
+        // Wait till we can queue, backing off till we can
+        while (true)
+        {
+            switch (waitPhase)
+            {
+            case WaitPhase::Short:
+                if (ShortWait())
+                {
+                    break;
+                }
+                waitPhase = WaitPhase::Medium;
+                continue;
+            case WaitPhase::Medium:
+                if (MediumWait())
+                {
+                    break;
+                }
+                waitPhase = WaitPhase::Long;
+                continue;
+            case WaitPhase::Long:
+                if (MediumWait())
+                {
+                    break;
+                }
+                continue;
+            }
+            break;
+        }
+    }
 
     // add new work item to the pool
     template <class F, class... Args>
@@ -288,12 +327,13 @@ public:
             (*task)();
             return task->get_future();
         }
+
         auto res = task->get_future();
-        {
-            // Queue the new task, get the lock to do it; blocks on the spin mutex until it can!
-            std::unique_lock<MUtils::audio_spin_mutex> lock(this->queue_mutex);
-            this->tasks.emplace([task]() { (*task)(); });
-        }
+
+        BlockingTryLock();
+        this->tasks.emplace([task]() { (*task)(); });
+        task_mutex.unlock();
+
         return res;
     }
 
@@ -302,6 +342,23 @@ public:
         this->stop = true;
         for (std::thread& worker : this->workers)
             worker.join();
+    }
+
+    void WaitAll()
+    {
+        while (true)
+        {
+            BlockingTryLock();
+            if (!tasks.empty())
+            {
+                continue;
+            }
+            if (running.load() != 0)
+            {
+                continue;
+            }
+            break;
+        }
     }
 
     // the destructor joins all threads
@@ -318,15 +375,14 @@ private:
         Long
     };
 
-    WaitPhase waitPhase = WaitPhase::Short;
-
     // All the worker threads
     std::vector<std::thread> workers;
 
     // the task queue and it's sync mutex
     std::queue<std::function<void()>> tasks;
-    MUtils::audio_spin_mutex queue_mutex;
+    MUtils::audio_spin_mutex task_mutex;
 
     // workers finalization flag
     std::atomic_bool stop;
+    std::atomic<int> running;
 };
