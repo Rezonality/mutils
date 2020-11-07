@@ -10,11 +10,10 @@
 #include <vector>
 
 #include <mutils/logger/logger.h>
-#include <mutils/profile/profile.h>
-#include <mutils/thread/mempool.h>
-#include <mutils/time/time_utils.h>
-#include <mutils/time/time_provider.h>
 #include <mutils/string/stringutils.h>
+#include <mutils/thread/mempool.h>
+#include <mutils/time/time_provider.h>
+#include <mutils/time/time_utils.h>
 
 #include <concurrentqueue/concurrentqueue.h>
 
@@ -55,50 +54,15 @@ public:
 
     virtual void Init() override
     {
-        // TODO: Cludge for now; used by note display: remove it
-        for (uint32_t i = 0; i < TimeLineStorageSpace; i++)
-        {
-            m_storage[i] = (uint32_t)-1;
-        }
         m_triggered = false;
-        m_pNext = nullptr;
-        m_pPrevious = nullptr;
     }
 
-    TimePoint m_time; 
+    TimePoint m_time;
     std::chrono::milliseconds m_duration;
     bool m_triggered = false;
     const char* m_pszName = nullptr;
-
-    // Spare
-    uint32_t m_storage[TimeLineStorageSpace];
 };
 
-class NoteEvent : public MUtils::TimeLineEvent
-{
-public:
-    DECLARE_POOL_ITEM(NoteEvent);
-
-    NoteEvent(MUtils::IMemoryPool* pPool, uint64_t id)
-        : MUtils::TimeLineEvent(pPool, id)
-    {
-    }
-
-    float velocity = 1.0f; // Velocity note was hit with; also like amplitude
-    uint32_t midiNote = 0; // Midi note
-    int64_t instrumentId = -1; // Unique Id, -1 for all
-    int32_t channelId = -1; // Assigned channel, or just use Midi
-    float frequency = 0.0f; // Frequency; if 0, then use midi
-    bool pressed = false;
-    bool transition = true; // Transitioned to press or release
-    bool inactive = false; // Has this note gone inactive due to finishing being played?
-    float activeAmplitude = 0.0f; // Amplitude of active note
-    uint64_t groupId = 0;
-
-    uint64_t ownerId = 0;         // A unique owner for this note
-    uint32_t ownerOffset = 0;     // Offset inside the owner
-    uint32_t ownerSize = 0;       // Size inside the owner
-};
 
 template <class T>
 class Timeline
@@ -109,7 +73,6 @@ public:
     {
         m_startTime = TimeProvider::Instance().Now();
     }
-
 
     void Free()
     {
@@ -234,4 +197,3 @@ private:
 };
 
 }; // namespace MUtils
-

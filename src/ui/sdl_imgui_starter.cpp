@@ -7,7 +7,7 @@
 
 #include "mutils/file/runtree.h"
 #include "mutils/logger/logger.h"
-#include "mutils/profile/profile.h"
+#include "mutils/time/profiler.h"
 #include "mutils/time/timer.h"
 #include "mutils/ui/dpi.h"
 

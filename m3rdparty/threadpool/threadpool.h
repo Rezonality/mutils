@@ -45,8 +45,7 @@ Original here: https://github.com/progschj/ThreadPool
 #include <stdexcept>
 #include <string>
 
-#include "mutils/profile/profile.h"
-
+#include "mutils/time/profiler.h"
 #include <concurrentqueue/concurrentqueue.h>
 #include <mutils/thread/threadutils.h>
 
@@ -243,14 +242,23 @@ public:
                                 break;
                             }
 
-                            waitPhase = WaitPhase::Short;
-
                             // This is the finalize/exit path
                             if (this->stop && this->tasks.empty())
                             {
                                 task_mutex.unlock();
                                 return;
                             }
+                            
+
+                            // Nothing to do
+                            if (tasks.empty())
+                            {
+                                waitPhase = WaitPhase::Long;
+                                continue;
+                            }
+
+                            // Found something to do, short cycle check for next time
+                            waitPhase = WaitPhase::Short;
 
                             // Do the new task on this thread
                             std::function<void()> task = std::move(this->tasks.front());

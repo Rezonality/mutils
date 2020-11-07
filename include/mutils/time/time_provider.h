@@ -11,7 +11,7 @@
 
 #include <mutils/logger/logger.h>
 #include <mutils/time/time_utils.h>
-#include <mutils/profile/profile.h>
+#include <mutils/time/profiler.h>
 
 #include <concurrentqueue/concurrentqueue.h>
 
