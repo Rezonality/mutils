@@ -84,6 +84,22 @@ glm::vec4 RectClip(const glm::vec4& rect, const glm::vec4& clip)
     return ret;
 }
 
+float LuminanceABGR(const uint32_t& color)
+{
+    float red = (color & 0xFF) * .299f;
+    float green = ((color & 0xFF00) >> 8) * .587f;
+    float blue = ((color & 0xFF0000) >> 16) * .114f;
+    return (red + green + blue) / float(255);
+}
+
+float LuminanceARGB(const uint32_t& color)
+{
+    float blue = (color & 0xFF) * .299f;
+    float green = ((color & 0xFF00) >> 8) * .587f;
+    float red = ((color & 0xFF0000) >> 16) * .114f;
+    return (red + green + blue) / float(255);
+}
+
 float Luminance(const glm::vec4& color)
 {
     return Luminance(glm::vec3(color.x, color.y, color.z) * color.w);
