@@ -147,6 +147,8 @@ using NVec2f = NVec2<float>;
 using NVec2d = NVec2<double>;
 using NVec2i = NVec2<int>;
 using NVec2l = NVec2<long>;
+using NVec2ll = NVec2<int64_t>;
+using NVec2ull = NVec2<uint64_t>;
 
 template <class T>
 struct NVec3
@@ -395,6 +397,8 @@ using NVec3f = NVec3<float>;
 using NVec3d = NVec3<double>;
 using NVec3i = NVec3<int>;
 using NVec3l = NVec3<long>;
+using NVec3ll = NVec3<int64_t>;
+using NVec3ull = NVec3<uint64_t>;
 
 template <class T>
 struct NVec4
@@ -801,10 +805,23 @@ struct NRect
     {
         return (Height() == 0.0f || Width() == 0.0f) ? true : false;
     }
+
     void Clear()
     {
-        topLeftPx = NRect<T>();
-        bottomRightPx = NRect<T>();
+        topLeftPx = NVec2<T>();
+        bottomRightPx = NVec2<T>();
+    }
+
+    void Normalize()
+    {
+        if (topLeftPx.x > bottomRightPx.x)
+        {
+            std::swap(topLeftPx.x, bottomRightPx.x);
+        }
+        if (topLeftPx.y > bottomRightPx.y)
+        {
+            std::swap(topLeftPx.y, bottomRightPx.y);
+        }
     }
 
     void SetSize(const NVec2<T>& size)

@@ -36,6 +36,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/time/timeline.cpp
     ${MUTILS_ROOT}/src/time/timer.cpp
     ${MUTILS_ROOT}/src/ui/colors.cpp
+    ${MUTILS_ROOT}/src/ui/theme.cpp
     ${MUTILS_ROOT}/src/ui/dpi.cpp
     ${MUTILS_ROOT}/src/ui/fbo.cpp
     ${MUTILS_ROOT}/src/ui/imgui_extras.cpp
@@ -63,6 +64,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/thread/threadutils.h
     ${MUTILS_ROOT}/include/mutils/thread/mempool.h
     ${MUTILS_ROOT}/include/mutils/ui/colors.h
+    ${MUTILS_ROOT}/include/mutils/ui/theme.h
     ${MUTILS_ROOT}/include/mutils/ui/dpi.h
     ${MUTILS_ROOT}/include/mutils/ui/fbo.h
     ${MUTILS_ROOT}/include/mutils/ui/imgui_extras.h

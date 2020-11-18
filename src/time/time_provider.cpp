@@ -6,6 +6,8 @@ using namespace std::chrono;
 namespace MUtils
 {
 
+using namespace Profiler;
+
 TimeProvider& TimeProvider::Instance()
 {
     static TimeProvider provider;
@@ -40,21 +42,18 @@ void TimeProvider::ResetStartTime()
 
 void TimeProvider::RegisterConsumer(ITimeConsumer* pConsumer)
 {
-    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    LOCK_GUARD(m_spin_mutex, TP_Lock);
     m_consumers.insert(pConsumer);
 }
 
 void TimeProvider::UnRegisterConsumer(ITimeConsumer* pConsumer)
 {
-    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    LOCK_GUARD(m_spin_mutex, TP_Lock);
     m_consumers.erase(pConsumer);
 }
 
 void TimeProvider::StartThread()
 {
-    //    static Moving_Average<uint64_t, uint64_t, 100> av;
-
-    MUtilsNameThread("Time Provider");
     auto lastTime = TimeProvider::Instance().Now();
 
     // A thread which wakes up and ticks
@@ -62,7 +61,8 @@ void TimeProvider::StartThread()
     m_tickThread = std::thread([&]() {
         for (;;)
         {
-            MUtilsZoneScopedN("TimeProvider Beat");
+            PROFILE_NAME_THREAD(Time_Provider);
+
             // Beat at regular intervals, no matter how long our operation takes
             auto startTime = TimeProvider::Instance().Now();
             auto nextTime = startTime + m_timePerBeat;
@@ -70,7 +70,8 @@ void TimeProvider::StartThread()
             auto frame = m_frame.load();
 
             {
-                std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+                PROFILE_SCOPE(TP_Beat);
+                LOCK_GUARD(m_spin_mutex, TP_Lock);
 
                 m_lastTime = startTime;
                 m_lastBeat = beat;
@@ -133,7 +134,7 @@ double TimeProvider::GetQuantum() const
 
 void TimeProvider::SetTempo(double tempo, double quantum)
 {
-    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    LOCK_GUARD(m_spin_mutex, TP_Lock);
     m_quantum = quantum;
     m_tempo = tempo;
     m_timePerBeat = microseconds((uint64_t)(60000000.0 / tempo));
@@ -141,13 +142,13 @@ void TimeProvider::SetTempo(double tempo, double quantum)
 
 void TimeProvider::SetBeat(double beat)
 {
-    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    LOCK_GUARD(m_spin_mutex, TP_Lock);
     m_beat = beat;
 }
 
 void TimeProvider::SetFrame(uint32_t frame)
 {
-    std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+    LOCK_GUARD(m_spin_mutex, TP_Lock);
     m_frame.store(frame);
 }
 

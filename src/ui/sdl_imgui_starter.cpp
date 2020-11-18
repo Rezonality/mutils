@@ -164,6 +164,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     while (!done)
     {
+        MUtils::Profiler::NewFrame();
 
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -239,8 +240,6 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         }
 
         SDL_GL_SwapWindow(window);
-
-        MUtilsFrameMark;
     }
 
     pClient->Destroy();

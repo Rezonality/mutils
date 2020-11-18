@@ -12,6 +12,7 @@
 #include <mutils/logger/logger.h>
 #include <mutils/time/time_utils.h>
 #include <mutils/time/profiler.h>
+#include <mutils/thread/threadutils.h>
 
 #include <concurrentqueue/concurrentqueue.h>
 
@@ -58,7 +59,7 @@ public:
 private:
     TimePoint m_startTime;
     std::unordered_set<ITimeConsumer*> m_consumers;
-    MUtilsLockable(std::recursive_mutex, m_mutex);
+    audio_spin_mutex m_spin_mutex;
 
     std::atomic_bool m_quitTimer = false;
     std::thread m_tickThread;

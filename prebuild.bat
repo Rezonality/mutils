@@ -15,7 +15,7 @@ if not exist "..\vcpkg\" (
 if not exist "..\vcpkg\imgui\" (
   cd ..\vcpkg
   echo Installing Libraries 
-  vcpkg install kissfft clipp date tinydir fmt portaudio miniz nanovg libcuckoo cpp-httplib tinyfiledialogs imgui[sdl2-binding,freetype,opengl3-gl3w-binding] gl3w gsl-lite glm concurrentqueue utfcpp stb catch2 magic-enum nlohmann-json cpptoml toml11 drlibs freetype sdl2 --triplet x64-windows-static-md --recurse
+  vcpkg install kissfft clipp date kubazip tinydir fmt portaudio nanovg libcuckoo cpp-httplib tinyfiledialogs imgui[sdl2-binding,freetype,opengl3-gl3w-binding,vulkan-binding,dx12-binding] gl3w gsl-lite glm concurrentqueue utfcpp stb catch2 magic-enum nlohmann-json cpptoml toml11 drlibs freetype sdl2 --triplet x64-windows-static-md --recurse
   cd %~dp0
 )
 

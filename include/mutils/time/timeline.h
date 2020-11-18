@@ -12,6 +12,7 @@
 #include <mutils/logger/logger.h>
 #include <mutils/string/stringutils.h>
 #include <mutils/thread/mempool.h>
+#include <mutils/thread/threadutils.h>
 #include <mutils/time/time_provider.h>
 #include <mutils/time/time_utils.h>
 
@@ -92,7 +93,7 @@ public:
 
     void ExpireEvents(int secondsOld)
     {
-        std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+        LOCK_GUARD(m_mutex, Timeline_Lock);
 
         auto startTime = TimeProvider::Instance().Now();
 
@@ -118,7 +119,7 @@ public:
 
     void StoreTimeEvent(T* ev)
     {
-        std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+        LOCK_GUARD(m_mutex, Timeline_Lock);
         assert(ev->m_pNext == nullptr);
         assert(ev->m_pPrevious == nullptr);
 
@@ -135,7 +136,7 @@ public:
     // TODO: Don't think this is necessary any more; since time events have linked lists
     void GetTimeEvents(std::vector<T*>& ev)
     {
-        std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+        LOCK_GUARD(m_mutex, Timeline_Lock);
         ev.clear();
 
         auto pCurrent = m_timeEventPool.m_pRoot;
@@ -150,7 +151,7 @@ public:
     // TODO: Just return links to begin/end?
     void DequeTimeEvents(std::vector<T*>& ev, ctti::type_id_t type, TimePoint upTo)
     {
-        std::lock_guard<MUtilsLockableBase(std::recursive_mutex)> lock(m_mutex);
+        LOCK_GUARD(m_mutex, Timeline_Lock);
         ev.clear();
 
         //LOG(DEBUG) << "T: " << time_to_float_seconds(upTo);
@@ -193,7 +194,7 @@ private:
     TimePoint m_startTime;
     TSMemoryPool<T> m_timeEventPool;
 
-    MUtilsLockable(std::recursive_mutex, m_mutex);
+    audio_spin_mutex m_mutex;
 };
 
 }; // namespace MUtils
