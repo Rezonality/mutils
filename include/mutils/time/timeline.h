@@ -93,6 +93,7 @@ public:
 
     void ExpireEvents(int secondsOld)
     {
+        PROFILE_SCOPE(ExpireEvents);
         LOCK_GUARD(m_mutex, Timeline_Lock);
 
         auto startTime = TimeProvider::Instance().Now();
@@ -136,6 +137,7 @@ public:
     // TODO: Don't think this is necessary any more; since time events have linked lists
     void GetTimeEvents(std::vector<T*>& ev)
     {
+        PROFILE_SCOPE(GetTimeEvents);
         LOCK_GUARD(m_mutex, Timeline_Lock);
         ev.clear();
 
@@ -151,6 +153,7 @@ public:
     // TODO: Just return links to begin/end?
     void DequeTimeEvents(std::vector<T*>& ev, ctti::type_id_t type, TimePoint upTo)
     {
+        PROFILE_SCOPE(DequeTimeEvents);
         LOCK_GUARD(m_mutex, Timeline_Lock);
         ev.clear();
 

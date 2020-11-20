@@ -166,23 +166,26 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     {
         MUtils::Profiler::NewFrame();
 
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
         {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
-                done = true;
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
-                done = true;
-
-            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+            PROFILE_SCOPE(PollEvents);
+            // Poll and handle events (inputs, window resize, etc.)
+            // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+            // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+            // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+            // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+            SDL_Event event;
+            while (SDL_PollEvent(&event))
             {
-                pClient->KeyEvent(event.key);
+                ImGui_ImplSDL2_ProcessEvent(&event);
+                if (event.type == SDL_QUIT)
+                    done = true;
+                if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+                    done = true;
+
+                if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+                {
+                    pClient->KeyEvent(event.key);
+                }
             }
         }
 
@@ -223,9 +226,12 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         if (settings.flags & AppStarterFlags::ShowDemoWindow)
             ImGui::ShowDemoWindow(&show_demo_window);
 
-        // Rendering
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        {
+            PROFILE_SCOPE(RenderGui)
+            // Rendering
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        }
 
         // Update and Render additional Platform Windows
         // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
@@ -239,7 +245,10 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
 
-        SDL_GL_SwapWindow(window);
+        {
+            PROFILE_SCOPE(SwapWindow)
+            SDL_GL_SwapWindow(window);
+        }
     }
 
     pClient->Destroy();
