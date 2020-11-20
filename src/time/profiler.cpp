@@ -306,8 +306,7 @@ void PopSection()
     int entryIndex = threadData->entryStack[threadData->callStackDepth];
     ProfilerEntry* profilerEntry = &threadData->entries[entryIndex];
 
-    if (profilerEntry->szSection == nullptr)
-        DebugBreak();
+    assert(profilerEntry->szSection != nullptr);
 
     // store end time
     profilerEntry->endTime = timer_get_elapsed(gTimer);
