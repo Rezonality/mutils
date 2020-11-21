@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 
 #include <mutils/time/profiler.h>
@@ -981,7 +982,7 @@ void ShowProfile()
                         timer_to_ms(entry.startTime),
                         timer_to_ms(entry.endTime),
                         entry.szFile, entry.line);
-                    ImGui::SetTooltip(tip.c_str());
+                    ImGui::SetTooltip("%s", tip.c_str());
                 }
 
                 float width = rectMax.x - rectMin.x;
