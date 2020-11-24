@@ -10,6 +10,7 @@
 #include "mutils/time/profiler.h"
 #include "mutils/time/timer.h"
 #include "mutils/ui/dpi.h"
+#include "mutils/ui/sdl_dpi.h"
 
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
@@ -29,19 +30,6 @@ Logger logger = { true, LT::INFO };
 #endif
 bool Log::disabled = false;
 
-NVec2f GetDisplayScale()
-{
-    float ddpi = 0.0f;
-    float hdpi = 0.0f;
-    float vdpi = 0.0f;
-    auto res = SDL_GetDisplayDPI(0, &ddpi, &hdpi, &vdpi);
-    if (res == 0 && hdpi != 0)
-    {
-        return NVec2f(hdpi, vdpi) / 96.0f;
-    }
-    return NVec2f(1.0f);
-}
-
 IAppStarterClient* pClient = nullptr;
 int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pClient)
 {
@@ -52,7 +40,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         return -1;
     }
 
-    set_dpi(GetDisplayScale());
+    sdl_update_dpi();
 
     // Setup app runtree
     runtree_init(pClient->GetRootPath());
