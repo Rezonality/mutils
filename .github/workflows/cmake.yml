@@ -7,20 +7,6 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  evaluate-environment:
-    name: Look at the environment
-    runs-on: [ubuntu-latest]
-    steps:
-      - name: Print github workspace
-        run: |
-          echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
-          echo "github.workspace = ${{ github.workspace }}"
-          echo "pr.ref = ${{github.event.pull_request.head.ref}}"
-          echo "github.ref = ${{ github.ref }}"
-          echo "$GITHUB_CONTEXT"
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
