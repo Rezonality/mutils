@@ -12,7 +12,7 @@
 #include <mutils/logger/logger.h>
 #include <mutils/time/time_utils.h>
 #include <mutils/time/profiler.h>
-#include <mutils/thread/threadutils.h>
+#include <mutils/thread/thread_utils.h>
 
 #include <concurrentqueue/concurrentqueue.h>
 

@@ -13,7 +13,7 @@
 
 #include <mutils/logger/logger.h>
 #include <mutils/gl/gl_shader.h>
-#include <mutils/string/stringutils.h>
+#include <mutils/string/string_utils.h>
 #include <mutils/compile/compile_messages.h>
 #include <mutils/file/file.h>
 

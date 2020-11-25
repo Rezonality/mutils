@@ -4,7 +4,7 @@
 
 #include <mutils/time/profiler.h>
 #include <mutils/math/imgui_glm.h>
-#include <mutils/math/mathutils.h>
+#include <mutils/math/math_utils.h>
 #include <mutils/ui/dpi.h>
 
 #include "imgui.h"

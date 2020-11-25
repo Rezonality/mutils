@@ -47,7 +47,7 @@ Original here: https://github.com/progschj/ThreadPool
 
 #include "mutils/time/profiler.h"
 #include <concurrentqueue/concurrentqueue.h>
-#include <mutils/thread/threadutils.h>
+#include <mutils/thread/thread_utils.h>
 
 // std::thread pool for resources recycling
 class TPool

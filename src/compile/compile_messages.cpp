@@ -1,5 +1,5 @@
 #include "mutils/compile/compile_messages.h"
-#include "mutils/string/stringutils.h"
+#include "mutils/string/string_utils.h"
 
 namespace MUtils
 {

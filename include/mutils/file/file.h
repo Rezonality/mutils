@@ -25,4 +25,6 @@ fs::path file_documents_path();
 fs::path file_roaming_path();
 fs::path file_appdata_path();
 
+fs::path file_init_settings(const std::string& appName, const fs::path& defaultSettings, bool forceReset = false);
+
 } // namespace MUtils

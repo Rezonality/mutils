@@ -16,7 +16,7 @@ set(CMAKE_DEBUG_POSTFIX "-debug")
 set(CMAKE_RELWITHDEBINFO_POSTFIX "-reldbg")
 
 if (WIN32)
-set(VCPKG_TARGET_TRIPLET x64-windows-static-md)
+    set(VCPKG_TARGET_TRIPLET x64-windows-static-md)
 endif()
 
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "Vcpkg toolchain file")
@@ -24,7 +24,7 @@ set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../vcpkg/scripts/buildsyste
 project(MUtils
     LANGUAGES CXX C
     VERSION 0.5.0
-)
+    )
 
 # config_app.h checks
 # This makes a config_shared.h file which can be included for system settings
@@ -47,7 +47,9 @@ install(EXPORT mutils-targets
     FILE mutils-targets.cmake
     NAMESPACE MUtils::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mutils
-)
+    )
+
+include(CMakePackageConfigHelpers)
 
 configure_package_config_file(
     ${MUTILS_ROOT}/cmake/mutils-config.cmake.in
@@ -55,18 +57,18 @@ configure_package_config_file(
     INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mutils
     PATH_VARS MUTILS_INCLUDE_DIR
     PATH_VARS MUTILS_LIB_DIR
-)
+    )
 
 write_basic_package_version_file(
     ${CMAKE_BINARY_DIR}/cmake/mutils-config-version.cmake
     VERSION 1.0
     COMPATIBILITY AnyNewerVersion
-)
+    )
 
 install(
     FILES
-        ${CMAKE_BINARY_DIR}/cmake/mutils-config.cmake
-        ${CMAKE_BINARY_DIR}/cmake/mutils-config-version.cmake
+    ${CMAKE_BINARY_DIR}/cmake/mutils-config.cmake
+    ${CMAKE_BINARY_DIR}/cmake/mutils-config-version.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mutils
-)
+    )
 

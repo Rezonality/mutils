@@ -9,27 +9,26 @@ find_package(gl3w CONFIG REQUIRED)
 
 # Used Packages external to vcpkg
 include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 
 set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/CMakeLists.txt
-    ${MUTILS_ROOT}/src/algorithm/containerutils.cpp
+    ${MUTILS_ROOT}/src/algorithm/container_utils.cpp
     ${MUTILS_ROOT}/src/callback/callback.cpp
     ${MUTILS_ROOT}/src/chibi/chibi.cpp
     ${MUTILS_ROOT}/src/compile/compile_messages.cpp
     ${MUTILS_ROOT}/src/compile/meta_tags.cpp
     ${MUTILS_ROOT}/src/file/file.cpp
     ${MUTILS_ROOT}/src/file/runtree.cpp
+    ${MUTILS_ROOT}/src/file/toml_utils.cpp
     ${MUTILS_ROOT}/src/geometry/indexer.cpp
     ${MUTILS_ROOT}/src/geometry/standard_shapes.cpp
     ${MUTILS_ROOT}/src/geometry/vertex_spacial_sort.cpp
     ${MUTILS_ROOT}/src/gl/gl_buffer.cpp
     ${MUTILS_ROOT}/src/gl/gl_shader.cpp
     ${MUTILS_ROOT}/src/gl/gl_texture.cpp
-    ${MUTILS_ROOT}/src/math/mathutils.cpp
+    ${MUTILS_ROOT}/src/math/math_utils.cpp
     ${MUTILS_ROOT}/src/string/murmur_hash.cpp
-    ${MUTILS_ROOT}/src/string/stringutils.cpp
-    ${MUTILS_ROOT}/src/string/tomlutils.cpp
+    ${MUTILS_ROOT}/src/string/string_utils.cpp
     ${MUTILS_ROOT}/src/thread/mempool.cpp
     ${MUTILS_ROOT}/src/time/profiler.cpp
     ${MUTILS_ROOT}/src/time/time_provider.cpp
@@ -43,7 +42,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/ui/sdl_imgui_starter.cpp
     ${MUTILS_ROOT}/src/ui/ui_manager.cpp
 
-    ${MUTILS_ROOT}/include/mutils/algorithm/containerutils.h
+    ${MUTILS_ROOT}/include/mutils/algorithm/container_utils.h
     ${MUTILS_ROOT}/include/mutils/algorithm/ringiterator.h
     ${MUTILS_ROOT}/include/mutils/chibi/chibi.h
     ${MUTILS_ROOT}/include/mutils/compile/compile_messages.h
@@ -51,6 +50,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/device/IDevice.h
     ${MUTILS_ROOT}/include/mutils/device/IDeviceBuffer.h
     ${MUTILS_ROOT}/include/mutils/file/runtree.h
+    ${MUTILS_ROOT}/include/mutils/file/toml_utils.h
     ${MUTILS_ROOT}/include/mutils/geometry/geometry.h
     ${MUTILS_ROOT}/include/mutils/geometry/icosahedron.h
     ${MUTILS_ROOT}/include/mutils/geometry/icosphere.h
@@ -61,7 +61,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/gl/gl_buffer.h
     ${MUTILS_ROOT}/include/mutils/gl/gl_shader.h
     ${MUTILS_ROOT}/include/mutils/gl/gl_texture.h
-    ${MUTILS_ROOT}/include/mutils/thread/threadutils.h
+    ${MUTILS_ROOT}/include/mutils/thread/thread_utils.h
     ${MUTILS_ROOT}/include/mutils/thread/mempool.h
     ${MUTILS_ROOT}/include/mutils/ui/colors.h
     ${MUTILS_ROOT}/include/mutils/ui/theme.h
@@ -129,6 +129,9 @@ set(default_module_path
     #"${CMAKE_INSTALL_PREFIX}/${thePrefix}${pathsep}${CMAKE_INSTALL_PREFIX}/bin"
     )
 
+# Special step for chibi
+if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/include/chibi/install.h)
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/chibi)
 file(READ ${MUTILS_ROOT}/m3rdparty/chibi/RELEASE release)
 string(STRIP ${release} release)
@@ -149,6 +152,8 @@ file(WRITE
     #define sexp_version \"\"
     #define sexp_release_name \"${release}\""
     )
+
+endif()
 
 set (MPC_SOURCE
     ${M3RDPARTY_DIR}/mpc/mpc.c)

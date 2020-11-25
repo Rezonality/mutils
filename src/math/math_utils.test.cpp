@@ -1,5 +1,5 @@
 #include <catch2/catch.hpp>
-#include "mutils/math/mathutils.h"
+#include "mutils/math/math_utils.h"
 
 TEST_CASE("RectEmpty", "MathUtils")
 {

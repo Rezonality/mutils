@@ -1,7 +1,7 @@
 #include "glm/gtc/quaternion.hpp"
 
-#include "mutils/math/mathutils.h"
-#include "mutils/math/randomutils.h"
+#include <mutils/math/math_utils.h>
+#include <mutils/math/random_utils.h>
 
 static std::random_device rd;
 static std::mt19937 mt(rd());

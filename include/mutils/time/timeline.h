@@ -10,9 +10,9 @@
 #include <vector>
 
 #include <mutils/logger/logger.h>
-#include <mutils/string/stringutils.h>
+#include <mutils/string/string_utils.h>
 #include <mutils/thread/mempool.h>
-#include <mutils/thread/threadutils.h>
+#include <mutils/thread/thread_utils.h>
 #include <mutils/time/time_provider.h>
 #include <mutils/time/time_utils.h>
 

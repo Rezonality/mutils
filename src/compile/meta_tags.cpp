@@ -1,5 +1,5 @@
-#include "mutils/algorithm/containerutils.h"
-#include "mutils/string/stringutils.h"
+#include "mutils/algorithm/container_utils.h"
+#include "mutils/string/string_utils.h"
 #include "mutils/logger/logger.h"
 #include "mutils/compile/meta_tags.h"
 

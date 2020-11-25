@@ -1,19 +1,22 @@
+#include <cassert>
 #include <fstream>
 #include <queue>
 #include <set>
-#include <cassert>
 
 #ifdef __APPLE__
 #include <sysdir.h>
 #include <unistd.h>
 #endif
 
+#include <toml.hpp>
+
 // For logging events to file
 #include "tinydir.h"
 
+#include "mutils/common.h"
 #include "mutils/file/file.h"
 #include "mutils/logger/logger.h"
-#include "mutils/string/stringutils.h"
+#include "mutils/string/string_utils.h"
 
 #ifdef WIN32
 #include "shlobj.h"
@@ -211,7 +214,7 @@ fs::path file_roaming_path()
 {
     PWSTR path;
     HRESULT hr = SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &path);
-    if (SUCCEEDED(hr)) 
+    if (SUCCEEDED(hr))
     {
         fs::path ret(path);
         CoTaskMemFree(path);
@@ -224,7 +227,7 @@ fs::path file_appdata_path()
 {
     PWSTR path;
     HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path);
-    if (SUCCEEDED(hr)) 
+    if (SUCCEEDED(hr))
     {
         fs::path ret(path);
         CoTaskMemFree(path);
@@ -237,7 +240,7 @@ fs::path file_documents_path()
 {
     PWSTR path;
     HRESULT hr = SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &path);
-    if (SUCCEEDED(hr)) 
+    if (SUCCEEDED(hr))
     {
         fs::path ret(path);
         CoTaskMemFree(path);
@@ -248,64 +251,64 @@ fs::path file_documents_path()
 #elif __APPLE__
 fs::path file_exe_path()
 {
-    char result[ PATH_MAX ];
-    ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-    return fs::path(std::string( result, (count > 0) ? count : 0 ));
+    char result[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    return fs::path(std::string(result, (count > 0) ? count : 0));
 }
 
 fs::path file_documents_path()
 {
-	char pathChars[PATH_MAX];
-	if (&sysdir_start_search_path_enumeration != NULL) 
+    char pathChars[PATH_MAX];
+    if (&sysdir_start_search_path_enumeration != NULL)
     {
-		sysdir_search_path_enumeration_state state;
+        sysdir_search_path_enumeration_state state;
 
-		state = sysdir_start_search_path_enumeration(
-		    SYSDIR_DIRECTORY_DOCUMENT,
-		    SYSDIR_DOMAIN_MASK_USER);
-		if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
+        state = sysdir_start_search_path_enumeration(
+            SYSDIR_DIRECTORY_DOCUMENT,
+            SYSDIR_DOMAIN_MASK_USER);
+        if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
         {
             return fs::path(pathChars);
         }
-	} 
+    }
     LOG(ERROR, "Search path not found");
     return fs::path();
 }
 
 fs::path file_roaming_path()
 {
-	char pathChars[PATH_MAX];
-	if (&sysdir_start_search_path_enumeration != NULL) 
+    char pathChars[PATH_MAX];
+    if (&sysdir_start_search_path_enumeration != NULL)
     {
-		sysdir_search_path_enumeration_state state;
+        sysdir_search_path_enumeration_state state;
 
-		state = sysdir_start_search_path_enumeration(
-		    SYSDIR_DIRECTORY_AUTOSAVED_INFORMATION,
-		    SYSDIR_DOMAIN_MASK_USER);
-		if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
+        state = sysdir_start_search_path_enumeration(
+            SYSDIR_DIRECTORY_AUTOSAVED_INFORMATION,
+            SYSDIR_DOMAIN_MASK_USER);
+        if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
         {
             return fs::path(pathChars);
         }
-	} 
+    }
     LOG(ERROR, "Search path not found");
     return fs::path();
 }
 
 fs::path file_appdata_path()
 {
-	char pathChars[PATH_MAX];
-	if (&sysdir_start_search_path_enumeration != NULL) 
+    char pathChars[PATH_MAX];
+    if (&sysdir_start_search_path_enumeration != NULL)
     {
-		sysdir_search_path_enumeration_state state;
+        sysdir_search_path_enumeration_state state;
 
-		state = sysdir_start_search_path_enumeration(
-		    SYSDIR_DIRECTORY_APPLICATION,
-		    SYSDIR_DOMAIN_MASK_USER);
-		if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
+        state = sysdir_start_search_path_enumeration(
+            SYSDIR_DIRECTORY_APPLICATION,
+            SYSDIR_DOMAIN_MASK_USER);
+        if (sysdir_get_next_search_path_enumeration(state, pathChars) != 0)
         {
             return fs::path(pathChars);
         }
-	} 
+    }
     LOG(ERROR, "Search path not found");
     return fs::path();
 }
@@ -336,4 +339,48 @@ fs::path file_appdata_path()
 }
 #endif
 
-} // namespace Utils
+// Copy settings from our run tree onto the local machine preferred settings folder
+void file_copy_settings()
+{
+}
+
+fs::path file_init_settings(const std::string& appName, const fs::path& defaultSettings, bool forceReset)
+{
+    // Try really hard to find somewhere to put stuff!
+    auto settingsPath = file_appdata_path();
+    if (settingsPath.empty())
+    {
+        settingsPath = file_documents_path();
+        if (settingsPath.empty())
+        {
+            settingsPath = fs::temp_directory_path();
+        }
+    }
+
+    // TOOD: Error message on no path
+    settingsPath = settingsPath / appName / "settings" / "settings.toml";
+    if (!fs::exists(settingsPath))
+    {
+        fs::create_directories(settingsPath.parent_path());
+        forceReset = true;
+    }
+
+    // Maybe copy new settings
+    if (forceReset)
+    {
+        auto flags = fs::copy_options::recursive;
+        flags |= fs::copy_options::overwrite_existing;
+
+        if (fs::exists(defaultSettings))
+        {
+            fs::copy(defaultSettings, settingsPath.parent_path(), flags);
+        }
+        else
+        {
+            LOG(WARNING, "Default setting file not found: " << defaultSettings.string());
+        }
+    }
+    return settingsPath;
+}
+
+} // namespace MUtils
