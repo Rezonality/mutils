@@ -9,6 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
+    - uses: actions/checkout@master
     
     - name: Python install
       run: |
@@ -19,6 +20,7 @@ jobs:
     - name: Install GL
       run: |
         sudo apt-get install freeglut3-dev
+
         
     - name: Prebuild Linux
       working-directory: ${{github.workspace}}
@@ -36,7 +38,12 @@ jobs:
         cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER="g++" ..
         make
         ./unittests
-        cd ..
-        coveralls --build-root build --gcov-options '\-lp' -e include/mutils/tracy -e build -e cmake -e m3rdparty
         bash <(curl -s https://codecov.io/bash)
+    
+    - name: codacy-coverage-reporter
+      uses: codacy/codacy-coverage-reporter-action@master
+      with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      
+
         
