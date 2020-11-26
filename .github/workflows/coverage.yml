@@ -40,10 +40,20 @@ jobs:
         ./unittests
         bash <(curl -s https://codecov.io/bash)
     
+    - name: Coverage-Report-Gen
+      run: |
+        find .. -name *.gcno | xargs gcov
+        lcov -c -d .. -o coverage.info
+        lcov --remove coverage.info 'm3rdparty' 'cmake' 'scripts' -o coverage.info
+        genhtml coverage.info
+                
     - name: codacy-coverage-reporter
       uses: codacy/codacy-coverage-reporter-action@master
       with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      
+          coverage-reports: coverage.info
 
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      
         
