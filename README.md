@@ -1,8 +1,7 @@
 [MUtils](https://github.com/Rezonality/MUtils) - Useful C++
 ===================================================================================================
 
-[![Build Status](https://travis-ci.org/Rezonality/mutils.svg?branch=master)](https://travis-ci.org/Rezonality/mutils)
-[![Build status](https://ci.appveyor.com/api/projects/status/lm9p5djinghjfo40?svg=true)](https://ci.appveyor.com/project/cmaughan/mutils)
+![CMake](https://github.com/Rezonality/mutils/workflows/CMake/badge.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Rezonality/zep/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/Rezonality/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/Rezonality/MUtils)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ea66b760a217428c996b131bc183072f)](https://www.codacy.com/app/Rezonality/MUtils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Rezonality/MUtils&amp;utm_campaign=Badge_Grade)
@@ -11,7 +10,7 @@ This project contains useful things that are often needed in bigger c++ projects
 
 Because of modern CMake, you can install this library & reference it in your CMake with just a couple of lines.
 
-First, you need to build the dependent packages.  Some libraries do modern CMake well - such as SDL and OpenSSL.  Those can just be installed on your system.  Others are easy to reference as external project but don't quite handle the install step well; this project builds them and then does its own install of the necessary pieces.  The prebuild.bat/sh script is the part that handles that, and you need to run it first.  Note that on linux it will also apt install 'libasound2-dev.lib'
+This library now uses vcpkg to simplify cross platform building of all the dependent packages.  Running prebuild will create a parallel folder containing all the useful bits.  Some libraries that are not part of vcpkg are still built by MUtils, but the majority are created in the vcpkg.  The following step may take a little time, but is only done once:
 
 ```
 prebuild.bat OR prebuild.sh
@@ -36,32 +35,32 @@ target_link_libraries(MyApp PRIVATE MUtils::MUtils)
 ## External Projects
 The following external projects are in the library for convenient access.  Look in their folders for more information.  These libraries are all cross platform - you shouldn't be using ones that arent.  There are a couple projects that duplicate functionality; this is mostly to maintain backward compatibility if I've used another version.  Some of these components are installed on the machine when you run 'prebuild.bat/sh'.  Most of them are built into the static MUtils library.
 
-* Catch2 - better unit testing that gtest
-* Chibi - a scheme implementation for embedding an interpreter
-* Clip - clipboard support
-* Ctti - Compile time type information
-* SDL2 - for windows/UI, as prebuilt package dependency
-* Freetype - for better fonts, as a prebuilt package dependency
-* httplib - a library for making http & https requests
-* OpenSSL - for ssh support (so that httplib can make https calls), as a prebuilt dependency
-* FileWatcher - utilities for watching for file changes 
-* GLM - a math library
-* json - for reading and writing json files
-* lexertk - a simple tokenizer/lexer
-* magic_enum - the missing enum reflection api from c++
-* pfd/tfd - file dialogs
-* zip - creating and loading zip files
-* toml11 & cpptoml - a useful/easy file format for storing configuration
-* soundpipe, dr_libs, miniaudio, kiss_fft - useful libraries for sounds
-* stb - single header utility libraries
-* imgui - a GUI library, including OpenGL components
-* tinydir - for parsing directories/searching for files
-* fmt - a better string formatter
-* tclap - for parsing commandline arguments
-* threadpool - a simple C++ threadpool
-* tracy - an awesome real time profiler
-* mpc - a parser generator that's easy to use
-* gsl-lit - a coding standards library
+*  Catch2 - better unit testing that gtest
+*  Chibi - a scheme implementation for embedding an interpreter
+*  Clip - clipboard support
+*  Ctti - Compile time type information
+*  SDL2 - for windows/UI, as prebuilt package dependency
+*  Freetype - for better fonts, as a prebuilt package dependency
+*  httplib - a library for making http & https requests
+*  OpenSSL - for ssh support (so that httplib can make https calls), as a prebuilt dependency
+*  FileWatcher - utilities for watching for file changes 
+*  GLM - a math library
+*  json - for reading and writing json files
+*  lexertk - a simple tokenizer/lexer
+*  magic_enum - the missing enum reflection api from c++
+*  pfd/tfd - file dialogs
+*  zip - creating and loading zip files
+*  toml11 & cpptoml - a useful/easy file format for storing configuration
+*  soundpipe, dr_libs, miniaudio, kiss_fft - useful libraries for sounds
+*  stb - single header utility libraries
+*  imgui - a GUI library, including OpenGL components
+*  tinydir - for parsing directories/searching for files
+*  fmt - a better string formatter
+*  tclap - for parsing commandline arguments
+*  threadpool - a simple C++ threadpool
+*  tracy - an awesome real time profiler
+*  mpc - a parser generator that's easy to use
+*  gsl-lit - a coding standards library
 
 ## Utilties
 
