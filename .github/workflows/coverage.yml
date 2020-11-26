@@ -1,9 +1,9 @@
-name: CMake
+name: Coverage
 
 on: [push]
 jobs:
   build:
-    name: "Coverage"
+    name: "coverage-ubuntu"
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +22,7 @@ jobs:
       # uses: mxschmitt/action-tmate@v3
         
     - name: Coverage
-      working-directory: ${github.workspace}}
+      working-directory: ${{github.workspace}}
       run: |
         pip install --upgrade --user git+git://github.com/eddyxu/cpp-coveralls.git
         mkdir build
