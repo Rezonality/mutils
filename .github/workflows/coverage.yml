@@ -8,7 +8,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
     
+    - name: Python install
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+        python -m pip install git+git://github.com/eddyxu/cpp-coveralls.git
+        
     - name: Install GL
       run: |
         sudo apt-get install freeglut3-dev
@@ -24,8 +31,6 @@ jobs:
     - name: Coverage
       working-directory: ${{github.workspace}}
       run: |
-        pip install wheel
-        pip install git+git://github.com/eddyxu/cpp-coveralls.git
         mkdir build
         cd build
         cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER="g++" ..
