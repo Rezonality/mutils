@@ -1,0 +1,36 @@
+name: CMake
+
+on: [push]
+jobs:
+  build:
+    name: "Coverage"
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Install GL
+      run: |
+        sudo apt-get install freeglut3-dev
+        
+    - name: Prebuild Linux
+      working-directory: ${{github.workspace}}
+      run: |
+        ./prebuild.sh
+    
+      #- name: Setup tmate session
+      # uses: mxschmitt/action-tmate@v3
+        
+    - name: Coverage
+      working-directory: ${github.workspace}}
+      run: |
+        pip install --upgrade --user git+git://github.com/eddyxu/cpp-coveralls.git
+        mkdir build
+        cd build
+        cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER="g++" ..
+        make
+        ./unittests
+        cd ..
+        coveralls --build-root build --gcov-options '\-lp' -e include/mutils/tracy -e build -e cmake -e m3rdparty
+        bash <(curl -s https://codecov.io/bash)
+        
