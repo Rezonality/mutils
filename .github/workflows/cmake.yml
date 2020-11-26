@@ -28,7 +28,8 @@ jobs:
           - { title: "Mac", os: "macos-latest", cc: "clang", arch: "x64", build_type: "Debug" }
 
     steps:
-    - env:
+    - name: Make all binaries with ${{ matrix.cc }}
+      env:
         CC: ${{ matrix.cc }}  
 
     - uses: actions/checkout@v2
