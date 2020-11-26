@@ -43,6 +43,7 @@ jobs:
     
     - name: Prebuild Windows
       working-directory: ${{github.workspace}}
+      shell: cmd
       env:
         CC: ${{ matrix.cc }}  
       run: |
