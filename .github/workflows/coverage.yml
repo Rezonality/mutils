@@ -24,6 +24,7 @@ jobs:
     - name: Coverage
       working-directory: ${{github.workspace}}
       run: |
+        pip install wheel
         pip install --upgrade --user git+git://github.com/eddyxu/cpp-coveralls.git
         mkdir build
         cd build
