@@ -12,24 +12,32 @@ jobs:
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    name: "${{matrix.title}} (${{matrix.cc}}, ${{matrix.arch}}, ${{matrix.build_type}}"
+    name: "${{matrix.title}} (${{matrix.cc}}, ${{matrix.arch}}, ${{matrix.build_type}})"
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
       matrix:
         include:
           - { title: "Linux", os: "ubuntu-latest", cc: "clang", arch: "x64", build_type: "Release" }
+          - { title: "Linux", os: "ubuntu-latest", cc: "clang", arch: "x64", build_type: "Debug" }
           - { title: "Linux", os: "ubuntu-latest", cc: "gcc", arch: "x64", build_type: "Release" }
+          - { title: "Linux", os: "ubuntu-latest", cc: "gcc", arch: "x64", build_type: "Debug" }
           - { title: "Windows", os: "windows-latest", cc: "vs2019", arch: "x64", build_type: "Release" }
+          - { title: "Windows", os: "windows-latest", cc: "vs2019", arch: "x64", build_type: "Debug" }
+          - { title: "Mac", os: "macos-latest", cc: "clang", arch: "x64", build_type: "Release" }
+          - { title: "Mac", os: "macos-latest", cc: "clang", arch: "x64", build_type: "Debug" }
 
     steps:
+    - env:
+        CC: ${{ matrix.cc }}  
+
     - uses: actions/checkout@v2
     
     - name: Install GL
       run: |
         sudo apt-get install freeglut3-dev
       if: matrix.os == 'ubuntu-latest'
-      
+        
     - name: Prebuild
       working-directory: ${{github.workspace}}
       run: |
