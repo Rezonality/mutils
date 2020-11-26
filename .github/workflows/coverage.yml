@@ -43,7 +43,5 @@ jobs:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: coverage.info
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
       
         
