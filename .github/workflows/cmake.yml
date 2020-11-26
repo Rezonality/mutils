@@ -16,7 +16,9 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - uses: openrndr/setup-opengl@v1
+    
+    - name: Install GL
+      run: sudo apt-get install freeglut3-dev
 
     - name: Prebuild
       working-directory: ${{github.workspace}}
