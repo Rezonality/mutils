@@ -33,16 +33,21 @@ jobs:
         sudo apt-get install freeglut3-dev
       if: matrix.os == 'ubuntu-latest'
         
-    - name: Prebuild
+    - name: Prebuild Linux
       working-directory: ${{github.workspace}}
       env:
         CC: ${{ matrix.cc }}  
-
       run: |
-        echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
-        echo "runner = ${{runner.workspace}}"
-        echo "github = ${{github.workspace}}"
         ./prebuild.sh
+      if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+    
+    - name: Prebuild Windows
+      working-directory: ${{github.workspace}}
+      env:
+        CC: ${{ matrix.cc }}  
+      run: |
+        prebuild.bat
+      if: matrix.os == 'windows-latest'
     
       #- name: Setup tmate session
       # uses: mxschmitt/action-tmate@v3
