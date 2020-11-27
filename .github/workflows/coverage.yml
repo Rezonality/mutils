@@ -42,6 +42,19 @@ jobs:
       with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: coverage.info
-
+ 
+    - name: Archive Coverage HTML
+      uses: actions/upload-artifact@v2
+      with:
+          name: coverage-html
+          path: |
+            *.html
+            *.css
+            
+    - name: Archive Binary
+      uses: actions/upload-artifact@v2
+      with:
+          name: unit-tests
+          path: ${{github.workspace}}/build/unittests
       
         
