@@ -48,8 +48,8 @@ jobs:
       with:
           name: coverage-html
           path: |
-            *.html
-            *.css
+            **/*.html
+            **/*.css
             
     - name: Archive Binary
       uses: actions/upload-artifact@v2
