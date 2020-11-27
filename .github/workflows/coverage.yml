@@ -3,7 +3,7 @@ name: Coverage
 on: [push]
 jobs:
   build:
-    name: "coverage-ubuntu"
+    name: "Ubuntu"
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +25,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER="g++" ..
+        cmake -DENABLE_COVERAGE=ON -DENABLE_ASAN -DENABLE_USAN -DENABLE_TSAN -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER="g++" ..
         make
         ./unittests
         bash <(curl -s https://codecov.io/bash)

@@ -1,10 +1,11 @@
 [MUtils](https://github.com/Rezonality/MUtils) - Useful C++
 ===================================================================================================
 
-![CMake](https://github.com/Rezonality/mutils/workflows/CMake/badge.svg)
+![Builds](https://github.com/Rezonality/mutils/workflows/Builds/badge.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Rezonality/zep/blob/master/LICENSE)
 [![codecov](https://codecov.io/gh/Rezonality/MUtils/branch/master/graph/badge.svg)](https://codecov.io/gh/Rezonality/MUtils)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ea66b760a217428c996b131bc183072f)](https://www.codacy.com/app/Rezonality/MUtils?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Rezonality/MUtils&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/8bb47022b078477186c6941140e0f62c)](https://www.codacy.com/gh/Rezonality/mutils/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Rezonality/mutils&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/8bb47022b078477186c6941140e0f62c)](https://www.codacy.com/gh/Rezonality/mutils/dashboard?utm_source=github.com&utm_medium=referral&utm_content=Rezonality/mutils&utm_campaign=Badge_Coverage)
 
 This project contains useful things that are often needed in bigger c++ projects.  If something is in here, it helps save time when teaching coding or building apps.  The point of this big static library and associated modules is that when you have built it, you can make apps quickly without figuring out how to compile and get everything to work cross platform (On Windows, Mac and Linux)
 
