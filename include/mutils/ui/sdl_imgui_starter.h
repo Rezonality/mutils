@@ -34,6 +34,7 @@ struct AppStarterSettings
 struct IAppStarterClient
 {
     virtual fs::path GetRootPath() const = 0;
+    virtual void AddFonts(float size_pixels, const ImFontConfig*, const ImWchar*){};
     virtual void Init() = 0;
     virtual void Update(float seconds, const NVec2i& displaySize) = 0;
     virtual void Destroy() = 0;

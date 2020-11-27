@@ -134,6 +134,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     float fontPixelHeight = dpi_pixel_height_from_point_size(DemoFontPtSize, dpi.scaleFactorXY.y);
     io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/Cousine-Regular.ttf").string().c_str(), fontPixelHeight, &config, ranges);
 
+    pClient->AddFonts(fontPixelHeight, &config, ranges);
+
     LOG(INFO, "DPI Scale: " << dpi.scaleFactorXY);
     LOG(INFO, "Font Pixel Size: " << fontPixelHeight);
 
