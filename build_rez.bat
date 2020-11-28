@@ -1,4 +1,5 @@
 cd build
+call config_all.bat
 cmake --build . --config Debug
 cmake --build . --config Release
 cmake --build . --config RelWithDebInfo

@@ -9,25 +9,23 @@
 
 This project contains useful things that are often needed in bigger c++ projects.  If something is in here, it helps save time when teaching coding or building apps.  The point of this big static library and associated modules is that when you have built it, you can make apps quickly without figuring out how to compile and get everything to work cross platform (On Windows, Mac and Linux)
 
-Because of modern CMake, you can install this library & reference it in your CMake with just a couple of lines.
-
 This library now uses vcpkg to simplify cross platform building of all the dependent packages.  Running prebuild will create a parallel folder containing all the useful bits.  Some libraries that are not part of vcpkg are still built by MUtils, but the majority are created in the vcpkg.  The following step may take a little time, but is only done once:
 
-```
+``` bash
 prebuild.bat OR prebuild.sh
 ```
 
 The MUtils build is pretty standard, and makes useful shared code, as well as installing various pieces.
 It is built like this:
 
-```
+``` bash
 config.bat OR config.sh
 build_all.bat OR build.sh
 ```
 
 Now in your project CMakeLists.txt, you can add the following to reference the library and pull in all the header paths.  Note there are no include/library defines; the target_link_libraries is enough to pull all the necessary things in.
 
-```
+``` cmake
 find_package(MUtils REQUIRED)
 ...
 target_link_libraries(MyApp PRIVATE MUtils::MUtils)
