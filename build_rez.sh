@@ -1,15 +1,22 @@
 #!/bin/bash
 
-if [ "$1" != "" ] ; then
-source config_all.sh
-set CONFIG=Release
+if [ "$1" == "" ] ; then
+CONFIG=Debug
 else
-source config_all.sh $1
-set CONFIG=$1
+CONFIG=$1
+fi
+
+source config_all.sh $CONFIG
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+PACKAGE_TYPE=osx
+else
+PACKAGE_TYPE=linux
 fi
 
 cd build
 cmake --build . --config $CONFIG
-cmake --install . --config $CONFIG --prefix ../../vcpkg/packages/mutils_x64-linux
+cmake --install . --config $CONFIG --prefix ../../vcpkg/packages/mutils_x64-$PACKAGE_TYPE
 cd ..
 
+echo "Built $CONFIG for $PACKAGE_TYPE"
