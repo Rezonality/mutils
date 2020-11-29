@@ -104,6 +104,14 @@ set (THREADPOOL_SOURCE
     ${M3RDPARTY_DIR}/threadpool/threadpool.h
     )
 
+set (IMGUIFILEDIALOG_SOURCE
+    ${M3RDPARTY_DIR}/imguifiledialog/ImGuiFileDialog/ImGuiFileDialog.cpp
+    ${M3RDPARTY_DIR}/imguifiledialog/ImGuiFileDialog/ImGuiFileDialog.h
+    ${M3RDPARTY_DIR}/imguifiledialog/CustomFont.cpp
+    ${M3RDPARTY_DIR}/imguifiledialog/CustomFont.h
+    ${M3RDPARTY_DIR}/imguifiledialog/ImGuiFileDialog/ImGuiFileDialogConfig.h
+    )
+
 set (CHIBI_SCHEME_SOURCE
     # SEXP
     ${M3RDPARTY_DIR}/chibi/gc.c
@@ -170,15 +178,16 @@ LIST(APPEND SOUNDPIPE_SOURCE
 
 # Create the library
 add_library(MUtils STATIC 
-    ${UTILS_SOURCES}
-    ${TRACY_SOURCE}
+    ${CHIBI_SCHEME_SOURCE}
+    ${CLIP_SOURCE}
+    ${IMGUIFILEDIALOG_SOURCE}
     ${JANET_SOURCE}
     ${MPC_SOURCE}
-    ${SOUNDPIPE_SOURCE}
-    ${CHIBI_SCHEME_SOURCE}
     ${ORCA_SOURCE}
-    ${CLIP_SOURCE}
+    ${SOUNDPIPE_SOURCE}
     ${THREADPOOL_SOURCE}
+    ${TRACY_SOURCE}
+    ${UTILS_SOURCES}
     )
 
 target_compile_definitions(MUtils
@@ -324,6 +333,10 @@ install(FILES ${MUTILS_ROOT}/m3rdparty/chibi/lib/meta-7.scm
 # Note: We keep the necessary includes seperate for clean install
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/tracy
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/imguifiledialog/imguifiledialog
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/chibi/install.h
