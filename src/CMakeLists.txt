@@ -335,7 +335,7 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/tracy
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tracy
     )
 
-install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/imguifiledialog/imguifiledialog
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/imguifiledialog/ImGuiFileDialog
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
