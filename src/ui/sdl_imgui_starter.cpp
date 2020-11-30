@@ -100,11 +100,17 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+
     if (settings.flags & AppStarterFlags::DockingEnable)
     {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+    }
+
+    if (settings.flags & AppStarterFlags::ViewportsEnable)
+    {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     }
+
     ImGui::StyleColorsDark();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
@@ -151,6 +157,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     // Main loop
     bool done = false;
+
+    pClient->InitBeforeDraw();
 
     while (!done)
     {
@@ -200,7 +208,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
         if (firstInit)
         {
-            pClient->Init();
+            pClient->InitDuringDraw();
             firstInit = false;
         }
 
@@ -214,7 +222,9 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (settings.flags & AppStarterFlags::ShowDemoWindow)
+        {
             ImGui::ShowDemoWindow(&show_demo_window);
+        }
 
         {
             PROFILE_SCOPE(RenderGui)

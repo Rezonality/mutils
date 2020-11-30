@@ -20,10 +20,20 @@ using namespace std::chrono;
 // This one is better at spans that cover frame boundaries, uses cross platform cpp libraries
 // instead of OS specific ones.
 // No claims made about performance, but in practice has been very useful in finding bugs
-// Has a summary view and support for zoom/pan, CTRL+select range or click in the summary
-// There is an optional single 'Region' which I use for audio frame profiling
-// The profile macros can pick a unique/nice color for a given name
+// Has a summary view and support for zoom/pan, CTRL+select range or click in the summary graphs
+// There is an optional single 'Region' which I use for audio frame profiling; you can only have one
+// The profile macros can pick a unique/nice color for a given name.
 // There is a LOCK_GUARD wrapper around a mutex, for tracking lock times
+// Requires some helper code from my mutils library (https://github.com/Rezonality/MUtils) for:
+// - NVec/NRect
+// - murmur hash (for text to color)
+// - dpi 
+// - fmt for text formatting
+// I typically use this as a 'one shot, collect frames' debugger.  I hit the Pause/Resume button at interesting spots and collect a bunch of frames.
+// You have to pause to navigate/inspect.
+// All memory allocation is up-front; change the 'Max' values below to collect more frames
+// The profiler just 'stops' when the memory is full.  It can be restarted/stopped.
+// I pulled this together over the space of a weekend, it could be tidier here and there, but it works great ;)
 namespace MUtils
 {
 
@@ -36,11 +46,13 @@ namespace
 {
 
 const unsigned int frameMarkerColor = 0x22FFFFFF;
+
 const uint32_t MaxThreads = 50;
 const uint32_t MaxCallStack = 20;
 const uint32_t MaxEntriesPerThread = 100000;
 const uint32_t MaxFrames = 10000;
 const uint32_t MaxRegions = 10000;
+
 const uint32_t MinLeadInFrames = 3;
 const uint32_t MinFrame = MinLeadInFrames - 2;
 const uint32_t MinSizeForTextDisplay = 5;
@@ -83,7 +95,7 @@ NVec2i gVisibleFrames = NVec2i(0, 0);
 } // namespace
 
 // Run Init every time a profile is started
-void Init(uint32_t maxEntries)
+void Init()
 {
     gThreadData.resize(MaxThreads);
 
@@ -196,7 +208,7 @@ void Reset()
 {
     std::unique_lock<std::mutex> lk(gMutex);
     gThreadIndexTLS = -1;
-    Init(MaxEntriesPerThread);
+    Init();
 }
 
 bool CheckEndState()
@@ -731,10 +743,9 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
 }
 
 // Show the profiler window
-void ShowProfile()
+void ShowProfile(bool* opened)
 {
-    bool opened = true;
-    if (!ImGui::Begin("Profiler", &opened))
+    if (!ImGui::Begin("Profiler", opened))
     {
         ImGui::End();
         return;

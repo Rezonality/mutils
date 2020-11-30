@@ -58,7 +58,7 @@ struct ThreadData
     std::vector<uint32_t> entryStack;
 };
 
-void Init(uint32_t maxEntries);
+void Init();
 void NewFrame();
 void NameThread(const char* pszName);
 void BeginRegion();
@@ -66,8 +66,7 @@ void EndRegion();
 void SetRegionLimit(uint64_t maxTimeNs);
 void PushSectionBase(const char*, uint32_t, const char*, int);
 void PopSection();
-void ImGuiLogger(bool* opened);
-void ShowProfile();
+void ShowProfile(bool* opened);
 void HideThread();
 void Finish();
 
@@ -127,19 +126,24 @@ private:
 } // namespace Profiler
 } // namespace MUtils
 
+// PROFILE_SCOPE(MyNameWithoutQuotes)
 #define PROFILE_SCOPE(name) \
 static const uint32_t name##_color = ToPackedARGB(MUtils::Theme::ThemeManager::ColorFromName(#name, sizeof(#name))); \
 MUtils::Profiler::ProfileScope name##_scope(#name, name##_color, __FILE__, __LINE__);
 
+// PROFILE_SCOPE(char*, ImColor32 bit value)
 #define PROFILE_SCOPE_STR(str, col) \
 MUtils::Profiler::ProfileScope name##_scope(str, col, __FILE__, __LINE__);
 
+// Mark one extra region
 #define PROFILE_REGION(name) \
 MUtils::Profiler::RegionScope name##_region;
 
+// Give a thread a name.
 #define PROFILE_NAME_THREAD(name) \
 MUtils::Profiler::NameThread(#name);
 
+// Hide a thread.  Not sure this is tested or works....
 #define PROFILE_HIDE_THREAD() \
 MUtils::Profiler::HideThread();
 
