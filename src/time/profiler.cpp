@@ -59,6 +59,7 @@ const uint32_t MinSizeForTextDisplay = 5;
 
 MUtils::timer gTimer;
 bool gPaused = true;
+bool gRequestPause = false;
 bool gRestarting = true;
 
 std::mutex gMutex;
@@ -177,6 +178,14 @@ void FinishThread()
 void Finish()
 {
     gThreadData.clear();
+}
+
+void SetPaused(bool pause)
+{
+    if (gPaused != pause)
+    {
+        gRequestPause = pause;
+    }
 }
 
 ThreadData* GetThreadData()
@@ -754,14 +763,29 @@ void ShowProfile(bool* opened)
     PROFILE_SCOPE(Profile_UI);
 
     bool pause = gPaused;
+    bool changed = false;
+
+    if (pause != gRequestPause)
+    {
+        changed = true;
+        pause = gRequestPause;
+    }
+
     if (ImGui::Button(pause ? "Resume" : "Pause"))
     {
+        changed = true;
         pause = !pause;
+    }
+
+    if (changed)
+    {
+        // Call reset before setting paused
         if (!pause)
         {
             Reset();
         }
         gPaused = pause;
+        gRequestPause = pause;
     }
 
     ImGui::SameLine();

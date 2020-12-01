@@ -61,6 +61,7 @@ struct ThreadData
 void Init();
 void NewFrame();
 void NameThread(const char* pszName);
+void SetPaused(bool pause);
 void BeginRegion();
 void EndRegion();
 void SetRegionLimit(uint64_t maxTimeNs);
