@@ -139,7 +139,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     config.DstFont = ImGui::GetFont();
     float fontPixelHeight = int(dpi_pixel_height_from_point_size(DemoFontPtSize, dpi.scaleFactorXY.y));
 
-#ifdef TARGET_MAC
+#if TARGET_OS_MAC
     // TODO: I'm still struggling with DPI setup for fonts!
     // Need to compare windows and figure this out.
     fontPixelHeight = int(fontPixelHeight * (winSize.y / float(targetSize.y)));
