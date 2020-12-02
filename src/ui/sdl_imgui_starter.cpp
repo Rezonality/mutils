@@ -42,6 +42,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     sdl_update_dpi();
 
+    LOG(INFO, "DPI: " << dpi.scaleFactorXY);
+
     // Setup app runtree
     runtree_init(pClient->GetRootPath());
 
@@ -95,8 +97,6 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGui::GetStyle().ScaleAllSizes(dpi.scaleFactor);
-
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
@@ -131,7 +131,13 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     config.OversampleH = 4;
     config.OversampleV = 4;
     config.DstFont = ImGui::GetFont();
-    float fontPixelHeight = dpi_pixel_height_from_point_size(DemoFontPtSize, dpi.scaleFactorXY.y);
+    float fontPixelHeight = int(dpi_pixel_height_from_point_size(DemoFontPtSize, dpi.scaleFactorXY.y));
+
+#ifdef TARGET_MAC
+    // TODO: I'm still struggling with DPI setup for fonts!
+    // Need to compare windows and figure this out.
+    fontPixelHeight = int(fontPixelHeight * (winSize.y / float(targetSize.y)));
+#endif
     io.Fonts->AddFontFromFileTTF(runtree_find_asset("fonts/Cousine-Regular.ttf").string().c_str(), fontPixelHeight, &config, ranges);
 
     pClient->AddFonts(fontPixelHeight, &config, ranges);
@@ -141,6 +147,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     unsigned int flags = 0; // ImGuiFreeType::NoHinting;
     ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
+
+    ImGui::GetStyle().ScaleAllSizes(dpi.scaleFactorXY.y);
 
     // Our state
     bool show_demo_window = false;
