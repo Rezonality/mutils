@@ -19,7 +19,8 @@ enum
     None = (0),
     ShowDemoWindow = (1 << 0),
     DockingEnable = (1 << 1),
-    HideCursor = (1 << 2)
+    ViewportsEnable = (1 << 2),
+    HideCursor = (1 << 3)
 };
 }
 
@@ -35,7 +36,8 @@ struct IAppStarterClient
 {
     virtual fs::path GetRootPath() const = 0;
     virtual void AddFonts(float size_pixels, const ImFontConfig*, const ImWchar*){};
-    virtual void Init() = 0;
+    virtual void InitDuringDraw() = 0;
+    virtual void InitBeforeDraw() = 0;
     virtual void Update(float seconds, const NVec2i& displaySize) = 0;
     virtual void Destroy() = 0;
     virtual void Draw(const NVec2i& displaySize) = 0;

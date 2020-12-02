@@ -24,12 +24,50 @@ count accumulate_pairs(C& container, count c, Op fun)
     return c;
 }
 
+template<typename C, typename Op>
+void container_test_pairs(C& container, Op fn)
+{
+    for (auto it = container.begin(); it != container.end(); it++)
+    {
+        for (auto it2 = it + 1; it2 != container.end(); it2++)
+        {
+            if (it != it2)
+            {
+                if (!fn(*it, *it2))
+                    return;
+            }
+        }
+    }
+}
+
+template<typename C, typename Op>
+void container_test_triples(C& container, Op fn)
+{
+    for (auto it = container.begin(); it != container.end(); it++)
+    {
+        for (auto it2 = it + 1; it2 != container.end(); it2++)
+        {
+            if (it2 != it)
+            {
+                for (auto it3 = it2 + 1; it3 != container.end(); it3++)
+                {
+                    if ((it2 != it3) && (it != it3))
+                    {
+                        if (!fn(*it, *it2, *it3))
+                            return;
+                    }
+                }
+            }
+        }
+    }
+}
+
 template<typename T>
 void container_splice(T& container, typename T::iterator itrStart, int size, std::function<void (typename T::iterator, typename T::iterator)> fn)
 {
     auto itr = itrStart;
     auto itr2 = itrStart + size;
-    while (itr2 <= container.end())
+    while (itr2 < container.end())
     {
         fn(itr, itr2);
         if ((container.end() - itr2) < size)
