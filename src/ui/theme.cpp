@@ -86,10 +86,15 @@ void ThemeManager::SetDarkTheme()
     m_colors[ThemeColor::WidgetBackground] = NVec4f(.2f, .2f, .2f, 1.0f);
     m_colors[ThemeColor::FlashColor] = NVec4f(.80f, .40f, .05f, 1.0f);
 
-    m_colors[ThemeColor::AccentColor1] = NVec4f(.80f, .50f, .02f, 1.0f);
-    m_colors[ThemeColor::AccentColor2] = NVec4f(.80f, .45f, .02f, 1.0f);
-    m_colors[ThemeColor::AccentColor3] = NVec4f(.80f, .40f, .02f, 1.0f);
+    m_colors[ThemeColor::AccentColor1] = NVec4f(.90f, .58f, .03f, 1.0f);
+    m_colors[ThemeColor::AccentColor2] = NVec4f(.90f, .45f, .02f, 1.0f);
+    m_colors[ThemeColor::AccentColor3] = NVec4f(.90f, .30f, .02f, 1.0f);
     m_colors[ThemeColor::AccentColor4] = NVec4f(.80f, .35f, .02f, 1.0f);
+
+    m_colors[ThemeColor::OppositeAccentColor1] = NVec4f(.03f, .58f, .90f, 1.0f);
+    m_colors[ThemeColor::OppositeAccentColor2] = NVec4f(.02f, .45f, .90f, 1.0f);
+    m_colors[ThemeColor::OppositeAccentColor3] = NVec4f(.02f, .30f, .90f, 1.0f);
+    m_colors[ThemeColor::OppositeAccentColor4] = NVec4f(.02f, .35f, .80f, 1.0f);
 }
 
 void ThemeManager::SetLightTheme()
@@ -140,6 +145,11 @@ void ThemeManager::SetLightTheme()
     m_colors[ThemeColor::AccentColor2] = NVec4f(.80f, .45f, .02f, 1.0f);
     m_colors[ThemeColor::AccentColor3] = NVec4f(.80f, .40f, .02f, 1.0f);
     m_colors[ThemeColor::AccentColor4] = NVec4f(.80f, .35f, .02f, 1.0f);
+    
+    m_colors[ThemeColor::OppositeAccentColor1] = NVec4f(.03f, .58f, .90f, 1.0f);
+    m_colors[ThemeColor::OppositeAccentColor2] = NVec4f(.02f, .45f, .90f, 1.0f);
+    m_colors[ThemeColor::OppositeAccentColor3] = NVec4f(.02f, .30f, .90f, 1.0f);
+    m_colors[ThemeColor::OppositeAccentColor4] = NVec4f(.02f, .35f, .80f, 1.0f);
 }
 
 ThemeColor ThemeManager::GetUniqueColor(uint32_t index) const

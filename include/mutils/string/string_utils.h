@@ -135,6 +135,8 @@ std::string string_url_encode(const std::string& value);
 void string_split(const std::string& text, const char* delims, std::vector<std::string>& tokens);
 std::vector<std::string> string_split(const std::string& text, const char* delims);
 void string_split_lines(const std::string& text, std::vector<std::string>& tokens);
+std::vector<std::string> string_split_lines(const std::string& text);
+std::vector<std::string> string_split_delim_string(const std::string& str, const std::string& delim);
 void string_split_each(const std::string& text, const char* delims, std::function<bool(size_t, size_t)> fn);
 void string_split_each(char* text, size_t start, size_t end, const char* delims, std::function<bool(size_t, size_t)> fn);
 size_t string_first_of(const char* text, size_t start, size_t end, const char* delims);

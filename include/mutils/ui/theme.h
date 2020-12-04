@@ -54,6 +54,10 @@ enum class ThemeColor
     AccentColor2,
     AccentColor3,
     AccentColor4,
+    OppositeAccentColor1,
+    OppositeAccentColor2,
+    OppositeAccentColor3,
+    OppositeAccentColor4,
     Custom,
 
     // Last in the list!

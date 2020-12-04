@@ -302,6 +302,20 @@ void string_split_each(const std::string& text, const char* delims, std::functio
         fn(start, text.length() - start);
 }
 
+std::vector<std::string> string_split_delim_string(const std::string& str, const std::string& delim)
+{
+    std::vector<std::string> ret;
+    std::size_t current, previous = 0;
+    current = str.find(delim);
+    while (current != std::string::npos) {
+        ret.push_back(str.substr(previous, current - previous));
+        previous = current + 1;
+        current = str.find(delim, previous);
+    }
+    ret.push_back(str.substr(previous, current - previous));
+    return ret;
+}
+
 size_t string_first_not_of(const char* text, size_t start, size_t end, const char* delims)
 {
     for (auto index = start; index < end; index++)
@@ -417,6 +431,13 @@ std::pair<uint32_t, uint32_t> string_convert_index_to_line_offset(const std::str
 void string_split_lines(const std::string& text, std::vector<std::string>& split)
 {
     string_split(text, "\r\n", split);
+}
+
+std::vector<std::string> string_split_lines(const std::string& text)
+{
+    std::vector<std::string> split;
+    string_split(text, "\r\n", split);
+    return split;
 }
 
 StringId::StringId(const char* pszString)
