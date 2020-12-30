@@ -11,6 +11,7 @@
 
 #include <cppcodec/base64_default_rfc4648.hpp>
 
+#undef ERROR
 namespace MUtils
 {
 
