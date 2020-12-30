@@ -41,6 +41,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/src/ui/imgui_extras.cpp
     ${MUTILS_ROOT}/src/ui/sdl_imgui_starter.cpp
     ${MUTILS_ROOT}/src/ui/ui_manager.cpp
+    ${MUTILS_ROOT}/src/ui/layout_manager.cpp
 
     ${MUTILS_ROOT}/include/mutils/algorithm/container_utils.h
     ${MUTILS_ROOT}/include/mutils/algorithm/ringiterator.h
@@ -70,6 +71,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/ui/imgui_extras.h
     ${MUTILS_ROOT}/include/mutils/ui/sdl_imgui_starter.h
     ${MUTILS_ROOT}/include/mutils/ui/ui_manager.h
+    ${MUTILS_ROOT}/include/mutils/ui/layout_manager.h
     ${MUTILS_ROOT}/include/mutils/vm/vm.h
     )
 
