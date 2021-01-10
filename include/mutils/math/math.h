@@ -949,6 +949,16 @@ inline void hash_combine(size_t& seed, size_t hash)
     seed ^= hash;
 }
 
+inline float degToRad(float deg)
+{
+	return deg / 180.0f * 3.1415926f;
+}
+
+inline float radToDeg(float rad)
+{
+	return rad / 3.1415926f * 180.0f;
+}
+
 } // namespace MUtils
 
 namespace std

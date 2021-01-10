@@ -114,6 +114,21 @@ set (IMGUIFILEDIALOG_SOURCE
     ${M3RDPARTY_DIR}/imguifiledialog/ImGuiFileDialog/ImGuiFileDialogConfig.h
     )
 
+set (YOGA_SOURCE
+    ${M3RDPARTY_DIR}/yoga/yoga/Utils.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGConfig.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGEnums.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGLayout.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGNode.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGNodePrint.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGStyle.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/YGValue.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/log.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/Yoga.cpp
+    ${M3RDPARTY_DIR}/yoga/yoga/event/event.cpp
+    #${M3RDPARTY_DIR}/yoga/yoga/internal/experiments.cpp
+    )
+
 set (CHIBI_SCHEME_SOURCE
     # SEXP
     ${M3RDPARTY_DIR}/chibi/gc.c
@@ -181,6 +196,7 @@ LIST(APPEND SOUNDPIPE_SOURCE
 # Create the library
 add_library(MUtils STATIC 
     ${CHIBI_SCHEME_SOURCE}
+    ${YOGA_SOURCE}
     ${CLIP_SOURCE}
     ${IMGUIFILEDIALOG_SOURCE}
     ${JANET_SOURCE}
@@ -230,6 +246,7 @@ target_include_directories(MUtils
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/tfd>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/chibi/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/ctti/include>
+    $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/yoga>
     $<BUILD_INTERFACE:${SOUNDPIPE_DIR}/lib/dr_wav>
     $<BUILD_INTERFACE:${SOUNDPIPE_DIR}/lib/faust>
     $<BUILD_INTERFACE:${SOUNDPIPE_DIR}/lib/inih>
@@ -305,6 +322,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/orca-c
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/clip
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/yoga/yoga
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
