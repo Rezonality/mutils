@@ -1,11 +1,14 @@
-#include "glm/gtc/quaternion.hpp"
+//#include "glm/gtc/quaternion.hpp"
 
+#include <mutils/math/math.h>
 #include <mutils/math/math_utils.h>
 #include <mutils/math/random_utils.h>
 
 static std::random_device rd;
 static std::mt19937 mt(rd());
 
+namespace MUtils
+{
 double RandRange(double min, double max)
 {
     std::uniform_real_distribution<double> dist(min, std::nextafter(max, DBL_MAX));
@@ -26,44 +29,46 @@ uint32_t RandRange(uint32_t min, uint32_t max)
 
 int32_t RandRange(int32_t min, int32_t max)
 {
-    std::uniform_int_distribution<int32_t> dist (min, max);
+    std::uniform_int_distribution<int32_t> dist(min, max);
     return dist(mt);
 }
 
-/** Build a unit quaternion representing the rotation
- * from u to v. The input vectors need not be normalised. */
-glm::quat QuatFromVectors(glm::vec3 u, glm::vec3 v)
+/*
+// Build a unit quaternion representing the rotation
+// from u to v. The input vectors need not be normalised.
+glm::quat QuatFromVectors(NVec3f u, NVec3f v)
 {
     float norm_u_norm_v = sqrt(dot(u, u) * dot(v, v));
     float real_part = norm_u_norm_v + dot(u, v);
-    glm::vec3 w;
+    NVec3f w;
 
     if (real_part < 1.e-6f * norm_u_norm_v)
     {
-        /* If u and v are exactly opposite, rotate 180 degrees
-         * around an arbitrary orthogonal axis. Axis normalisation
-         * can happen later, when we normalise the quaternion. */
+        // If u and v are exactly opposite, rotate 180 degrees
+        // around an arbitrary orthogonal axis. Axis normalisation
+        // can happen later, when we normalise the quaternion.
         real_part = 0.0f;
-        w = std::abs(u.x) > std::abs(u.z) ? glm::vec3(-u.y, u.x, 0.f)
-            : glm::vec3(0.f, -u.z, u.y);
+        w = std::abs(u.x) > std::abs(u.z) ? NVec3f(-u.y, u.x, 0.f)
+            : NVec3f(0.f, -u.z, u.y);
     }
     else
     {
-        /* Otherwise, build quaternion the standard way. */
+        // Otherwise, build quaternion the standard way. 
         w = cross(u, v);
     }
 
     return glm::normalize(glm::quat(real_part, w.x, w.y, w.z));
 }
+*/
 
 float SmoothStep(float val)
 {
     return val * val * (3.0f - 2.0f * val);
 }
 
-glm::vec4 RectClip(const glm::vec4& rect, const glm::vec4& clip)
+NVec4f RectClip(const NVec4f& rect, const NVec4f& clip)
 {
-    glm::vec4 ret = rect;
+    NVec4f ret = rect;
     if (ret.x < clip.x)
     {
         ret.x = clip.x;
@@ -100,18 +105,18 @@ float LuminanceARGB(const uint32_t& color)
     return (red + green + blue) / float(255);
 }
 
-float Luminance(const glm::vec4& color)
+float Luminance(const NVec4f& color)
 {
-    return Luminance(glm::vec3(color.x, color.y, color.z) * color.w);
+    return Luminance(NVec3f(color.x, color.y, color.z) * color.w);
 }
 
-float Luminance(const glm::vec3& color)
+float Luminance(const NVec3f& color)
 {
     // Perceived.
     return (0.299f * color.x + 0.587f * color.y + 0.114f * color.z);
 }
 
-glm::vec4 Desaturate(const glm::vec4& col)
+NVec4f Desaturate(const NVec4f& col)
 {
     float r = col.x;
     float g = col.y;
@@ -121,7 +126,7 @@ glm::vec4 Desaturate(const glm::vec4& col)
     g += .5f;
     b += .5f;
 
-    auto sq = glm::sqrt((r * r) + (g * g) + (b * b));
+    auto sq = std::sqrtf((r * r) + (g * g) + (b * b));
     if (sq != 0.0f)
         sq = 1.0f / sq;
 
@@ -129,10 +134,10 @@ glm::vec4 Desaturate(const glm::vec4& col)
     g = g * sq;
     b = b * sq;
 
-    return glm::vec4(r, g, b, col.w);
+    return NVec4f(r, g, b, col.w);
 }
 
-glm::vec4 Saturate(const glm::vec4& col)
+NVec4f Saturate(const NVec4f& col)
 {
     float r = col.x;
     float g = col.y;
@@ -148,23 +153,7 @@ glm::vec4 Saturate(const glm::vec4& col)
         g = 0.0f;
     if (b < 0.0f)
         b = 0.0f;
-    return glm::vec4(r, g, b, col.w);
+    return NVec4f(r, g, b, col.w);
 }
 
-void GetBounds(const glm::vec3* coords, uint32_t count, glm::vec3& min, glm::vec3& max)
-{
-    if (count == 0 || coords == nullptr)
-    {
-        min = glm::vec3(0.0f);
-        max = glm::vec3(0.0f);
-        return;
-    }
-
-    min = glm::vec3(std::numeric_limits<float>::max());
-    max = glm::vec3(-std::numeric_limits<float>::max());
-    for (uint32_t i = 0; i < count; i++)
-    {
-        min = glm::min(min, coords[i]);
-        max = glm::max(max, coords[i]);
-    }
-}
+} // namespace MUtils

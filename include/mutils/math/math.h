@@ -1,10 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <functional>
 #include <ostream>
-#include <cassert>
 
 // This just saves using a library like glm (my personal preference)
 namespace MUtils
@@ -54,6 +54,17 @@ struct NVec2
         return !(*this == rhs);
     }
 };
+
+template <class T>
+inline NVec2<T> Min(const NVec2<T>& lhs, const NVec2<T>& rhs)
+{
+    return NVec2<T>(std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y));
+}
+template <class T>
+inline NVec2<T> Max(const NVec2<T>& lhs, const NVec2<T>& rhs)
+{
+    return NVec2<T>(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y));
+}
 
 template <class T>
 inline NVec2<T> operator+(const NVec2<T>& lhs, const NVec2<T>& rhs)
@@ -119,16 +130,6 @@ template <class T>
 inline NVec2<T> Clamp(const NVec2<T>& val, const NVec2<T>& min, const NVec2<T>& max)
 {
     return NVec2<T>(std::min(max.x, std::max(min.x, val.x)), std::min(max.y, std::max(min.y, val.y)));
-}
-template <class T>
-inline NVec2<T> Min(const NVec2<T>& val, const NVec2<T>& c)
-{
-    return NVec2<T>(std::min(val.x, c.x), std::min(val.y, c.y));
-}
-template <class T>
-inline NVec2<T> Max(const NVec2<T>& val, const NVec2<T>& c)
-{
-    return NVec2<T>(std::max(val.x, c.x), std::max(val.y, c.y));
 }
 template <class T>
 inline T ManhattanDistance(const NVec2<T>& l, const NVec2<T>& r)
@@ -211,7 +212,7 @@ struct NVec3
             return x;
         }
     }
-    
+
     const T& operator[](size_t index) const
     {
         switch (index)
@@ -228,6 +229,16 @@ struct NVec3
         }
     }
 };
+template <class T>
+inline NVec3<T> Min(const NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    return NVec3<T>(std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y), std::min(lhs.z, rhs.z));
+}
+template <class T>
+inline NVec3<T> Max(const NVec3<T>& lhs, const NVec3<T>& rhs)
+{
+    return NVec3<T>(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z));
+}
 template <class T>
 inline NVec3<T> operator+(const NVec3<T>& lhs, const NVec3<T>& rhs)
 {
@@ -265,7 +276,6 @@ inline NVec3<T> operator*(const NVec3<T>& lhs, const NVec3<T>& rhs)
 {
     return NVec3<T>(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z);
 }
-
 
 template <class T>
 inline NVec3<T> operator/(const NVec3<T>& lhs, T val)
@@ -321,19 +331,6 @@ inline NVec3<T> Clamp(const NVec3<T>& val, const NVec3<T>& min, const NVec3<T>& 
         std::min(max.y, std::max(min.y, val.y)),
         std::min(max.z, std::max(min.z, val.z)));
 }
-
-template <class T>
-inline NVec3<T> Min(const NVec3<T>& val, const NVec3<T>& c)
-{
-    return NVec3<T>(std::min(val.x, c.x), std::min(val.y, c.y), std::min(val.z, c.z));
-}
-
-template <class T>
-inline NVec3<T> Max(const NVec3<T>& val, const NVec3<T>& c)
-{
-    return NVec3<T>(std::max(val.x, c.x), std::max(val.y, c.y), std::max(val.z, c.z));
-}
-
 inline uint32_t ToPacked(const NVec3<float>& val)
 {
     uint32_t col = 0;
@@ -467,7 +464,7 @@ struct NVec4
             return x;
         }
     }
-    
+
     const T& operator[](size_t index) const
     {
         switch (index)
@@ -487,6 +484,16 @@ struct NVec4
     }
 };
 template <class T>
+inline NVec4<T> Min(const NVec4<T>& lhs, const NVec4<T>& rhs)
+{
+    return NVec4<T>(std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y), std::min(lhs.z, rhs.z), std::min(lhs.w, rhs.w));
+}
+template <class T>
+inline NVec4<T> Max(const NVec4<T>& lhs, const NVec4<T>& rhs)
+{
+    return NVec4<T>(std::max(lhs.x, rhs.x), std::max(lhs.y, rhs.y), std::max(lhs.z, rhs.z), std::max(lhs.w, rhs.w));
+}
+template <class T>
 inline NVec4<T> operator+(const NVec4<T>& lhs, const NVec4<T>& rhs)
 {
     return NVec4<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w);
@@ -495,6 +502,11 @@ template <class T>
 inline NVec4<T> operator-(const NVec4<T>& lhs, const NVec4<T>& rhs)
 {
     return NVec4<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
+}
+template <class T>
+inline NVec4<T> operator-(const NVec4<T>& lhs)
+{
+    return NVec4<T>(-lhs.x, -lhs.y, -lhs.z, -lhs.w);
 }
 template <class T>
 inline NVec4<T>& operator+=(NVec4<T>& lhs, const NVec4<T>& rhs)
@@ -525,7 +537,6 @@ inline NVec4<T> operator*(const NVec4<T>& lhs, const NVec4<T>& rhs)
 {
     return NVec4<T>(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w);
 }
-
 
 template <class T>
 inline NVec4<T> operator/(const NVec4<T>& lhs, T val)
@@ -585,18 +596,6 @@ inline NVec4<T> Clamp(const NVec4<T>& val, const NVec4<T>& min, const NVec4<T>& 
         std::min(max.y, std::max(min.y, val.y)),
         std::min(max.z, std::max(min.z, val.z)),
         std::min(max.w, std::max(min.w, val.w)));
-}
-
-template <class T>
-inline NVec4<T> Min(const NVec4<T>& val, const NVec4<T>& c)
-{
-    return NVec4<T>(std::min(val.x, c.x), std::min(val.y, c.y), std::min(val.z, c.z), std::min(val.w, c.w));
-}
-
-template <class T>
-inline NVec4<T> Max(const NVec4<T>& val, const NVec4<T>& c)
-{
-    return NVec4<T>(std::max(val.x, c.x), std::max(val.y, c.y), std::max(val.z, c.z), std::max(val.w, c.w));
 }
 
 inline uint32_t ToPacked(const NVec4<float>& val)
@@ -845,6 +844,30 @@ struct NRect
         bottomRightPx.y += y;
     }
 
+    void Adjust(const NVec2<T>& v)
+    {
+        Adjust(v.x, v.y);
+    }
+
+    void Adjust(const NVec4<T>& v)
+    {
+        Adjust(v.x, v.y);
+    }
+
+    NRect<T> Adjusted(const NVec4<T>& v) const
+    {
+        NRect<T> adj(topLeftPx, bottomRightPx);
+        adj.Adjust(v);
+        return adj;
+    }
+    
+    NRect<T> Adjusted(const NVec2<T>& v) const
+    {
+        NRect<T> adj(topLeftPx, bottomRightPx);
+        adj.Adjust(v);
+        return adj;
+    }
+
     void Move(T x, T y)
     {
         auto width = Width();
@@ -853,6 +876,38 @@ struct NRect
         topLeftPx.y = y;
         bottomRightPx.x = x + width;
         bottomRightPx.y = y + height;
+    }
+
+    void Move(const NVec2<T>& v)
+    {
+        Move(v.x, v.y);
+    }
+
+    NRect<T> Moved(const NVec2<T>& v) const
+    {
+        NRect<T> adj(topLeftPx, bottomRightPx);
+        adj.Move(v);
+        return adj;
+    }
+
+    void Expand(T x, T y, T z, T w)
+    {
+        topLeftPx.x -= x;
+        topLeftPx.y -= y;
+        bottomRightPx.x += z;
+        bottomRightPx.y += w;
+    }
+
+    void Expand(const NVec4<T> v)
+    {
+        Expand(v.x, v.y, v.z, v.w);
+    }
+
+    NRect<T> Expanded(const NVec4<T> v) const
+    {
+        NRect<T> adj(topLeftPx, bottomRightPx);
+        adj.Expand(v);
+        return adj;
     }
 
     bool operator==(const NRect<T>& region) const
@@ -879,6 +934,16 @@ template <class T>
 inline NRect<T> operator-(const NRect<T>& lhs, const NRect<T>& rhs)
 {
     return NRect<T>(lhs.topLeftPx.x - rhs.topLeftPx.x, lhs.bottomRightPx.y - rhs.topLeftPx.y);
+}
+template <class T>
+inline NRect<T> operator-(const NRect<T>& lhs, const NVec2<T>& pos)
+{
+    return lhs.Adjusted(-pos);
+}
+template <class T>
+inline NRect<T> operator+(const NRect<T>& lhs, const NVec2<T>& pos)
+{
+    return lhs.Adjusted(pos);
 }
 template <class T>
 inline std::ostream& operator<<(std::ostream& str, const NRect<T>& region)
@@ -951,12 +1016,12 @@ inline void hash_combine(size_t& seed, size_t hash)
 
 inline float degToRad(float deg)
 {
-	return deg / 180.0f * 3.1415926f;
+    return deg / 180.0f * 3.1415926f;
 }
 
 inline float radToDeg(float rad)
 {
-	return rad / 3.1415926f * 180.0f;
+    return rad / 3.1415926f * 180.0f;
 }
 
 } // namespace MUtils
