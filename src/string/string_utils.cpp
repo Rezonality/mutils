@@ -44,7 +44,6 @@ string string_url_encode(const string& value)
     return escaped.str();
 }
 
-std::unordered_map<uint32_t, std::string> StringId::stringLookup;
 std::string string_tolower(const std::string& str)
 {
     std::string copy = str;
@@ -307,7 +306,8 @@ std::vector<std::string> string_split_delim_string(const std::string& str, const
     std::vector<std::string> ret;
     std::size_t current, previous = 0;
     current = str.find(delim);
-    while (current != std::string::npos) {
+    while (current != std::string::npos)
+    {
         ret.push_back(str.substr(previous, current - previous));
         previous = current + 1;
         current = str.find(delim, previous);
@@ -443,27 +443,28 @@ std::vector<std::string> string_split_lines(const std::string& text)
 StringId::StringId(const char* pszString)
 {
     id = murmur_hash(pszString, (int)strlen(pszString), 0);
-    stringLookup[id] = pszString;
+    LookupInstance()[id] = pszString;
 }
 
 StringId::StringId(const std::string& str)
 {
     id = murmur_hash(str.c_str(), (int)str.length(), 0);
-    stringLookup[id] = str;
+    LookupInstance()[id] = str;
 }
 
 const StringId& StringId::operator=(const char* pszString)
 {
     id = murmur_hash(pszString, (int)strlen(pszString), 0);
-    stringLookup[id] = pszString;
+    LookupInstance()[id] = pszString;
     return *this;
 }
 
 const StringId& StringId::operator=(const std::string& str)
 {
     id = murmur_hash(str.c_str(), (int)str.length(), 0);
-    stringLookup[id] = str;
+    LookupInstance()[id] = str;
     return *this;
 }
+
 
 } // namespace MUtils

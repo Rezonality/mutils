@@ -1,9 +1,9 @@
 #pragma once
 
 #include <functional>
-#include <string>
 #include <ostream>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -114,18 +114,22 @@ struct StringId
 
     std::string ToString() const
     {
-        auto itr = stringLookup.find(id);
-        if (itr == stringLookup.end())
+        auto itr = LookupInstance().find(id);
+        if (itr == LookupInstance().end())
         {
             return "murmur:" + std::to_string(id);
         }
         return itr->second;
     }
 
-    static std::unordered_map<uint32_t, std::string> stringLookup;
+    std::unordered_map<uint32_t, std::string>& StringId::LookupInstance() const
+    {
+        static std::unordered_map<uint32_t, std::string> look;
+        return look;
+    }
 };
 
-inline std::ostream& operator<<(std::ostream& str, StringId id)
+inline std::ostream& operator<<(std::ostream& str, const StringId& id)
 {
     str << id.ToString();
     return str;

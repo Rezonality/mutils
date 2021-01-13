@@ -1,4 +1,4 @@
-//#include "glm/gtc/quaternion.hpp"
+#include <cmath>
 
 #include <mutils/math/math.h>
 #include <mutils/math/math_utils.h>
@@ -11,13 +11,13 @@ namespace MUtils
 {
 double RandRange(double min, double max)
 {
-    std::uniform_real_distribution<double> dist(min, std::nextafter(max, DBL_MAX));
+    std::uniform_real_distribution<double> dist(min, std::nextafter(max, std::numeric_limits<double>::max()));
     return dist(mt);
 }
 
 float RandRange(float min, float max)
 {
-    std::uniform_real_distribution<float> dist(min, std::nextafter(max, FLT_MAX));
+    std::uniform_real_distribution<float> dist(min, std::nextafter(max, std::numeric_limits<float>::max()));
     return dist(mt);
 }
 
