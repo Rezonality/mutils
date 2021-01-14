@@ -122,7 +122,7 @@ struct StringId
         return itr->second;
     }
 
-    std::unordered_map<uint32_t, std::string>& StringId::LookupInstance() const
+    std::unordered_map<uint32_t, std::string>& LookupInstance() const
     {
         static std::unordered_map<uint32_t, std::string> look;
         return look;
