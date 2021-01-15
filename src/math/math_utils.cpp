@@ -126,7 +126,7 @@ NVec4f Desaturate(const NVec4f& col)
     g += .5f;
     b += .5f;
 
-    auto sq = std::sqrtf((r * r) + (g * g) + (b * b));
+    auto sq = sqrtf((r * r) + (g * g) + (b * b));
     if (sq != 0.0f)
         sq = 1.0f / sq;
 
