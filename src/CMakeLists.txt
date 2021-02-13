@@ -66,6 +66,7 @@ set(UTILS_SOURCES
     ${MUTILS_ROOT}/include/mutils/thread/mempool.h
     ${MUTILS_ROOT}/include/mutils/ui/colors.h
     ${MUTILS_ROOT}/include/mutils/ui/theme.h
+    ${MUTILS_ROOT}/include/mutils/ui/style.h
     ${MUTILS_ROOT}/include/mutils/ui/dpi.h
     ${MUTILS_ROOT}/include/mutils/ui/fbo.h
     ${MUTILS_ROOT}/include/mutils/ui/imgui_extras.h

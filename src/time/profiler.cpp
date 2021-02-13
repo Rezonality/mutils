@@ -597,7 +597,7 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
     auto drawRegions = [&dragTimeRange](const auto& region, const auto& framesStartTime, const auto& framesDuration, auto& regionData, auto& regionDisplayStart, const auto& maxTime, const auto& limitTime, const auto& color1, const auto& color2) {
         const NVec2f candleRegionSize = region.Size();
         const auto pDrawList = ImGui::GetWindowDrawList();
-        const auto LimitColor = ThemeManager::Instance().GetColor(ThemeColor::Error);
+        const auto LimitColor = ThemeManager::Instance().Get(color_Error);
 
         auto timePerPixel = framesDuration / int64_t(region.Width());
         auto MaxRegion = int64_t(gCurrentRegion);
@@ -731,10 +731,10 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
         assert(dragTimeRange.x <= dragTimeRange.y);
     };
 
-    const auto FrameCandleColor = ThemeManager::Instance().GetColor(ThemeColor::AccentColor1);
-    const auto FrameCandleAltColor = ThemeManager::Instance().GetColor(ThemeColor::AccentColor2) * .85f;
-    const auto RegionCandleColor = ThemeManager::Instance().GetColor(ThemeColor::Warning);
-    const auto RegionCandleAltColor = ThemeManager::Instance().GetColor(ThemeColor::Warning) * .85f;
+    const auto FrameCandleColor = ThemeManager::Instance().Get(color_AccentColor1);
+    const auto FrameCandleAltColor = ThemeManager::Instance().Get(color_AccentColor2) * .85f;
+    const auto RegionCandleColor = ThemeManager::Instance().Get(color_Warning);
+    const auto RegionCandleAltColor = ThemeManager::Instance().Get(color_Warning) * .85f;
     const auto framesStartTime = gFrameData[int64_t(gFrameCandleRange.x)].startTime;
     const auto framesDuration = gFrameData[int64_t(gFrameCandleRange.y)].startTime - framesStartTime;
 
