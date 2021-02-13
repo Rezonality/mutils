@@ -71,6 +71,13 @@ std::string string_from_value(const T& t)
     return oss.str();
 }
 
+template<typename T>
+std::string string_from_value(const T &t, int precision) {
+    std::ostringstream oss;
+    oss << std::setprecision(precision) << t;
+    return oss.str();
+}
+
 template <typename T>
 T string_to_value(const std::string& s)
 {

@@ -1,0 +1,5 @@
+#define sexp_so_extension ".dll"
+    #define sexp_default_module_path ""
+    #define sexp_platform "windows"
+    #define sexp_version ""
+    #define sexp_release_name "oxygen"

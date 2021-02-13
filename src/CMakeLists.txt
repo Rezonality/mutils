@@ -4,7 +4,6 @@ find_package(gsl-lite CONFIG REQUIRED)
 find_package(unofficial-concurrentqueue CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
 find_package(gl3w CONFIG REQUIRED)
 
 # Used Packages external to vcpkg
@@ -115,6 +114,25 @@ set (IMGUIFILEDIALOG_SOURCE
     ${M3RDPARTY_DIR}/imguifiledialog/ImGuiFileDialog/ImGuiFileDialogConfig.h
     )
 
+set(IMGUI_SOURCE
+    ${M3RDPARTY_DIR}/imgui/imconfig.h
+    ${M3RDPARTY_DIR}/imgui/imgui.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui.h
+    ${M3RDPARTY_DIR}/imgui/imgui_demo.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui_draw.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui_internal.h
+    ${M3RDPARTY_DIR}/imgui/imgui_tables.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui_widgets.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui_freetype.cpp
+    ${M3RDPARTY_DIR}/imgui/imstb_rectpack.h
+    ${M3RDPARTY_DIR}/imgui/imstb_textedit.h
+    ${M3RDPARTY_DIR}/imgui/imstb_truetype.h
+    ${M3RDPARTY_DIR}/imgui/imgui_impl_opengl3.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui_impl_opengl3.h
+    ${M3RDPARTY_DIR}/imgui/imgui_impl_sdl.cpp
+    ${M3RDPARTY_DIR}/imgui/imgui_impl_sdl.h
+)
+
 set (YOGA_SOURCE
     ${M3RDPARTY_DIR}/yoga/yoga/Utils.cpp
     ${M3RDPARTY_DIR}/yoga/yoga/YGConfig.cpp
@@ -200,6 +218,7 @@ add_library(MUtils STATIC
     ${YOGA_SOURCE}
     ${CLIP_SOURCE}
     ${IMGUIFILEDIALOG_SOURCE}
+    ${IMGUI_SOURCE}
     ${JANET_SOURCE}
     ${MPC_SOURCE}
     ${ORCA_SOURCE}
@@ -245,6 +264,7 @@ target_include_directories(MUtils
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/janet>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/tfd>
+    $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/imgui>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/chibi/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/ctti/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/yoga>
@@ -267,7 +287,6 @@ target_include_directories(MUtils
 
 target_link_libraries(MUtils PUBLIC
     SDL2::SDL2-static
-    imgui::imgui
     gsl::gsl-lite-v1
     fmt::fmt-header-only
     unofficial::gl3w::gl3w
@@ -335,6 +354,10 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/janet
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/lexertk
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/imgui
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 

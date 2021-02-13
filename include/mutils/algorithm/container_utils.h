@@ -119,4 +119,18 @@ V map_get_with_default(const  std::map <K, V> & m, const K & key, const V & defv
     }
 }
 
+template <template<class,class,class...> class C, typename K, typename V, typename F, typename... Args>
+void map_apply(C<K,V,Args...>& m, K const& key, const V & defVal, F fn)
+{
+    typename C<K,V,Args...>::iterator it = m.find( key );
+    if (it == m.end())
+    {
+        m[key] = defVal;
+        fn(m[key]);
+        return;
+    }
+
+    fn(it->second);
+}
+
 }

@@ -2,7 +2,7 @@
 
 #include <SDL.h>
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 
 #include <mutils/file/file.h>
 #include <mutils/math/math.h>

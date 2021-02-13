@@ -1,0 +1,8 @@
+D:/dev/rez/mutils/ninja/CMakeFiles/rebuild_cache.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/test.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/MUtils.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/install/local.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/install.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/edit_cache.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/unittests.dir
+D:/dev/rez/mutils/ninja/CMakeFiles/list_install_components.dir

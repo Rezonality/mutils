@@ -56,6 +56,11 @@ struct NVec2
 };
 
 template <class T>
+inline NVec2<T> Abs(const NVec2<T>& lhs)
+{
+    return NVec2<T>(std::abs(lhs.x), std::abs(lhs.y));
+}
+template <class T>
 inline NVec2<T> Min(const NVec2<T>& lhs, const NVec2<T>& rhs)
 {
     return NVec2<T>(std::min(lhs.x, rhs.x), std::min(lhs.y, rhs.y));
@@ -194,7 +199,7 @@ struct NVec3
 
     bool operator!=(const NVec3<T>& rhs) const
     {
-        return !(*this = rhs);
+        return !(*this == rhs);
     }
 
     T& operator[](size_t index)
@@ -229,6 +234,11 @@ struct NVec3
         }
     }
 };
+template <class T>
+inline NVec3<T> Abs(const NVec3<T>& lhs)
+{
+    return NVec3<T>(std::abs(lhs.x), std::abs(lhs.y), std::abs(lhs.z));
+}
 template <class T>
 inline NVec3<T> Min(const NVec3<T>& lhs, const NVec3<T>& rhs)
 {
@@ -444,7 +454,7 @@ struct NVec4
 
     bool operator!=(const NVec4<T>& rhs) const
     {
-        return !(*this = rhs);
+        return !(*this == rhs);
     }
 
     T& operator[](size_t index)
@@ -483,6 +493,11 @@ struct NVec4
         }
     }
 };
+template <class T>
+inline NVec4<T> Abs(const NVec4<T>& lhs)
+{
+    return NVec4<T>(std::abs(lhs.x), std::abs(lhs.y), std::abs(lhs.z), std::abs(lhs.w));
+}
 template <class T>
 inline NVec4<T> Min(const NVec4<T>& lhs, const NVec4<T>& rhs)
 {
@@ -828,30 +843,32 @@ struct NRect
         bottomRightPx = topLeftPx + size;
     }
 
-    void Adjust(T x, T y, T z, T w)
+    NRect<T>& Adjust(T x, T y, T z, T w)
     {
         topLeftPx.x += x;
         topLeftPx.y += y;
         bottomRightPx.x += z;
         bottomRightPx.y += w;
+        return *this;
     }
 
-    void Adjust(T x, T y)
+    NRect<T>& Adjust(T x, T y)
     {
         topLeftPx.x += x;
         topLeftPx.y += y;
         bottomRightPx.x += x;
         bottomRightPx.y += y;
+        return *this;
     }
 
-    void Adjust(const NVec2<T>& v)
+    NRect<T>& Adjust(const NVec2<T>& v)
     {
-        Adjust(v.x, v.y);
+        return Adjust(v.x, v.y);
     }
 
-    void Adjust(const NVec4<T>& v)
+    NRect<T>& Adjust(const NVec4<T>& v)
     {
-        Adjust(v.x, v.y);
+        return Adjust(v.x, v.y, v.z, v.w);
     }
 
     NRect<T> Adjusted(const NVec4<T>& v) const
@@ -868,7 +885,7 @@ struct NRect
         return adj;
     }
 
-    void Move(T x, T y)
+    NRect<T>& Move(T x, T y)
     {
         auto width = Width();
         auto height = Height();
@@ -876,11 +893,12 @@ struct NRect
         topLeftPx.y = y;
         bottomRightPx.x = x + width;
         bottomRightPx.y = y + height;
+        return *this;
     }
 
-    void Move(const NVec2<T>& v)
+    NRect<T>& Move(const NVec2<T>& v)
     {
-        Move(v.x, v.y);
+        return Move(v.x, v.y);
     }
 
     NRect<T> Moved(const NVec2<T>& v) const
@@ -890,17 +908,18 @@ struct NRect
         return adj;
     }
 
-    void Expand(T x, T y, T z, T w)
+    NRect<T>& Expand(T x, T y, T z, T w)
     {
         topLeftPx.x -= x;
         topLeftPx.y -= y;
         bottomRightPx.x += z;
         bottomRightPx.y += w;
+        return *this;
     }
 
-    void Expand(const NVec4<T> v)
+    NRect<T>& Expand(const NVec4<T> v)
     {
-        Expand(v.x, v.y, v.z, v.w);
+        return Expand(v.x, v.y, v.z, v.w);
     }
 
     NRect<T> Expanded(const NVec4<T> v) const
@@ -908,6 +927,53 @@ struct NRect
         NRect<T> adj(topLeftPx, bottomRightPx);
         adj.Expand(v);
         return adj;
+    }
+
+    NRect<T>& Clamp(const NRect<T>& r)
+    {
+        T x, y, z, w;
+        x = topLeftPx.x;
+        y = topLeftPx.y;
+        z = Width();
+        w = Height();
+        if (x > r.Right())
+        {
+            x = r.Right();
+            z = 0.0;
+        }
+        else if (x < r.Left())
+        {
+            z = (x + z) - r.Left();
+            x = r.Left();
+            z = std::max(0.0f, z);
+        }
+
+        if (y > r.Bottom())
+        {
+            y = r.Bottom();
+            w = 0.0;
+        }
+        else if (y < r.Top())
+        {
+            w = (y + w) - r.Top();
+            y = r.Top();
+            w = std::max(0.0f, w);
+        }
+
+        if ((x + z) >= r.Right())
+        {
+            z = r.Right() - x;
+            z = std::max(0.0f, z);
+        }
+
+        if ((y + w) >= r.Bottom())
+        {
+            w = r.Bottom() - y;
+            w = std::max(0.0f, w);
+        }
+        topLeftPx = NVec2<T>(x, y);
+        bottomRightPx = NVec2<T>(x + z, y + w);
+        return *this;
     }
 
     bool operator==(const NRect<T>& region) const

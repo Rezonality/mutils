@@ -1,4 +1,5 @@
 #include <bitset>
+#include <vector>
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/constants.hpp>
 
