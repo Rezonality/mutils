@@ -25,6 +25,8 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+Ninja
+
 imgui.ini
 git_stats
 # Visual Studio 2015 cache/options directory
