@@ -57,7 +57,7 @@ uint64_t timer_get_time_now(timerT<T>& timer)
     // NOTE! This is using high resolution clock and is not relative to UTC or any other calendar!
     // https://stackoverflow.com/questions/26128035/c11-how-to-print-out-high-resolution-clock-time-point
     // If you want a real-world clock, it won't do
-    return duration_cast<nanoseconds>(timer.clock.now().time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(timer.clock.now().time_since_epoch()).count();
 }
 
 template<class T>
