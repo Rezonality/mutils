@@ -89,14 +89,15 @@ uint64_t timer_to_epoch_utc_seconds(const timerT<T>& timer)
     return (timer.startTime / 1000000000) + diff.count();
 }
 
+double timer_to_seconds(uint64_t value);
+double timer_to_ms(uint64_t value);
+
 template<class T>
 double timer_get_elapsed_seconds(const timerT<T>& timer)
 {
     return timer_to_seconds(timer_get_elapsed(timer));
 }
 
-double timer_to_seconds(uint64_t value);
-double timer_to_ms(uint64_t value);
 
 struct TimeRange
 {
