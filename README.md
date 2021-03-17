@@ -20,7 +20,7 @@ It is built like this:
 
 ``` bash
 config.bat OR config.sh
-build_all.bat OR build.sh
+build.bat OR build.sh
 ```
 
 Now in your project CMakeLists.txt, you can add the following to reference the library and pull in all the header paths.  Note there are no include/library defines; the target_link_libraries is enough to pull all the necessary things in.
