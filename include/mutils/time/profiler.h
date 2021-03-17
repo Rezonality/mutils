@@ -58,6 +58,16 @@ struct ThreadData
     std::vector<uint32_t> entryStack;
 };
 
+struct ProfileSettings
+{
+    uint32_t MaxThreads = 120;
+    uint32_t MaxCallStack = 20;
+    uint32_t MaxEntriesPerThread = 100000;
+    uint32_t MaxFrames = 10000;
+    uint32_t MaxRegions = 10000;
+};
+
+void SetProfileSettings(const ProfileSettings& settings);
 void Init();
 void NewFrame();
 void NameThread(const char* pszName);

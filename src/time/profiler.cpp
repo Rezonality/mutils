@@ -2,9 +2,9 @@
 #include <atomic>
 #include <cassert>
 
-#include <mutils/time/profiler.h>
 #include <mutils/math/imgui_glm.h>
 #include <mutils/math/math_utils.h>
+#include <mutils/time/profiler.h>
 #include <mutils/ui/dpi.h>
 
 #include "imgui.h"
@@ -16,7 +16,7 @@ using namespace std::chrono;
 // Initial prototypes used:
 // https://gist.github.com/CedricGuillemet/fc82e7a9b2f703ff1ebf
 // https://github.com/arnaud-jamin/imgui/blob/master/profiler.cpp
-// 
+//
 // This one is better at spans that cover frame boundaries, uses cross platform cpp libraries
 // instead of OS specific ones.
 // No claims made about performance, but in practice has been very useful in finding bugs
@@ -27,7 +27,7 @@ using namespace std::chrono;
 // Requires some helper code from my mutils library (https://github.com/Rezonality/MUtils) for:
 // - NVec/NRect
 // - murmur hash (for text to color)
-// - dpi 
+// - dpi
 // - fmt for text formatting
 // I typically use this as a 'one shot, collect frames' debugger.  I hit the Pause/Resume button at interesting spots and collect a bunch of frames.
 // You have to pause to navigate/inspect.
@@ -42,17 +42,12 @@ using namespace Theme;
 namespace Profiler
 {
 
+ProfileSettings settings;
+
 namespace
 {
 
 const unsigned int frameMarkerColor = 0x22FFFFFF;
-
-const uint32_t MaxThreads = 50;
-const uint32_t MaxCallStack = 20;
-const uint32_t MaxEntriesPerThread = 100000;
-const uint32_t MaxFrames = 10000;
-const uint32_t MaxRegions = 10000;
-
 const uint32_t MinLeadInFrames = 3;
 const uint32_t MinFrame = MinLeadInFrames - 2;
 const uint32_t MinSizeForTextDisplay = 5;
@@ -95,14 +90,20 @@ NVec2i gVisibleFrames = NVec2i(0, 0);
 
 } // namespace
 
+// Optionally call this before doing any profiler calls to change the defaults
+void SetProfileSettings(const ProfileSettings& s)
+{
+    settings = s;
+}
+
 // Run Init every time a profile is started
 void Init()
 {
-    gThreadData.resize(MaxThreads);
+    gThreadData.resize(settings.MaxThreads);
 
     gProfilerGeneration++;
 
-    for (uint32_t iZero = 0; iZero < MaxThreads; iZero++)
+    for (uint32_t iZero = 0; iZero < settings.MaxThreads; iZero++)
     {
         ThreadData* threadData = &gThreadData[iZero];
         threadData->initialized = iZero == 0;
@@ -111,17 +112,17 @@ void Init()
         threadData->maxTime = 0;
         threadData->currentEntry = 0;
         threadData->name = std::string("Thread ") + std::to_string(iZero);
-        threadData->entries.resize(MaxEntriesPerThread);
+        threadData->entries.resize(settings.MaxEntriesPerThread);
         memset(threadData->entries.data(), 0, sizeof(ProfilerEntry) * threadData->entries.size());
         threadData->entryStack.resize(50);
         threadData->callStackDepth = 0;
     }
 
-    gFrameData.resize(MaxFrames);
-    gRegionData.resize(MaxRegions);
+    gFrameData.resize(settings.MaxFrames);
+    gRegionData.resize(settings.MaxRegions);
     for (auto& frame : gFrameData)
     {
-        frame.frameThreads.resize(MaxThreads);
+        frame.frameThreads.resize(settings.MaxThreads);
         frame.frameThreadCount = 0;
         for (auto& threadInfo : frame.frameThreads)
         {
@@ -151,7 +152,7 @@ void InitThread()
 {
     std::unique_lock<std::mutex> lk(gMutex);
 
-    for (uint32_t iThread = 0; iThread < MaxThreads; iThread++)
+    for (uint32_t iThread = 0; iThread < settings.MaxThreads; iThread++)
     {
         ThreadData* threadData = &gThreadData[iThread];
         if (!threadData->initialized)
@@ -161,6 +162,7 @@ void InitThread()
             gGenerationTLS = gProfilerGeneration;
             threadData->currentEntry = 0;
             threadData->initialized = true;
+
             return;
         }
     }
@@ -222,19 +224,22 @@ void Reset()
 
 bool CheckEndState()
 {
-    if (gThreadData[gThreadIndexTLS].currentEntry >= MaxEntriesPerThread)
+    if (gThreadData[gThreadIndexTLS].currentEntry >= settings.MaxEntriesPerThread)
     {
         gPaused = true;
+        gRequestPause = true;
     }
 
-    if (gCurrentFrame >= MaxFrames)
+    if (gCurrentFrame >= settings.MaxFrames)
     {
         gPaused = true;
+        gRequestPause = true;
     }
 
-    if (gCurrentRegion >= MaxRegions)
+    if (gCurrentRegion >= settings.MaxRegions)
     {
         gPaused = true;
+        gRequestPause = true;
     }
     return gPaused;
 }
@@ -252,7 +257,7 @@ void PushSectionBase(const char* szSection, unsigned int color, const char* szFi
         return;
     }
 
-    assert(threadData->callStackDepth < MaxCallStack && "Might need to make call stack bigger!");
+    assert(threadData->callStackDepth < settings.MaxCallStack && "Might need to make call stack bigger!");
 
     // check again
     if (gPaused)
@@ -292,6 +297,20 @@ void PushSectionBase(const char* szSection, unsigned int color, const char* szFi
     threadData->minTime = std::min(profilerEntry->startTime, threadData->minTime);
     threadData->maxTime = std::max(profilerEntry->startTime, threadData->maxTime);
 
+    // New thread begin during frame
+    if (threadData->currentEntry == 1)
+    {
+        // Add this thread to the current frame info
+        if (gCurrentFrame > 0)
+        {
+            auto& frame = gFrameData[gCurrentFrame - 1];
+            auto& threadInfo = frame.frameThreads[frame.frameThreadCount];
+            threadInfo.activeEntry = threadData->currentEntry - 1;
+            threadInfo.threadIndex = gThreadIndexTLS;
+            frame.frameThreadCount++;
+        }
+    }
+
     if (gRestarting)
     {
         gRestarting = false;
@@ -310,7 +329,6 @@ void PopSection()
     {
         return;
     }
-
 
     if (gRestarting || gPaused)
     {
@@ -358,7 +376,7 @@ void BeginRegion()
 {
     if (gPaused)
     {
-        return; 
+        return;
     }
 
     // Must get thread data to init the thread
@@ -405,7 +423,7 @@ void NewFrame()
     }
 
     auto& frame = gFrameData[gCurrentFrame];
-    for (uint32_t threadIndex = 0; threadIndex < MaxThreads; threadIndex++)
+    for (uint32_t threadIndex = 0; threadIndex < settings.MaxThreads; threadIndex++)
     {
         auto& thread = gThreadData[threadIndex];
         if (!thread.initialized)
@@ -657,7 +675,7 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
                     auto& data = regionData[int64_t(currentRegion)];
                     regionTimeRange.y = data.endTime;
                     totalDuration += data.endTime - data.startTime;
-                    
+
                     // Find the time region which the mouse has selected
                     if (regionFind)
                     {
@@ -746,7 +764,7 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
 
     if (dragTimeRange.x > dragTimeRange.y)
     {
-        dragTimeRange = NVec2ll(0); 
+        dragTimeRange = NVec2ll(0);
     }
     return dragTimeRange;
 }
