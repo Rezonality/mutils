@@ -612,20 +612,22 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
     }
 
     NVec2ll dragTimeRange = NVec2ll(0);
-    auto drawRegions = [&dragTimeRange](const auto& region, const auto& framesStartTime, const auto& framesDuration, auto& regionData, auto& regionDisplayStart, const auto& maxTime, const auto& limitTime, const auto& color1, const auto& color2) {
+    auto drawRegions = [&dragTimeRange](const auto maxRegion, const auto& region, const auto& framesStartTime, const auto& framesDuration, auto& regionData, auto& regionDisplayStart, const auto& maxTime, const auto& limitTime, const auto& color1, const auto& color2) {
         const NVec2f candleRegionSize = region.Size();
         const auto pDrawList = ImGui::GetWindowDrawList();
-        const auto LimitColor = ThemeManager::Instance().Get(color_Error);
+        const auto MaxCandleColor = ThemeManager::Instance().Get(color_Error);
 
         auto timePerPixel = framesDuration / int64_t(region.Width());
-        auto MaxRegion = int64_t(gCurrentRegion);
+
+        regionDisplayStart = std::min(regionDisplayStart, int64_t(maxRegion - 1));
+        regionDisplayStart = std::max(regionDisplayStart, 0ll);
 
         // Keep global counters to simplify finding the regions
         while (regionDisplayStart > 0 && regionData[regionDisplayStart].startTime > framesStartTime)
         {
             regionDisplayStart--;
         }
-        while ((regionDisplayStart < MaxRegion) && regionData[regionDisplayStart].endTime < framesStartTime)
+        while ((regionDisplayStart < maxRegion) && regionData[regionDisplayStart].endTime < framesStartTime)
         {
             regionDisplayStart++;
         }
@@ -634,47 +636,75 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
         auto pixelTime = framesStartTime - timePerPixel;
         auto currentRegion = regionDisplayStart;
         auto lastX = -1.0f;
-        auto lastHeight = 0.0f;
-        auto lastLimit = 0.0f;
-        auto colOn = false;
+        auto pendingCandleHeight = 0.0f;
+        auto pendingColorLerp = 0.0f;
+        auto colOn = (currentRegion & 0x1) ? true : false;
         auto regionFind = region.Contains(ImGui::GetIO().MouseClickedPos[0]) && (dragLimits.x != dragLimits.y);
 
         // Walk the pixels
         for (float pixel = region.Left(); pixel < region.Right(); pixel++)
         {
+            // Start of pixel time
             pixelTime += timePerPixel;
 
             // Catch up to the pixel
-            while ((currentRegion < MaxRegion) && (regionData[currentRegion].endTime < pixelTime))
+            while ((currentRegion < maxRegion) && (regionData[currentRegion].endTime < pixelTime))
             {
                 currentRegion++;
             }
 
-            // Don't fall off the end
-            if (currentRegion >= MaxRegion)
+            // Don't fall off the end - if we do, then there are no regions to draw
+            if (currentRegion >= maxRegion)
             {
+                lastX = -1;
                 break;
             }
 
             // We are ahead, move to next pixel
             if (regionData[currentRegion].startTime > (pixelTime + timePerPixel))
             {
+                // Draw the last thing first
+                if (lastX != -1 && pendingCandleHeight != 0.0f)
+                {
+                    // Should probably blend here
+                    auto col = colOn ? color1 : color2;
+                    colOn = !colOn;
+
+                    col = MUtils::Mix(col, MaxCandleColor, pendingColorLerp);
+
+                    pDrawList->AddRectFilled(ImVec2(lastX, region.Bottom() - 1.0f - std::max(1.0f, (pendingCandleHeight * region.Height() - 2.0f))), ImVec2(pixel, region.Bottom() - 1.0f), ToPackedABGR(col));
+                }
+
+                // Remember we aren't in a region now
+                lastX = -1;
+                pendingCandleHeight = 0.0f;
                 continue;
             }
 
-            NVec2ll regionTimeRange;
-            if (currentRegion < MaxRegion)
+            if (currentRegion < maxRegion)
             {
+                NVec2ll regionTimeRange;
                 regionTimeRange.x = regionData[int64_t(currentRegion)].startTime;
 
                 // Collect durations of all candles within this pixel
                 uint32_t count = 0;
                 int64_t totalDuration = 0;
-                while (currentRegion < MaxRegion)
+                while (currentRegion < maxRegion)
                 {
                     auto& data = regionData[int64_t(currentRegion)];
                     regionTimeRange.y = data.endTime;
-                    totalDuration += data.endTime - data.startTime;
+
+                    NVec2ll overlap;
+                    overlap.x = std::max(data.startTime, pixelTime);
+                    overlap.y = std::min(data.endTime, pixelTime + timePerPixel);
+
+                    float overlapRatio = 0.0f;
+                    if (overlap.y > overlap.x)
+                    {
+                        overlapRatio = (overlap.y - overlap.x) / float(timePerPixel);
+                        totalDuration += (data.endTime - data.startTime) * overlapRatio;
+                        count++;
+                    }
 
                     // Find the time region which the mouse has selected
                     if (regionFind)
@@ -690,7 +720,6 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
                         }
                     }
 
-                    count++;
                     if (regionData[currentRegion].endTime > (pixelTime + timePerPixel))
                     {
                         break;
@@ -705,8 +734,8 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
                     float candleHeight = totalDuration / float(maxTime);
                     candleHeight = std::min(candleHeight, 1.0f);
 
-                    float candleLimit = totalDuration / float(limitTime);
-                    candleLimit = std::clamp(candleLimit, 0.0f, 1.0f);
+                    float candleColorLerp = totalDuration / float(limitTime);
+                    candleColorLerp = std::clamp(candleColorLerp, 0.0f, 1.0f);
 
                     if (lastX == -1)
                     {
@@ -714,20 +743,24 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
                     }
                     else
                     {
-                        if (lastHeight != candleHeight)
+                        if (pendingCandleHeight != candleHeight)
                         {
                             // Should probably blend here
                             auto col = colOn ? color1 : color2;
                             colOn = !colOn;
 
-                            col = MUtils::Mix(col, LimitColor, lastLimit);
+                            col = MUtils::Mix(col, MaxCandleColor, pendingColorLerp);
 
-                            pDrawList->AddRectFilled(ImVec2(lastX, region.Bottom() - 1.0f - std::max(1.0f, (lastHeight * region.Height() - 2.0f))), ImVec2(pixel, region.Bottom() - 1.0f), ToPackedABGR(col));
-                            lastX = pixel;
+                            pDrawList->AddRectFilled(ImVec2(lastX, region.Bottom() - 1.0f - std::max(1.0f, (pendingCandleHeight * region.Height() - 2.0f))), ImVec2(pixel, region.Bottom() - 1.0f), ToPackedABGR(col));
+                            lastX = -1; 
                         }
                     }
-                    lastHeight = candleHeight;
-                    lastLimit = candleLimit;
+                    pendingCandleHeight = candleHeight;
+                    pendingColorLerp = candleColorLerp;
+                }
+                else
+                {
+                    lastX = -1;
                 }
             }
         }
@@ -736,9 +769,9 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
         {
             // Should probably blend here
             auto col = colOn ? color1 : color2;
-            col = MUtils::Mix(col, LimitColor, lastLimit);
+            col = MUtils::Mix(col, MaxCandleColor, pendingColorLerp);
 
-            pDrawList->AddRectFilled(ImVec2(lastX, region.Bottom() - 1.0f - std::max(1.0f, (lastHeight * region.Height() - 2.0f))), ImVec2(region.Right(), region.Bottom() - 1.0f), ToPackedABGR(col));
+            pDrawList->AddRectFilled(ImVec2(lastX, region.Bottom() - 1.0f - std::max(1.0f, (pendingCandleHeight * region.Height() - 2.0f))), ImVec2(region.Right(), region.Bottom() - 1.0f), ToPackedABGR(col));
         }
 
         if (!gCandleDragRect.Empty())
@@ -756,10 +789,10 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
     const auto framesStartTime = gFrameData[int64_t(gFrameCandleRange.x)].startTime;
     const auto framesDuration = gFrameData[int64_t(gFrameCandleRange.y)].startTime - framesStartTime;
 
-    drawRegions(regionFrames, framesStartTime, framesDuration, gFrameData, gFrameDisplayStart, gMaxFrameTime, gMaxFrameTime, FrameCandleColor, FrameCandleAltColor);
+    drawRegions(gCurrentFrame, regionFrames, framesStartTime, framesDuration, gFrameData, gFrameDisplayStart, gMaxFrameTime, gMaxFrameTime, FrameCandleColor, FrameCandleAltColor);
     regionMin.y += CandleHeight + 2.0f * dpi.scaleFactorXY.y;
 
-    drawRegions(regionRegion, framesStartTime, framesDuration, gRegionData, gRegionDisplayStart, gRegionTimeLimit, gRegionTimeLimit, RegionCandleColor, RegionCandleAltColor);
+    drawRegions(gCurrentRegion, regionRegion, framesStartTime, framesDuration, gRegionData, gRegionDisplayStart, gRegionTimeLimit, gRegionTimeLimit, RegionCandleColor, RegionCandleAltColor);
     regionMin.y += CandleHeight;
 
     if (dragTimeRange.x > dragTimeRange.y)
