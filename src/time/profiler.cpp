@@ -620,7 +620,7 @@ NVec2ll ShowCandles(NVec2f& regionMin, NVec2f& regionMax)
         auto timePerPixel = framesDuration / int64_t(region.Width());
 
         regionDisplayStart = std::min(regionDisplayStart, int64_t(maxRegion - 1));
-        regionDisplayStart = std::max(regionDisplayStart, 0ll);
+        regionDisplayStart = std::max(regionDisplayStart, int64_t(0));
 
         // Keep global counters to simplify finding the regions
         while (regionDisplayStart > 0 && regionData[regionDisplayStart].startTime > framesStartTime)
