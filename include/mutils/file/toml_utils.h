@@ -13,6 +13,9 @@ std::map<std::string, const toml::table&> toml_get_subtables(const toml::value& 
 
 std::vector<float> toml_floats(const toml::value& val);
 std::vector<int> toml_ints(const toml::value& val);
+
+// TODO pass value and use that instead
+std::string toml_table_string(const toml::value& value, const char* pszTable, const char* pszEntry, const char* pszDefault = "");
 NVec3f toml_get_vec3(const toml::table& table, const char* pszName, const NVec3f& def = NVec3f(0.0f));
 NVec4f toml_get_vec4(const toml::table& table, const char* pszName, const NVec4f& def = NVec4f(0.0f));
 NVec4i toml_get_vec4i(const toml::table& table, const char* pszName, const NVec4i& def = NVec4i(0));

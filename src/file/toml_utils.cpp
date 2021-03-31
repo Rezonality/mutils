@@ -67,6 +67,12 @@ std::vector<int> toml_ints(const toml::value& val)
     return std::vector<int>{};
 }
 
+std::string toml_table_string(const toml::value& value, const char* pszTable, const char* pszEntry, const char* pszDefault)
+{
+    const auto table = toml::find_or(value, pszTable, toml::value{});
+    return toml::find_or<std::string>(table, pszEntry, pszDefault);
+}
+
 NVec3f toml_get_vec3(const toml::table& table, const char* pszName, const NVec3f& def)
 {
     NVec3f ret = def;
