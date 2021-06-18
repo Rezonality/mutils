@@ -20,7 +20,8 @@ enum
     ShowDemoWindow = (1 << 0),
     DockingEnable = (1 << 1),
     ViewportsEnable = (1 << 2),
-    HideCursor = (1 << 3)
+    HideCursor = (1 << 3),
+    RefreshOnEvents = (1 << 4) // Only refresh when new events arrive or the client is returning 'RefreshRequired'
 };
 }
 
@@ -43,6 +44,7 @@ struct IAppStarterClient
     virtual void Draw(const NVec2i& displaySize) = 0;
     virtual void DrawGUI(const NVec2i& displaySize) = 0;
     virtual void KeyEvent(const SDL_KeyboardEvent&) {};
+    virtual bool RefreshRequired() const { return false; }
     virtual AppStarterSettings& GetSettings() = 0;
 };
 int sdl_imgui_start(int argCount, char** ppArgs, gsl::not_null<IAppStarterClient*> pClient);
