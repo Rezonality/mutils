@@ -106,6 +106,52 @@ inline bool IsDivisible(T value, T divisor)
     return (value / divisor) * divisor == value;
 }
 
+template <typename T>
+inline T Cube(T f)
+{
+    return f * f * f;
+}
+
+template <typename T>
+inline T Square(T f)
+{
+    return f * f;
+}
+
+// Transcribed from here: explicit form and derivative
+// https://en.wikipedia.org/wiki/B%C3%A9zier_curve#Cubic_B%C3%A9zier_curves
+template <typename T>
+inline T Bezier(float t, T p0, T p1, T p2, T p3)
+{
+    return Cube(1 - t) * p0 + 3 * Square(1 - t) * t * p1 + 3 * (1 - t) * Square(t) * p2 + Cube(t) * p3;
+}
+
+template <typename T>
+inline NVec2<T> Bezier(float t, const NVec2<T>& p0, const NVec2<T>& p1, const NVec2<T>& p2, const NVec2<T>& p3)
+{
+    return NVec2<T>(Bezier(t, p0.x, p1.x, p2.x, p3.x), Bezier(t, p0.y, p1.y, p2.y, p3.y));
+}
+
+template <typename T>
+inline T BezierDerivative(float t, T p0, T p1, T p2, T p3)
+{
+    return 3 * Square(1 - t) * (p1 - p0) + 6 * (1 - t) * t * (p2 - p1) + 3 * Square(t) * (p3 - p2);
+}
+
+// Tangent
+template <typename T>
+inline NVec2<T> BezierDerivative(float t, const NVec2<T>& p0, const NVec2<T>& p1, const NVec2<T>& p2, const NVec2<T>& p3)
+{
+    return NVec2<T>(BezierDerivative(t, p0.x, p1.x, p2.x, p3.x), BezierDerivative(t, p0.y, p1.y, p2.y, p3.y));
+}
+
+// Normal
+template <typename T>
+inline NVec2<T> BezierNormal(float t, const NVec2<T>& p0, const NVec2<T>& p1, const NVec2<T>& p2, const NVec2<T>& p3)
+{
+    auto deriv = BezierDerivative(t, p0, p1, p2, p3);
+    return Normalized(NVec2<T>(-deriv.y, deriv.x));
+}
 /*
 inline uint8_t Log2(uint64_t value)
 {

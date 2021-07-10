@@ -143,7 +143,25 @@ inline T ManhattanDistance(const NVec2<T>& l, const NVec2<T>& r)
 }
 
 template <class T>
-std::ostream& operator<<(std::ostream& str, const NVec2<T>& v)
+inline T LengthSquared(const NVec2<T>& v)
+{
+    return (v.x * v.x) + (v.y * v.y);
+}
+
+template <class T>
+inline T Length(const NVec2<T>& v)
+{
+    return sqrt(LengthSquared(v));
+}
+
+template <class T>
+inline NVec2<T> Normalized(const NVec2<T>& val)
+{
+    return val / Length(val);
+}
+
+template <class T>
+    std::ostream& operator<<(std::ostream& str, const NVec2<T>& v)
 {
     str << "(" << v.x << ", " << v.y << ")";
     return str;
@@ -340,6 +358,24 @@ inline NVec3<T> Clamp(const NVec3<T>& val, const NVec3<T>& min, const NVec3<T>& 
     return NVec3<T>(std::min(max.x, std::max(min.x, val.x)),
         std::min(max.y, std::max(min.y, val.y)),
         std::min(max.z, std::max(min.z, val.z)));
+}
+
+template <class T>
+inline T LengthSquared(const NVec3<T>& v)
+{
+    return (v.x * v.x) + (v.y * v.y) + (v.z * v.z);
+}
+
+template <class T>
+inline T Length(const NVec3<T>& v)
+{
+    return sqrt(LengthSquared(v));
+}
+
+template <class T>
+inline NVec3<T> Normalized(const NVec3<T>& val)
+{
+    return val / Length(val);
 }
 inline uint32_t ToPacked(const NVec3<float>& val)
 {
