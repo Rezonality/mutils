@@ -26,7 +26,7 @@ SOFTWARE.
 */
 
 #include "ImGuiFileDialog.h"
-#include "imgui.h"
+#include "imgui/imgui.h"
 
 #include <float.h>
 #include <string.h> // stricmp / strcasecmp
