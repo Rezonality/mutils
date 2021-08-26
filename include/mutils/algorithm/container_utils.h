@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <string>
 
 namespace MUtils
 {
