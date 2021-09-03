@@ -6,7 +6,7 @@ namespace MUtils
 IListItem* list_root(gsl::not_null<IListItem*> pEvent)
 {
     auto pCheck = pEvent;
-    while (pEvent && pEvent->m_pPrevious)
+    while (pEvent->m_pPrevious)
     {
         pEvent = gsl::not_null<IListItem*>(pEvent->m_pPrevious);
         assert(pEvent != pCheck);
@@ -88,7 +88,6 @@ void list_insert_before(IListItem* pPos, gsl::not_null<IListItem*> pInsert)
     }
 
     assert(pPos);
-    assert(pInsert);
 
     auto pBefore = pPos->m_pPrevious;
     pPos->m_pPrevious = pInsert;
@@ -276,7 +275,7 @@ IListItem* list_disconnect_range(IListItem* pBegin, IListItem* pEnd)
 
 IListItem* list_end(gsl::not_null<IListItem*> pEvent)
 {
-    while (pEvent && pEvent->m_pNext)
+    while (pEvent->m_pNext)
     {
         pEvent = gsl::not_null<IListItem*>(pEvent->m_pNext);
     }
