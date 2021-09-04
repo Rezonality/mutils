@@ -19,7 +19,7 @@ fi
 
 if [ ! -d "../vcpkg/imgui" ]; then
   cd ../vcpkg
-  ./vcpkg install kissfft cppcodec clipp date kubazip tinydir fmt portaudio nanovg libcuckoo foonathan-memory cpp-httplib tinyfiledialogs imgui[sdl2-binding,freetype,opengl3-gl3w-binding] gl3w gsl-lite glm concurrentqueue utfcpp stb catch2 magic-enum nlohmann-json cpptoml toml11 drlibs freetype sdl2 --triplet ${triplet[0]} --recurse
+  ./vcpkg install kissfft cppcodec clipp date kubazip tinydir fmt portaudio nanovg libcuckoo foonathan-memory cpp-httplib tinyfiledialogs imgui[sdl2-binding,freetype,opengl3-binding] gl3w gsl-lite glm concurrentqueue utfcpp stb catch2 magic-enum nlohmann-json cpptoml toml11 drlibs freetype sdl2 --triplet ${triplet[0]} --recurse
   if [ "$(uname)" != "Darwin" ]; then
   ./vcpkg install glib --triplet ${triplet[0]} --recurse
   fi
