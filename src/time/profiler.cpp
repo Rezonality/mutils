@@ -90,10 +90,13 @@ NVec2i gVisibleFrames = NVec2i(0, 0);
 
 } // namespace
 
+void Reset();
+
 // Optionally call this before doing any profiler calls to change the defaults
 void SetProfileSettings(const ProfileSettings& s)
 {
     settings = s;
+    Reset();
 }
 
 // Run Init every time a profile is started
@@ -883,7 +886,7 @@ void ShowProfile(bool* opened)
     double timePerPixels;
 
     auto setTimeRange = [&](NVec2<int64_t> range) {
-        assert(range.y > range.x);
+        assert(range.y >= range.x);
         if ((range.y < range.x) || ((range.y - range.x) < 1000))
         {
             range.x = std::clamp(range.x, minTime, maxTime - 1000);

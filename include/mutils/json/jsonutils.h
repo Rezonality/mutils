@@ -23,7 +23,7 @@ T json_enum_cast(const nlohmann::json& val, T def)
     return def;
 }
 
-std::string json_to_string(const nlohmann::json& val, const char* name, const char* def = "")
+inline std::string json_to_string(const nlohmann::json& val, const char* name, const char* def = "")
 {
     if (val.count(name) != 0)
     {
@@ -35,7 +35,7 @@ std::string json_to_string(const nlohmann::json& val, const char* name, const ch
     return def;
 }
 
-int json_to_int(const nlohmann::json& val, const char* name, int def = 0)
+inline int json_to_int(const nlohmann::json& val, const char* name, int def = 0)
 {
     if (val.count(name) != 0)
     {
@@ -47,7 +47,7 @@ int json_to_int(const nlohmann::json& val, const char* name, int def = 0)
     return def;
 }
 
-bool json_string_to_bool(const nlohmann::json& val, const char* name, bool def = false)
+inline bool json_string_to_bool(const nlohmann::json& val, const char* name, bool def = false)
 {
     auto str = json_to_string(val, name);
     if (str == "true")
@@ -57,7 +57,7 @@ bool json_string_to_bool(const nlohmann::json& val, const char* name, bool def =
     return false;
 }
 
-uint64_t json_to_date(const nlohmann::json& val, const char* name, uint64_t def = 0)
+inline uint64_t json_to_date(const nlohmann::json& val, const char* name, uint64_t def = 0)
 {
     std::string dt = json_to_string(val, name, "");
     if (dt.empty())
