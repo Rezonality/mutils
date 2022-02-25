@@ -6,7 +6,7 @@ else
 CONFIG=$1
 fi
 
-source config_all.sh $CONFIG
+source config.sh $CONFIG
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
 PACKAGE_TYPE=osx

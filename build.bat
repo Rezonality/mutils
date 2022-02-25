@@ -1,4 +1,4 @@
-call config_all.bat
+call config.bat
 
 cd build
 cmake --build . --config Debug && cmake --install . --config Debug --prefix ../../vcpkg/packages/mutils_x64-windows-static-md

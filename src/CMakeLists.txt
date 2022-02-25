@@ -261,6 +261,7 @@ target_include_directories(MUtils
     ${STB_INCLUDE_DIRS}
     ${TINYDIR_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
+    $<BUILD_INTERFACE:${MUTILS_ROOT}/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/janet>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/tfd>

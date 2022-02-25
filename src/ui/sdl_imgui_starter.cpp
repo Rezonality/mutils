@@ -12,9 +12,9 @@
 #include "mutils/ui/dpi.h"
 #include "mutils/ui/sdl_dpi.h"
 
+#include <imgui_freetype.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
-#include <imgui_freetype.h>
 
 #include <GL/gl3w.h>
 using namespace gsl;
@@ -84,7 +84,6 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_MakeCurrent(window, gl_context);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
 
     // Initialize OpenGL loader
     bool err = gl3wInit() != 0;
@@ -165,13 +164,13 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     // Main loop
     bool done = false;
+    bool foundEvents = true;
 
     pClient->InitBeforeDraw();
 
+    SDL_GL_SetSwapInterval(1); // Enable vsync
     while (!done)
     {
-        MUtils::Profiler::NewFrame();
-
         {
             PROFILE_SCOPE(PollSDLEvents);
             // Poll and handle events (inputs, window resize, etc.)
@@ -192,8 +191,19 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
                 {
                     pClient->KeyEvent(event.key);
                 }
+                foundEvents = true;
             }
         }
+
+        if (!foundEvents && (settings.flags & AppStarterFlags::RefreshOnEvents) && !pClient->RefreshRequired())
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
+            continue;
+        }
+
+        foundEvents = false;
+
+        MUtils::Profiler::NewFrame();
 
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
