@@ -281,6 +281,7 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/clip>
     $<INSTALL_INTERFACE:include/tracy>
     $<INSTALL_INTERFACE:include/orca-c>
+    $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include>
     $<INSTALL_INTERFACE:include/nod>
     $<INSTALL_INTERFACE:include/soundpipe/h>
