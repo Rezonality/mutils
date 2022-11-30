@@ -14,7 +14,7 @@ if not exist "..\vcpkg\" (
 
 cd ..\vcpkg
 echo Installing Libraries 
-vcpkg install kissfft cppcodec clipp date kubazip tinydir fmt portaudio nanovg libcuckoo foonathan-memory cpp-httplib tinyfiledialogs gl3w gsl-lite glm concurrentqueue utfcpp stb catch2 magic-enum nlohmann-json cpptoml toml11 drlibs dirent freetype sdl2 --triplet x64-windows-static-md --recurse
+vcpkg install kissfft cppcodec clipp date kubazip tinydir fmt portaudio nanovg libcuckoo foonathan-memory imgui cpp-httplib tinyfiledialogs gl3w gsl-lite glm concurrentqueue utfcpp stb catch2 magic-enum nlohmann-json cpptoml toml11 drlibs dirent freetype sdl2 --triplet x64-windows-static-md --recurse
 cd %~dp0
 
 echo %Time%

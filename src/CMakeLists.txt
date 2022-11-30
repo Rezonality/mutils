@@ -244,7 +244,7 @@ add_library(MUtils::MUtils ALIAS MUtils)
 
 find_path(CPPTOML_INCLUDE_DIRS "cpptoml.h")
 find_path(TOML11_INCLUDE_DIRS "toml.hpp")
-find_path(STB_INCLUDE_DIRS "stb.h")
+find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
 find_path(TINYDIR_INCLUDE_DIRS "tinydir.h")
 find_path(GLM_INCLUDE_DIRS glm/glm.hpp)
 
