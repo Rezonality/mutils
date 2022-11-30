@@ -12,7 +12,7 @@
 #include "mutils/ui/dpi.h"
 #include "mutils/ui/sdl_dpi.h"
 
-#include <imgui_freetype.h>
+//#include <imgui_freetype.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 
@@ -102,23 +102,25 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
 
     if (settings.flags & AppStarterFlags::DockingEnable)
     {
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+        //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
     }
 
     if (settings.flags & AppStarterFlags::ViewportsEnable)
     {
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     }
 
     ImGui::StyleColorsDark();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle& style = ImGui::GetStyle();
+    /*
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         style.WindowRounding = 0.0f;
         style.Colors[ImGuiCol_WindowBg].w = 1.0f;
     }
+    */
 
     // Setup Platform/Renderer bindings
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
@@ -151,7 +153,8 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
     LOG(INFO, "Font Pixel Size: " << fontPixelHeight);
 
     unsigned int flags = 0; // ImGuiFreeType::NoHinting;
-    ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
+    //ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
+    //ImGui::BuildFontAtlas(io.Fonts, flags);
 
     ImGui::GetStyle().ScaleAllSizes(dpi.scaleFactorXY.y);
 
@@ -254,6 +257,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
         // Update and Render additional Platform Windows
         // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
         //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
+        /*
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
@@ -262,6 +266,7 @@ int sdl_imgui_start(int argCount, char** ppArgs, not_null<IAppStarterClient*> pC
             ImGui::RenderPlatformWindowsDefault();
             SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
         }
+        */
 
         {
             PROFILE_SCOPE(SwapWindow)

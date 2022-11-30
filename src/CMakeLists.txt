@@ -5,6 +5,7 @@ find_package(unofficial-concurrentqueue CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(gl3w CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 # Used Packages external to vcpkg
 include(GNUInstallDirs)
@@ -114,25 +115,6 @@ set (IMGUIFILEDIALOG_SOURCE
     ${M3RDPARTY_DIR}/imguifiledialog/ImGuiFileDialog/ImGuiFileDialogConfig.h
     )
 
-set(IMGUI_SOURCE
-    ${M3RDPARTY_DIR}/imgui/imconfig.h
-    ${M3RDPARTY_DIR}/imgui/imgui.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui.h
-    ${M3RDPARTY_DIR}/imgui/imgui_demo.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui_draw.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui_internal.h
-    ${M3RDPARTY_DIR}/imgui/imgui_tables.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui_widgets.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui_freetype.cpp
-    ${M3RDPARTY_DIR}/imgui/imstb_rectpack.h
-    ${M3RDPARTY_DIR}/imgui/imstb_textedit.h
-    ${M3RDPARTY_DIR}/imgui/imstb_truetype.h
-    ${M3RDPARTY_DIR}/imgui/imgui_impl_opengl3.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui_impl_opengl3.h
-    ${M3RDPARTY_DIR}/imgui/imgui_impl_sdl.cpp
-    ${M3RDPARTY_DIR}/imgui/imgui_impl_sdl.h
-)
-
 set (YOGA_SOURCE
     ${M3RDPARTY_DIR}/yoga/yoga/Utils.cpp
     ${M3RDPARTY_DIR}/yoga/yoga/YGConfig.cpp
@@ -206,19 +188,18 @@ SET(SOUNDPIPE_DIR ${MUTILS_ROOT}/m3rdparty/soundpipe)
 SET(SOUNDPIPE_EXTENSIONS_DIR ${MUTILS_ROOT}/m3rdparty/soundpipe_extensions)
 
 file(GLOB_RECURSE SOUNDPIPE_SOURCE "${SOUNDPIPE_DIR}/modules/*.c")
-list (REMOVE_ITEM SOUNDPIPE_SOURCE "${SOUNDPIPE_DIR}/modules/diskin.c")            
+list (REMOVE_ITEM SOUNDPIPE_SOURCE "${SOUNDPIPE_DIR}/modules/diskin.c")
 LIST(APPEND SOUNDPIPE_SOURCE
     ${SOUNDPIPE_DIR}/lib/dr_wav/dr_wav.c
     ${SOUNDPIPE_DIR}/lib/inih/ini.c
     ${SOUNDPIPE_EXTENSIONS_DIR}/modules/oscmorph2d.c)
 
 # Create the library
-add_library(MUtils STATIC 
+add_library(MUtils STATIC
     ${CHIBI_SCHEME_SOURCE}
     ${YOGA_SOURCE}
     ${CLIP_SOURCE}
     ${IMGUIFILEDIALOG_SOURCE}
-    ${IMGUI_SOURCE}
     ${JANET_SOURCE}
     ${MPC_SOURCE}
     ${ORCA_SOURCE}
@@ -255,7 +236,7 @@ target_include_directories(MUtils
     ${MUTILS_ROOT}/include
     ${MUTILS_ROOT}/include/mutils
     ${CMAKE_CURRENT_BINARY_DIR}/include
-    PUBLIC 
+    PUBLIC
     ${CPPTOML_INCLUDE_DIRS}
     ${TOML11_INCLUDE_DIRS}
     ${STB_INCLUDE_DIRS}
@@ -265,7 +246,6 @@ target_include_directories(MUtils
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/janet>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/tfd>
-    $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/imgui>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/chibi/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/ctti/include>
     $<BUILD_INTERFACE:${MUTILS_ROOT}/m3rdparty/yoga>
@@ -281,7 +261,6 @@ target_include_directories(MUtils
     $<INSTALL_INTERFACE:include/clip>
     $<INSTALL_INTERFACE:include/tracy>
     $<INSTALL_INTERFACE:include/orca-c>
-    $<INSTALL_INTERFACE:include/imgui>
     $<INSTALL_INTERFACE:include>
     $<INSTALL_INTERFACE:include/nod>
     $<INSTALL_INTERFACE:include/soundpipe/h>
@@ -295,6 +274,7 @@ target_link_libraries(MUtils PUBLIC
     unofficial::concurrentqueue::concurrentqueue
     tinyfiledialogs::tinyfiledialogs
     freetype
+    imgui::imgui
     )
 
 if (TARGET_LINUX)
@@ -356,10 +336,6 @@ install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/janet
     )
 
 install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/lexertk
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    )
-
-install(DIRECTORY ${MUTILS_ROOT}/m3rdparty/imgui
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 

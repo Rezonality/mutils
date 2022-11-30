@@ -26,7 +26,7 @@ SOFTWARE.
 */
 
 #include "ImGuiFileDialog.h"
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 #include <float.h>
 #include <string.h> // stricmp / strcasecmp
@@ -1108,6 +1108,7 @@ namespace igfd
                 if (m_InputPathActivated)
                 {
 					auto gio = ImGui::GetIO();
+					/*
                     if (ImGui::IsKeyReleased(gio.KeyMap[ImGuiKey_Enter]))
                     {
 						SetPath(std::string(InputPathBuffer));
@@ -1116,7 +1117,7 @@ namespace igfd
 					if (ImGui::IsKeyReleased(gio.KeyMap[ImGuiKey_Escape]))
 					{
 						m_InputPathActivated = false;
-					}
+					}*/
                 }
 #ifdef USE_EXPLORATION_BY_KEYS
                 else
