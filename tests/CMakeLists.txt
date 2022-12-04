@@ -40,6 +40,7 @@ target_link_libraries(unittests
     PRIVATE
         MUtils::MUtils
         Catch2::Catch2
+        Catch2::Catch2WithMain
         ${PLATFORM_LINKLIBS}
         ${CMAKE_THREAD_LIBS_INIT})
 

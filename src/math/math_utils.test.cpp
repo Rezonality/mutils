@@ -1,6 +1,8 @@
-#include <catch2/catch.hpp>
+#include <catch.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "mutils/math/math_utils.h"
 
+using namespace Catch::Matchers;
 using namespace MUtils;
 
 TEST_CASE("RectEmpty", "MathUtils")
@@ -35,10 +37,10 @@ TEST_CASE("Bounds", "MathUtils")
 
     NVec3d min, max;
     GetBounds(&bounds[0], 2, min, max);
-    REQUIRE_THAT(min.x, Catch::WithinULP(.3f, 1));
-    REQUIRE_THAT(min.y, Catch::WithinULP(-.8f, 1));
-    REQUIRE_THAT(min.z, Catch::WithinULP(.6f, 1));
-    REQUIRE_THAT(max.x, Catch::WithinULP(.9f, 1));
-    REQUIRE_THAT(max.y, Catch::WithinULP(-.5f, 1));
-    REQUIRE_THAT(max.z, Catch::WithinULP(.6f, 1));
+    REQUIRE_THAT(min.x, WithinULP(.3f, 1));
+    REQUIRE_THAT(min.y, WithinULP(-.8f, 1));
+    REQUIRE_THAT(min.z, WithinULP(.6f, 1));
+    REQUIRE_THAT(max.x, WithinULP(.9f, 1));
+    REQUIRE_THAT(max.y, WithinULP(-.5f, 1));
+    REQUIRE_THAT(max.z, WithinULP(.6f, 1));
 }

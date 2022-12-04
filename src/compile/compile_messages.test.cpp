@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_all.hpp>
 #include "mutils/compile/compile_messages.h"
 
 using namespace MUtils;

@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch.hpp>
 #include "mutils/gl/gl_shader.h"
 
 using namespace MUtils;
