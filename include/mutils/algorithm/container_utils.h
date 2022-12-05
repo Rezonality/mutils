@@ -105,10 +105,6 @@ template< typename ContainerT, typename PredicateT >
     }
   };
 
-std::vector<int> string_get_integers(const std::string& str);
-std::vector<std::vector<int>> string_get_integer_grid(const std::string& str);
-std::vector<std::vector<std::string>> string_get_string_grid(const std::string& str);
-
 template <typename K, typename V>
 V map_get_with_default(const  std::map <K, V> & m, const K & key, const V & defval) {
     typename std::map<K, V>::const_iterator it = m.find(key);

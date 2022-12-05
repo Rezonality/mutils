@@ -154,6 +154,9 @@ void string_split_each(char* text, size_t start, size_t end, const char* delims,
 size_t string_first_of(const char* text, size_t start, size_t end, const char* delims);
 size_t string_first_not_of(const char* text, size_t start, size_t end, const char* delims);
 std::pair<uint32_t, uint32_t> string_convert_index_to_line_offset(const std::string& str, uint32_t index);
+std::vector<int> string_get_integers(const std::string& str);
+std::vector<std::vector<int>> string_get_integer_grid(const std::string& str);
+std::vector<std::vector<std::string>> string_get_string_grid(const std::string& str);
 
 inline bool string_equals(const std::string& str, const std::string& str2)
 {
