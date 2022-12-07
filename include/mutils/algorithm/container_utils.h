@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 #include <functional>
 
 namespace MUtils
@@ -128,6 +129,40 @@ void map_apply(C<K,V,Args...>& m, K const& key, const V & defVal, F fn)
     }
 
     fn(it->second);
+}
+
+template <typename I, typename F>
+void map_all(I& iterable, const F& functor)
+{
+    std::transform(iterable.begin(), iterable.end(), iterable.begin(), functor);
+}
+
+template <typename I, typename V, typename F>
+std::set<V> filter_map_to_set(const std::map<I, V>& iterable, const F& functor )
+{
+    std::set<V> out;
+    for (auto& entry : iterable)
+    {
+        if (functor(entry))
+        {
+            out.insert(entry.second);
+        }
+    }
+    return out;
+}
+
+template <typename I, typename V, typename F>
+std::vector<V> filter_map_to_vector(const std::map<I, V>& iterable, const F& functor )
+{
+    std::vector<V> out;
+    for (auto& entry : iterable)
+    {
+        if (functor(entry))
+        {
+            out.push_back(entry.second);
+        }
+    }
+    return out;
 }
 
 }
