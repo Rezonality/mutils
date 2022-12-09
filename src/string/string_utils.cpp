@@ -483,7 +483,7 @@ std::vector<std::vector<std::string>> string_get_string_grid(const std::string& 
     return arrayLines;
 }
 
-std::vector<std::vector<int>> string_get_integer_grid(const std::string& str)
+std::vector<std::vector<int>> string_get_integer_grid(const std::string& str, const std::string& delim)
 {
     // Gather into array
     std::vector<std::string> lines;
@@ -492,8 +492,15 @@ std::vector<std::vector<int>> string_get_integer_grid(const std::string& str)
     for (auto& line : lines)
     {
         std::vector<int> vals;
-        auto strVals = string_split(line, "\t ");
-        std::transform(strVals.begin(), strVals.end(), back_inserter(vals), [](const std::string& str) { return stoi(str); });
+        if (!delim.empty())
+        {
+            auto strVals = string_split(line, delim.c_str());
+            std::transform(strVals.begin(), strVals.end(), back_inserter(vals), [](const std::string& str) { return stoi(str); });
+        }
+        else
+        {
+            std::transform(line.begin(), line.end(), back_inserter(vals), [](const char& str) { return str - '0'; });
+        }
         if (!vals.empty())
         {
             arrayLines.push_back(vals);
