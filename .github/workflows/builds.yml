@@ -31,7 +31,7 @@ jobs:
     - name: Install GL
       run: |
         sudo apt-get install freeglut3-dev
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest-not'
         
     - name: Prebuild Linux
       working-directory: ${{github.workspace}}
