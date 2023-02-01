@@ -4,7 +4,7 @@ echo %Time%
 
 if not exist "..\vcpkg\" (
   echo Download vcpkg from github
-  git clone --single-branch --branch master https://github.com/Rezonality/vcpkg.git ..\vcpkg
+  git clone --single-branch --branch master https://github.com/Microsoft/vcpkg.git ..\vcpkg
   if not exist "..\vcpkg\vcpkg.exe" (
     cd ..\vcpkg
     call bootstrap-vcpkg.bat -disableMetrics

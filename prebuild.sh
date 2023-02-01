@@ -2,14 +2,14 @@
 # Remember to preinstall linux libraries:
 # (ibus,  tar, zip, unzip, buid-prerequisits, xorg-dev)
 
-if [ ! -d "../vcpkg" ]; then 
-    git clone --single-branch --branch master https://github.com/Rezonality/vcpkg.git ../vcpkg
+if [ ! -d "../vcpkg" ]; then
+    git clone --single-branch --branch master https://github.com/Microsoft/vcpkg.git ../vcpkg
 fi
 
 if [ ! -f "../vcpkg/vcpkg" ]; then
-    cd ../vcpkg 
+    cd ../vcpkg
     ./bootstrap-vcpkg.sh -disableMetrics
-    cd ../mutils 
+    cd ../mutils
 fi
 
 triplet=(x64-linux)
@@ -23,6 +23,6 @@ if [ ! -d "../vcpkg/imgui" ]; then
   if [ "$(uname)" != "Darwin" ]; then
   ./vcpkg install glib --triplet ${triplet[0]} --recurse
   fi
-  cd ../mutils 
+  cd ../mutils
 fi
 
