@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 #include <functional>
+#include <string>
 
 namespace MUtils
 {
