@@ -267,7 +267,8 @@ target_include_directories(MUtils
 )
 
 target_link_libraries(MUtils PUBLIC
-    SDL2::SDL2-static
+    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     gsl::gsl-lite-v1
     fmt::fmt-header-only
     unofficial::gl3w::gl3w
